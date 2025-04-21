@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QPushButton, QFileDialog, QMessageBox
 )
 from core.snapshot import SnapshotManager
+from app.snapshot_history import SnapshotHistoryWindow
 
 
 class MainWindow(QMainWindow):
@@ -16,12 +17,15 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         self.choose_button = QPushButton("选择文档")
         self.snapshot_button = QPushButton("创建快照")
+        self.history_button = QPushButton("查看快照历史")
+
 
         self.choose_button.clicked.connect(self.select_file)
         self.snapshot_button.clicked.connect(self.create_snapshot)
-
+        self.history_button.clicked.connect(self.show_history)
         layout.addWidget(self.choose_button)
         layout.addWidget(self.snapshot_button)
+        layout.addWidget(self.history_button)
 
         container = QWidget()
         container.setLayout(layout)
@@ -48,3 +52,11 @@ class MainWindow(QMainWindow):
             )
         except Exception as e:
             QMessageBox.critical(self, "错误", f"创建快照失败：\n{str(e)}")
+
+    def show_history(self):
+        if not self.selected_file:
+            QMessageBox.warning(self, "未选择文件", "请先选择一个文档文件！")
+            return
+
+        self.history_window = SnapshotHistoryWindow(self.selected_file)
+        self.history_window.show()
