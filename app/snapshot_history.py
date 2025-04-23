@@ -7,8 +7,10 @@ import os
 from app.preview_window import PreviewWindow
 
 class SnapshotHistoryWindow(QWidget):
-    def __init__(self, file_path):
-        super().__init__()
+    def __init__(self, file_path, parent=None):
+        super().__init__(parent)
+        self.parent_window = parent
+        self.doc_name = os.path.basename(file_path)
         self.setWindowTitle("快照历史")
         self.setMinimumSize(400, 300)
 
@@ -16,6 +18,10 @@ class SnapshotHistoryWindow(QWidget):
         self.db = VersionDB()
 
         self.layout = QVBoxLayout()
+        self.back_button = QPushButton("← 返回主页")
+        self.back_button.clicked.connect(self.go_back)
+        self.layout.addWidget(self.back_button)
+
         self.label = QLabel(f"文档：{self.doc_name}")
         self.list_widget = QListWidget()
         self.compare_button = QPushButton("对比选中快照")
@@ -32,6 +38,10 @@ class SnapshotHistoryWindow(QWidget):
 
         self.preview_windows = []
         self.load_snapshots()
+
+    def go_back(self):
+        if self.parent_window:
+            self.parent_window.go_back_to_dashboard()
 
     def load_snapshots(self):
         versions = self.db.get_versions(self.doc_name)

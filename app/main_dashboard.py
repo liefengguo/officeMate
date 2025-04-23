@@ -10,8 +10,9 @@ from PyQt5.QtGui import QBrush, QColor
 from app.project_delegate import ProjectItemDelegate
 
 class MainDashboard(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent_window = parent
         self.setWindowTitle("DocSnap 文档管理主页")
         self.setMinimumSize(500, 400)
 
@@ -73,9 +74,8 @@ class MainDashboard(QWidget):
     def open_snapshot_window(self, item):
         file_path = item.data(1000)
         if os.path.exists(file_path):
-            self.snapshot_window = SnapshotHistoryWindow(file_path)
-            self.snapshot_window.show()
-            self.close()  # close dashboard
+            if self.parent_window:
+                self.parent_window.open_snapshot_history(file_path)
         else:
             QMessageBox.warning(self, "文件不存在", f"该文件无法访问：\n{file_path}")
 
