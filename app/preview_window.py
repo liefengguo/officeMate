@@ -6,7 +6,7 @@ class PreviewWindow(QWidget):
     def __init__(self, file_path):
         super().__init__()
         self.setWindowTitle("快照内容预览")
-        self.setMinimumSize(600, 500)
+        self.setMinimumSize(400, 300)
 
         layout = QVBoxLayout()
         self.text_edit = QTextEdit()

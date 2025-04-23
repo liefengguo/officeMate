@@ -6,7 +6,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("DocSnap 文档助手")
-        self.setMinimumSize(900, 600)
+        self.setMinimumSize(300, 200)
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)

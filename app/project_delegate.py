@@ -8,7 +8,6 @@ class ProjectItemDelegate(QStyledItemDelegate):
         file_name = doc_path.split("/")[-1] if doc_path else index.data()
 
         painter.save()
-
         # Draw background based on state
         if option.state & QStyle.State_Selected:
             painter.fillRect(option.rect, QColor("#bae7ff"))
