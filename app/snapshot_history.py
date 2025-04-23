@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 from core.version_db import VersionDB
 from app.diff_viewer import DiffViewer
 import os
-
+from app.preview_window import PreviewWindow
 
 class SnapshotHistoryWindow(QWidget):
     def __init__(self, file_path):
@@ -20,16 +20,18 @@ class SnapshotHistoryWindow(QWidget):
         self.list_widget = QListWidget()
         self.compare_button = QPushButton("对比选中快照")
         self.compare_button.clicked.connect(self.compare_snapshots)
+        self.preview_button = QPushButton("查看快照内容")
+        self.preview_button.clicked.connect(self.preview_snapshots)
         self.list_widget.setSelectionMode(QAbstractItemView.MultiSelection)
 
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.list_widget)
         self.layout.addWidget(self.compare_button)
+        self.layout.addWidget(self.preview_button)
         self.setLayout(self.layout)
 
+        self.preview_windows = []
         self.load_snapshots()
-
-        self.list_widget.itemClicked.connect(self.show_snapshot_info)
 
     def load_snapshots(self):
         versions = self.db.get_versions(self.doc_name)
@@ -43,8 +45,21 @@ class SnapshotHistoryWindow(QWidget):
             path_str = v.get("snapshot_path", "未知路径")
             self.list_widget.addItem(f"{time_str}  |  {path_str}")
 
-    def show_snapshot_info(self, item):
-        QMessageBox.information(self, "快照详情", item.text())
+    # Removed show_snapshot_info method
+
+    def preview_snapshots(self):
+        items = self.list_widget.selectedItems()
+        if not items:
+            QMessageBox.information(self, "提示", "请至少选择一个快照进行预览")
+            return
+
+        for item in items:
+            parts = item.text().split("  |  ")
+            if len(parts) == 2:
+                file_path = parts[1].strip()
+                preview = PreviewWindow(file_path)
+                self.preview_windows.append(preview)  # Prevent GC
+                preview.show()
 
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
