@@ -51,7 +51,7 @@ class SnapshotManager:
         self.strategies = [DocxSnapshot(), TxtSnapshot()]
         self.version_db = VersionDB()
 
-    def create_snapshot(self, file_path: str) -> dict:
+    def create_snapshot(self, file_path: str, remark="") -> dict:
         strategy = self._get_strategy(file_path)
         if not strategy:
             raise ValueError(f"Unsupported file type: {file_path}")
@@ -72,7 +72,8 @@ class SnapshotManager:
             "file": base_name,
             "timestamp": timestamp,
             "hash": file_hash,
-            "snapshot_path": snapshot_file_path
+            "snapshot_path": snapshot_file_path,
+            "remark": remark,
         }
         self.version_db.save_version(base_name, metadata)
         return metadata
