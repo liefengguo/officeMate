@@ -1,0 +1,26 @@
+QWidget {
+    font-family: Arial;
+    font-size: 12px;
+}
+
+QPushButton {
+    border: none;
+    background: transparent;
+}
+
+QPushButton:hover {
+    background-color: #e6f7ff;
+}
+
+QToolButton {
+    border: none;
+    background: transparent;
+}
+
+QToolButton:hover {
+    background-color: #e6f7ff;
+}
+
+QStackedWidget {
+    background-color: #ffffff;
+}

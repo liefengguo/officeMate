@@ -39,3 +39,12 @@ def generate_diff(file1_path, file2_path):
 
     diff = difflib.ndiff(text1, text2)
     return list(diff)
+class DiffEngine:
+    def compare_files(self, file1, file2):
+        try:
+            diff_lines = generate_diff(file1, file2)
+            if not diff_lines:
+                return "两个快照内容无差异"
+            return ''.join(diff_lines)
+        except Exception as e:
+            return f"对比失败：{str(e)}"

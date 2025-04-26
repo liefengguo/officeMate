@@ -45,8 +45,8 @@ class MainDashboard(QWidget):
         self.doc_list.viewport().installEventFilter(self)
 
         self.add_button.clicked.connect(self.add_document)
-        self.doc_list.itemClicked.connect(self.open_snapshot_window)
-
+        # self.doc_list.itemClicked.connect(self.open_snapshot_window)
+        self.doc_list.itemClicked.connect(self.open_project_page)
         self.refresh_list()
 
     def refresh_list(self):
@@ -89,3 +89,11 @@ class MainDashboard(QWidget):
                     self.doc_list.viewport().setCursor(Qt.ArrowCursor)
                 self.doc_list.viewport().update()
         return super().eventFilter(source, event)
+
+    def open_project_page(self, item):
+        file_path = item.data(1000)
+        if os.path.exists(file_path):
+            # 通过 parent_window 触发页面切换
+            self.parent_window.open_project_page(file_path)
+        else:
+            QMessageBox.warning(self, "文件不存在", f"无法访问：{file_path}")

@@ -13,7 +13,6 @@ class PreviewWindow(QWidget):
         self.text_edit.setReadOnly(True)
         layout.addWidget(self.text_edit)
         self.setLayout(layout)
-
         self.load_content(file_path)
 
     def load_content(self, path):
