@@ -17,6 +17,11 @@ class ProjectPage(QWidget):
         self.toolbar_layout = QVBoxLayout()
         self.toolbar_layout.setAlignment(Qt.AlignTop)
 
+        self.back_button = QPushButton("⬅")
+        self.back_button.setFixedSize(40, 40)
+        self.back_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.toolbar_layout.addWidget(self.back_button)
+
         # Left toolbar
         self.add_snapshot_btn = QPushButton("📸")
         self.history_btn = QPushButton("📜")
@@ -53,6 +58,8 @@ class ProjectPage(QWidget):
         self.compare_btn.clicked.connect(lambda: self.stack.setCurrentIndex(2))
         self.settings_btn.clicked.connect(lambda: self.stack.setCurrentIndex(3))
 
+        self.back_button.clicked.connect(self.back_to_home)
+
         self.main_layout.addLayout(self.toolbar_layout)
         self.main_layout.addWidget(self.stack)
 
@@ -65,3 +72,8 @@ class ProjectPage(QWidget):
             self.page_history.load_snapshots()
         if hasattr(self, 'page_compare'):
             self.page_compare.load_snapshots()
+
+    def back_to_home(self):
+        """返回软件首页"""
+        if self.parent_window:
+            self.parent_window.go_back_to_dashboard()
