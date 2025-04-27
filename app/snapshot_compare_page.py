@@ -1,10 +1,9 @@
-
-
 import os
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox
 from core.snapshot import SnapshotManager
 from core.diff_engine import DiffEngine
 from PyQt5.QtWidgets import QPlainTextEdit
+from app.snapshot_list_widget import SnapshotListWidget
 class SnapshotComparePage(QWidget):
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
@@ -14,8 +13,7 @@ class SnapshotComparePage(QWidget):
 
         self.layout = QVBoxLayout()
         self.label = QLabel(f"🔍 {self.doc_name} 快照对比")
-        self.list_widget = QListWidget()
-        self.list_widget.setSelectionMode(QListWidget.MultiSelection)
+        self.list_widget = SnapshotListWidget(file_path, single_selection=False)
         self.compare_button = QPushButton("对比选中的两个快照")
 
         self.layout.addWidget(self.label)
@@ -29,24 +27,6 @@ class SnapshotComparePage(QWidget):
         self.diff_viewer = QPlainTextEdit()
         self.diff_viewer.setReadOnly(True)  # 只读，不可编辑
         self.layout.addWidget(self.diff_viewer)
-        self.load_snapshots()
-
-    def load_snapshots(self):
-        self.list_widget.clear()
-        versions = self.sm.version_db.get_versions(self.doc_name)
-        if not versions:
-            self.list_widget.addItem("暂无快照记录")
-            return
-
-        for v in versions:
-            timestamp = v.get("timestamp", "未知时间")
-            path = v.get("snapshot_path", "未知路径")
-            display = f"{timestamp}  |  {path}"
-            # QListWidgetItem needs to be constructed explicitly
-            from PyQt5.QtWidgets import QListWidgetItem
-            item = QListWidgetItem(display)
-            item.setData(1000, path)
-            self.list_widget.addItem(item)
 
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
