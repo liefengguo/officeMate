@@ -57,3 +57,11 @@ class ProjectPage(QWidget):
         self.main_layout.addWidget(self.stack)
 
         self.stack.setCurrentIndex(0)
+        self.page_add_snapshot.snapshot_created.connect(self.handle_snapshot_created)
+
+    def handle_snapshot_created(self, file_path):
+        """当快照创建完成后，刷新所有需要的页面"""
+        if hasattr(self, 'page_history'):
+            self.page_history.load_snapshots()
+        if hasattr(self, 'page_compare'):
+            self.page_compare.load_snapshots()

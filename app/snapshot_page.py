@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from core.snapshot import SnapshotManager
-
+from PyQt5.QtCore import pyqtSignal
 class SnapshotPage(QWidget):
+    snapshot_created = pyqtSignal(str)
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
         self.file_path = file_path
@@ -29,5 +30,7 @@ class SnapshotPage(QWidget):
             info = self.sm.create_snapshot(self.file_path, remark=remark)
             QMessageBox.information(self, "成功", f"快照已创建！\n时间：{info['timestamp']}")
             self.remark_input.clear()
+            self.snapshot_created.emit(self.file_path)
+
         except Exception as e:
             QMessageBox.critical(self, "错误", f"创建快照失败：{str(e)}")
