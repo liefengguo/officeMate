@@ -4,6 +4,7 @@ from core.snapshot import SnapshotManager
 from core.diff_engine import DiffEngine
 from PyQt5.QtWidgets import QPlainTextEdit
 from app.snapshot_list_widget import SnapshotListWidget
+from app.diff_viewer_widget import DiffViewerWidget
 class SnapshotComparePage(QWidget):
     def __init__(self, file_path, parent=None):
         super().__init__(parent)
@@ -24,8 +25,8 @@ class SnapshotComparePage(QWidget):
         self.compare_button.clicked.connect(self.compare_snapshots)
         self.list_widget.itemSelectionChanged.connect(self.check_selection_limit)
 
-        self.diff_viewer = QPlainTextEdit()
-        self.diff_viewer.setReadOnly(True)  # 只读，不可编辑
+        self.diff_viewer = DiffViewerWidget()
+
         self.layout.addWidget(self.diff_viewer)
 
     def compare_snapshots(self):
@@ -53,9 +54,9 @@ class SnapshotComparePage(QWidget):
         try:
             engine = DiffEngine()
             diff_result = engine.compare_files(base_path, latest_path)
-            self.diff_viewer.setPlainText(diff_result)
+            self.diff_viewer.set_diff_content(diff_result)
         except Exception as e:
-            self.diff_viewer.setPlainText(f"对比失败：{str(e)}")
+            self.diff_viewer.set_diff_content(f"对比失败：{str(e)}")
 
     def check_selection_limit(self):
         items = self.list_widget.selectedItems()

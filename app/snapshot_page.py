@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QPlainTextEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from core.snapshot import SnapshotManager
 from PyQt5.QtCore import pyqtSignal
 from core.diff_engine import DiffEngine
+from app.diff_viewer_widget import DiffViewerWidget
 import os
 class SnapshotPage(QWidget):
     snapshot_created = pyqtSignal(str)
@@ -18,8 +19,7 @@ class SnapshotPage(QWidget):
         self.create_button = QPushButton("创建快照")
 
         self.compare_button = QPushButton("对比当前文档与最新快照")
-        self.diff_result_view = QPlainTextEdit()
-        self.diff_result_view.setReadOnly(True)
+        self.diff_result_view = DiffViewerWidget()
 
         layout.addWidget(self.label)
         layout.addWidget(self.remark_input)
@@ -49,7 +49,7 @@ class SnapshotPage(QWidget):
             doc_name = os.path.basename(self.file_path)
             versions = self.sm.version_db.get_versions(doc_name)
             if not versions:
-                self.diff_result_view.setPlainText("没有可用的快照进行对比。")
+                self.diff_result_view.set_diff_content("没有可用的快照进行对比。")
                 return
 
             latest_version = sorted(versions, key=lambda v: v.get("timestamp", ""), reverse=True)[0]
@@ -59,9 +59,9 @@ class SnapshotPage(QWidget):
             diff_result = engine.compare_files(latest_snapshot_path, self.file_path)
 
             if not diff_result.strip():
-                self.diff_result_view.setPlainText("当前文档与最新快照没有任何差异。")
+                self.diff_result_view.set_diff_content("当前文档与最新快照没有任何差异。")
             else:
-                self.diff_result_view.setPlainText(diff_result)
+                self.diff_result_view.set_diff_content(diff_result)
 
         except Exception as e:
-            self.diff_result_view.setPlainText(f"对比失败：{str(e)}")
+            self.diff_result_view.set_diff_content(f"对比失败：{str(e)}")
