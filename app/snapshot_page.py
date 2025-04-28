@@ -1,6 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QPlainTextEdit
 from core.snapshot import SnapshotManager
 from PyQt5.QtCore import pyqtSignal
+from core.diff_engine import DiffEngine
+import os
 class SnapshotPage(QWidget):
     snapshot_created = pyqtSignal(str)
     def __init__(self, file_path, parent=None):
@@ -15,14 +17,21 @@ class SnapshotPage(QWidget):
         self.remark_input.setPlaceholderText("请输入快照备注（可选）")
         self.create_button = QPushButton("创建快照")
 
+        self.compare_button = QPushButton("对比当前文档与最新快照")
+        self.diff_result_view = QPlainTextEdit()
+        self.diff_result_view.setReadOnly(True)
+
         layout.addWidget(self.label)
         layout.addWidget(self.remark_input)
         layout.addWidget(self.create_button)
+        layout.addWidget(self.compare_button)
+        layout.addWidget(self.diff_result_view)
         layout.addStretch()
 
         self.setLayout(layout)
 
         self.create_button.clicked.connect(self.create_snapshot)
+        self.compare_button.clicked.connect(self.compare_with_latest)
 
     def create_snapshot(self):
         remark = self.remark_input.text()
@@ -34,3 +43,25 @@ class SnapshotPage(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "错误", f"创建快照失败：{str(e)}")
+
+    def compare_with_latest(self):
+        try:
+            doc_name = os.path.basename(self.file_path)
+            versions = self.sm.version_db.get_versions(doc_name)
+            if not versions:
+                self.diff_result_view.setPlainText("没有可用的快照进行对比。")
+                return
+
+            latest_version = sorted(versions, key=lambda v: v.get("timestamp", ""), reverse=True)[0]
+            latest_snapshot_path = latest_version.get("snapshot_path")
+
+            engine = DiffEngine()
+            diff_result = engine.compare_files(latest_snapshot_path, self.file_path)
+
+            if not diff_result.strip():
+                self.diff_result_view.setPlainText("当前文档与最新快照没有任何差异。")
+            else:
+                self.diff_result_view.setPlainText(diff_result)
+
+        except Exception as e:
+            self.diff_result_view.setPlainText(f"对比失败：{str(e)}")
