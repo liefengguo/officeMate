@@ -22,6 +22,7 @@ class HistoryPage(QWidget):
         self.setLayout(self.layout)
 
     def load_snapshots(self):
+        """加载快照数据到列表"""
         self.list_widget.clear()
         versions = self.sm.version_db.get_versions(self.doc_name)
         if not versions:
@@ -38,6 +39,7 @@ class HistoryPage(QWidget):
 
             self.list_widget.addItem(list_item)
             self.list_widget.setItemWidget(list_item, item_widget)
+
 
     def handle_selection_changed(self):
         for i in range(self.list_widget.count()):
