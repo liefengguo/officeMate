@@ -69,9 +69,9 @@ class ProjectPage(QWidget):
     def handle_snapshot_created(self, file_path):
         """当快照创建完成后，刷新所有需要的页面"""
         if hasattr(self, 'page_history'):
-            self.page_history.load_snapshots()
+            self.page_history.list_widget.load_snapshots()
         if hasattr(self, 'page_compare'):
-            self.page_compare.load_snapshots()
+            self.page_compare.list_widget.load_snapshots()
 
     def back_to_home(self):
         """返回软件首页"""
