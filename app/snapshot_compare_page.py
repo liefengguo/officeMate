@@ -29,6 +29,13 @@ class SnapshotComparePage(QWidget):
 
         self.layout.addWidget(self.diff_viewer)
 
+    def load_snapshots(self):
+        """重新加载快照数据"""
+        self.sm.version_db.reload()
+        self.list_widget.clear()
+        self.list_widget.load_snapshots()
+        self.diff_viewer.set_diff_content("")  # 清除上次对比结果
+
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
         if len(items) != 2:

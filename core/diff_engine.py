@@ -39,6 +39,7 @@ def generate_diff(file1_path, file2_path):
 
     diff = difflib.ndiff(text1, text2)
     return list(diff)
+
 class DiffEngine:
     def compare_files(self, file1, file2):
         try:

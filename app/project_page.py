@@ -64,14 +64,16 @@ class ProjectPage(QWidget):
         self.main_layout.addWidget(self.stack)
 
         self.stack.setCurrentIndex(0)
+        # Ensure snapshot_created signal is connected
         self.page_add_snapshot.snapshot_created.connect(self.handle_snapshot_created)
 
     def handle_snapshot_created(self, file_path):
         """当快照创建完成后，刷新所有需要的页面"""
-        if hasattr(self, 'page_history'):
+        print("SnapshotPage instance id:", id(self.page_add_snapshot))
+        if hasattr(self, 'page_history') and self.page_history:
             self.page_history.load_snapshots()
-        if hasattr(self, 'page_compare'):
-            self.page_compare.list_widget.load_snapshots()
+        if hasattr(self, 'page_compare') and self.page_compare:
+            self.page_compare.load_snapshots()
 
     def back_to_home(self):
         """返回软件首页"""

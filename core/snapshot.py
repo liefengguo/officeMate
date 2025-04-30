@@ -9,6 +9,18 @@ from docplatform.paths import get_snapshot_dir
 from core.utils import get_file_hash
 
 
+class SnapshotSaver(ABC):
+    """保存快照的策略接口"""
+    @abstractmethod
+    def save(self, source_path: str, content: str, dest_path: str) -> None:
+        pass
+
+
+class DefaultSnapshotSaver(SnapshotSaver):
+    def save(self, source_path: str, content: str, dest_path: str) -> None:
+        shutil.copy(source_path, dest_path)
+
+
 class SnapshotStrategy(ABC):
     """抽象快照策略接口"""
 
@@ -47,9 +59,10 @@ class TxtSnapshot(SnapshotStrategy):
 class SnapshotManager:
     """快照管理器，协调策略 + 存储 + 元信息"""
 
-    def __init__(self):
+    def __init__(self, saver: SnapshotSaver = None):
         self.strategies = [DocxSnapshot(), TxtSnapshot()]
         self.version_db = VersionDB()
+        self.saver = saver or DefaultSnapshotSaver()
 
     def create_snapshot(self, file_path: str, remark="") -> dict:
         strategy = self._get_strategy(file_path)
@@ -65,7 +78,7 @@ class SnapshotManager:
         # 存储原始文件副本
         snapshot_file_path = os.path.join(snapshot_dir, f"{timestamp}.bak")
         os.makedirs(snapshot_dir, exist_ok=True)
-        shutil.copy(file_path, snapshot_file_path)
+        self.saver.save(file_path, content, snapshot_file_path)
 
         # 存储元信息
         metadata = {
@@ -77,6 +90,13 @@ class SnapshotManager:
         }
         self.version_db.save_version(base_name, metadata)
         return metadata
+
+    def delete_snapshot(self, doc_name: str, target_version: dict):
+        """删除某个快照，包括文件和数据库记录"""
+        path = target_version.get("snapshot_path")
+        if path and os.path.exists(path):
+            os.remove(path)
+        self.version_db.remove_version(doc_name, target_version)
 
     def _get_strategy(self, file_path: str):
         for s in self.strategies:

@@ -23,6 +23,7 @@ class HistoryPage(QWidget):
 
     def load_snapshots(self):
         """加载快照数据到列表"""
+        self.sm.version_db.reload()
         self.list_widget.clear()
         versions = self.sm.version_db.get_versions(self.doc_name)
         if not versions:
@@ -34,6 +35,8 @@ class HistoryPage(QWidget):
             timestamp = v.get("timestamp", "")
 
             item_widget = SnapshotItemWidget(title, timestamp)
+            item_widget.view_requested.connect(lambda w=item_widget: self.view_snapshot(w))
+            item_widget.delete_requested.connect(lambda w=item_widget: self.delete_snapshot(w))
             list_item = QListWidgetItem()
             list_item.setSizeHint(item_widget.sizeHint())
 
@@ -47,3 +50,55 @@ class HistoryPage(QWidget):
             widget = self.list_widget.itemWidget(item)
             if widget:
                 widget.set_selected(item.isSelected())
+
+    def view_snapshot(self, widget):
+        """查看快照内容"""
+        from PyQt5.QtWidgets import QMessageBox
+        import docx
+        versions = self.sm.version_db.get_versions(self.doc_name)
+        target_version = None
+        for v in versions:
+            title = v.get("remark", "") or os.path.basename(v.get("snapshot_path", ""))
+            if title == widget.label_title.text():
+                target_version = v
+                break
+        if target_version:
+            path = target_version.get("snapshot_path")
+            try:
+                if path.endswith(".txt"):
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                elif path.endswith(".docx"):
+                    doc = docx.Document(path)
+                    content = "\n".join([para.text for para in doc.paragraphs])
+                else:
+                    content = "(不支持的文件格式)"
+
+                QMessageBox.information(self, "快照内容", content[:1000] + "..." if len(content) > 1000 else content)
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"无法读取快照内容：{str(e)}")
+        else:
+            QMessageBox.warning(self, "警告", "未找到对应快照。")
+
+    def delete_snapshot(self, widget):
+        """删除快照"""
+        from PyQt5.QtWidgets import QMessageBox
+        confirm = QMessageBox.question(self, "删除快照", "确定要删除这个快照吗？", QMessageBox.Yes | QMessageBox.No)
+        if confirm == QMessageBox.Yes:
+            # Find the version info
+            versions = self.sm.version_db.get_versions(self.doc_name)
+            target_version = None
+            for v in versions:
+                title = v.get("remark", "") or os.path.basename(v.get("snapshot_path", ""))
+                if title == widget.label_title.text():
+                    target_version = v
+                    break
+            if target_version:
+                self.sm.delete_snapshot(self.doc_name, target_version)
+
+            # Remove from list
+            for i in range(self.list_widget.count()):
+                item = self.list_widget.item(i)
+                if self.list_widget.itemWidget(item) == widget:
+                    self.list_widget.takeItem(i)
+                    break
