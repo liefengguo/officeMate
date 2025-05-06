@@ -1,6 +1,7 @@
 import os
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton, QMessageBox
 from functools import partial
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QListWidgetItem
+from PyQt5.QtCore import Qt
 from core.snapshot_manager import SnapshotManager
 from app.snapshot_item_widget import SnapshotItemWidget
 
@@ -15,13 +16,24 @@ class HistoryPage(QWidget):
         self.label = QLabel(f"📜 {self.doc_name} 的快照历史")
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QListWidget.SingleSelection)
+        # --- restore / undo buttons ---
+        self.btn_restore = QPushButton("恢复所选快照")
+        self.btn_undo    = QPushButton("撤销上次恢复")
+        self.btn_restore.clicked.connect(self.restore_selected)
+        self.btn_undo.clicked.connect(self.sm.undo_restore)
+        self.btn_undo.setEnabled(False)
         self.load_snapshots()
         self.list_widget.itemSelectionChanged.connect(self.handle_selection_changed)
         self.sm.snapshot_created.connect(self.load_snapshots)
         self.sm.snapshot_deleted.connect(self.load_snapshots)
+        # 挂接刷新按钮启用状态
+        self.sm.snapshot_created.connect(self._toggle_undo_button)
+        self.sm.snapshot_deleted.connect(self._toggle_undo_button)
 
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.list_widget)
+        self.layout.addWidget(self.btn_restore)
+        self.layout.addWidget(self.btn_undo)
         self.setLayout(self.layout)
 
     def load_snapshots(self):
@@ -30,6 +42,7 @@ class HistoryPage(QWidget):
         versions = self.sm.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
+            self._toggle_undo_button()
             return
         versions.sort(key=lambda v: v.get("timestamp", ""), reverse=True)
         for v in versions:
@@ -41,9 +54,12 @@ class HistoryPage(QWidget):
             item_widget.delete_requested.connect(partial(self.delete_snapshot, item_widget))
             list_item = QListWidgetItem()
             list_item.setSizeHint(item_widget.sizeHint())
+            # 将元数据存入 item，便于后续恢复/删除
+            list_item.setData(Qt.UserRole, v)
 
             self.list_widget.addItem(list_item)
             self.list_widget.setItemWidget(list_item, item_widget)
+        self._toggle_undo_button()
 
 
     def handle_selection_changed(self):
@@ -52,6 +68,25 @@ class HistoryPage(QWidget):
             widget = self.list_widget.itemWidget(item)
             if widget:
                 widget.set_selected(item.isSelected())
+
+    # ---------- restore / undo helpers ----------
+    def _toggle_undo_button(self, *_):
+        """根据管理器 undo 栈状态启用/禁用撤销按钮"""
+        self.btn_undo.setEnabled(self.sm.can_undo())
+
+    def restore_selected(self):
+        """恢复为所选快照"""
+        items = self.list_widget.selectedItems()
+        if not items:
+            QMessageBox.information(self, "提示", "请先选择要恢复的快照")
+            return
+
+        target_meta = items[0].data(Qt.UserRole)
+        if not isinstance(target_meta, dict):
+            QMessageBox.warning(self, "提示", "无法获取快照信息")
+            return
+
+        self.sm.restore_snapshot(target_meta)
 
     def view_snapshot(self, widget):
         """查看快照内容"""
