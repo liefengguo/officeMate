@@ -1,13 +1,14 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QPushButton, QAbstractItemView
 )
-from core.version_db import VersionDB
+from core.snapshot_manager import SnapshotManager
 from app.diff_viewer import DiffViewer
 import os
+from functools import partial
 from app.preview_window import PreviewWindow
 
 class SnapshotHistoryWindow(QWidget):
-    def __init__(self, file_path, parent=None):
+    def __init__(self, file_path, snapshot_manager: SnapshotManager, parent=None):
         super().__init__(parent)
         self.parent_window = parent
         self.doc_name = os.path.basename(file_path)
@@ -15,7 +16,9 @@ class SnapshotHistoryWindow(QWidget):
         self.setMinimumSize(400, 300)
 
         self.doc_name = os.path.basename(file_path)
-        self.db = VersionDB()
+        self.manager = snapshot_manager
+        self.manager.snapshot_created.connect(self.load_snapshots)
+        self.manager.snapshot_deleted.connect(self.load_snapshots)
 
         self.layout = QVBoxLayout()
         self.back_button = QPushButton("← 返回主页")
@@ -44,18 +47,18 @@ class SnapshotHistoryWindow(QWidget):
             self.parent_window.go_back_to_dashboard()
 
     def load_snapshots(self):
-        versions = self.db.get_versions(self.doc_name)
+        """刷新快照列表"""
+        self.list_widget.clear()
+        versions = self.manager.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
             self.list_widget.setDisabled(True)
             return
-
+        self.list_widget.setDisabled(False)
         for v in versions:
             time_str = v.get("timestamp", "未知时间")
             path_str = v.get("snapshot_path", "未知路径")
             self.list_widget.addItem(f"{time_str}  |  {path_str}")
-
-    # Removed show_snapshot_info method
 
     def preview_snapshots(self):
         items = self.list_widget.selectedItems()
@@ -84,5 +87,6 @@ class SnapshotHistoryWindow(QWidget):
                 paths.append(parts[1].strip())
 
         if len(paths) == 2:
-            self.viewer = DiffViewer(paths[0], paths[1])
-            self.viewer.show()
+            diff = self.manager.compare_snapshots(paths[0], paths[1])
+            viewer = DiffViewer(diff_text=diff)
+            viewer.show()

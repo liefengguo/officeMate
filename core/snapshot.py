@@ -4,7 +4,7 @@ import shutil
 import os
 import datetime
 from abc import ABC, abstractmethod
-from core.version_db import VersionDB
+from core.version_db import SnapshotRepository
 from docplatform.paths import get_snapshot_dir
 from core.utils import get_file_hash
 
@@ -61,7 +61,7 @@ class SnapshotManager:
 
     def __init__(self, saver: SnapshotSaver = None):
         self.strategies = [DocxSnapshot(), TxtSnapshot()]
-        self.version_db = VersionDB()
+        self.version_db = SnapshotRepository()
         self.saver = saver or DefaultSnapshotSaver()
 
     def create_snapshot(self, file_path: str, remark="") -> dict:

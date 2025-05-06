@@ -8,10 +8,12 @@ from app.snapshot_history import SnapshotHistoryWindow
 from core.recent_db import RecentDocDB
 from PyQt5.QtGui import QBrush, QColor
 from app.project_delegate import ProjectItemDelegate
+from core.snapshot_manager import SnapshotManager
 
 class MainDashboard(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, snapshot_manager: SnapshotManager, parent=None):
         super().__init__(parent)
+        self.manager = snapshot_manager
         self.parent_window = parent
         self.setWindowTitle("DocSnap 文档管理主页")
         self.setMinimumSize(500, 400)

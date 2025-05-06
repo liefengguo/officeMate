@@ -8,9 +8,10 @@ from app.snapshot_compare_page import SnapshotComparePage
 from app.settings_page import SettingsPage
 
 class ProjectPage(QWidget):
-    def __init__(self, file_path, parent=None):
+    def __init__(self, file_path, snapshot_manager, parent=None):
         super().__init__(parent)
         self.file_path = file_path
+        self.manager = snapshot_manager
         self.parent_window = parent
 
         self.main_layout = QHBoxLayout(self)
@@ -43,9 +44,9 @@ class ProjectPage(QWidget):
 
         # Right content area
         self.stack = QStackedWidget()
-        self.page_add_snapshot = SnapshotPage(self.file_path)
-        self.page_history = HistoryPage(self.file_path)
-        self.page_compare = SnapshotComparePage(self.file_path)
+        self.page_add_snapshot = SnapshotPage(self.file_path, self.manager)
+        self.page_history = HistoryPage(self.file_path, self.manager)
+        self.page_compare = SnapshotComparePage(self.file_path, self.manager)
         self.page_settings = SettingsPage()
 
         self.stack.addWidget(self.page_add_snapshot)  # index 0
@@ -64,15 +65,15 @@ class ProjectPage(QWidget):
         self.main_layout.addWidget(self.stack)
 
         self.stack.setCurrentIndex(0)
-        # Ensure snapshot_created signal is connected
-        self.page_add_snapshot.snapshot_created.connect(self.handle_snapshot_created)
+        # Ensure snapshot_created and snapshot_deleted signals are connected
+        self.manager.snapshot_created.connect(self.handle_snapshot_created)
+        self.manager.snapshot_deleted.connect(self.handle_snapshot_created)
 
-    def handle_snapshot_created(self, file_path):
+    def handle_snapshot_created(self, *_):
         """当快照创建完成后，刷新所有需要的页面"""
-        print("SnapshotPage instance id:", id(self.page_add_snapshot))
-        if hasattr(self, 'page_history') and self.page_history:
+        if self.page_history:
             self.page_history.load_snapshots()
-        if hasattr(self, 'page_compare') and self.page_compare:
+        if self.page_compare:
             self.page_compare.load_snapshots()
 
     def back_to_home(self):

@@ -1,7 +1,11 @@
 import os
 import json
 
-class VersionDB:
+class SnapshotRepository:
+    """
+    SnapshotRepository is responsible for managing snapshot metadata,
+    including saving, retrieving, and deleting version entries from disk.
+    """
     def __init__(self):
         self.db_path = os.path.expanduser("~/Documents/docsnap/versions.json")
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)

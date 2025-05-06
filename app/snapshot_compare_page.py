@@ -1,15 +1,24 @@
 import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox
-from core.snapshot import SnapshotManager
-from core.diff_engine import DiffEngine
-from PyQt5.QtWidgets import QPlainTextEdit
+from core.snapshot_manager import SnapshotManager
+from PyQt5.QtWidgets import QPlainTextEdit, QListWidgetItem
 from app.snapshot_list_widget import SnapshotListWidget
 from app.diff_viewer_widget import DiffViewerWidget
 class SnapshotComparePage(QWidget):
-    def __init__(self, file_path, parent=None):
+    def __init__(self, file_path, parent=None, snapshot_manager: SnapshotManager = None):
+        if isinstance(parent, SnapshotManager) and snapshot_manager is None:
+            # Handle legacy call order: (file_path, snapshot_manager)
+            snapshot_manager = parent
+            parent = None
         super().__init__(parent)
+
+        # ensure we have a manager instance
+        self.manager: SnapshotManager = snapshot_manager
+
         self.file_path = file_path
-        self.sm = SnapshotManager()
+        # 同步刷新：监听快照增删信号
+        self.manager.snapshot_created.connect(self.load_snapshots)
+        self.manager.snapshot_deleted.connect(self.load_snapshots)
         self.doc_name = os.path.basename(file_path)
 
         self.layout = QVBoxLayout()
@@ -30,11 +39,22 @@ class SnapshotComparePage(QWidget):
         self.layout.addWidget(self.diff_viewer)
 
     def load_snapshots(self):
-        """重新加载快照数据"""
-        self.sm.version_db.reload()
+        """重新加载快照数据（使用 SnapshotManager 列表接口）"""
         self.list_widget.clear()
-        self.list_widget.load_snapshots()
-        self.diff_viewer.set_diff_content("")  # 清除上次对比结果
+        versions = self.manager.list_snapshots(self.doc_name)
+        if not versions:
+            self.list_widget.addItem("暂无快照记录")
+            return
+        for v in versions:
+            path = v.get("snapshot_path")
+            title = v.get("remark", "") or os.path.basename(path)
+            timestamp = v.get("timestamp", "")
+            display = f"{title}\n{timestamp}"
+            item = QListWidgetItem(display)
+            item.setData(1000, path)
+            self.list_widget.addItem(item)
+        # 清空旧 diff
+        self.diff_viewer.set_diff_content("")
 
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
@@ -42,7 +62,7 @@ class SnapshotComparePage(QWidget):
             QMessageBox.warning(self, "提示", "请选择两个快照进行对比")
             return
 
-        versions = self.sm.version_db.get_versions(self.doc_name)
+        versions = self.manager.list_snapshots(self.doc_name)
 
         selected_versions = []
         for item in items:
@@ -59,8 +79,7 @@ class SnapshotComparePage(QWidget):
         base_path, latest_path = selected_versions[0][0], selected_versions[1][0]
 
         try:
-            engine = DiffEngine()
-            diff_result = engine.compare_files(base_path, latest_path)
+            diff_result = self.manager.compare_snapshots(base_path, latest_path)
             self.diff_viewer.set_diff_content(diff_result)
         except Exception as e:
             self.diff_viewer.set_diff_content(f"对比失败：{str(e)}")

@@ -1,13 +1,14 @@
 import os
+from functools import partial
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QListWidgetItem
-from core.snapshot import SnapshotManager
+from core.snapshot_manager import SnapshotManager
 from app.snapshot_item_widget import SnapshotItemWidget
 
 class HistoryPage(QWidget):
-    def __init__(self, file_path, parent=None):
+    def __init__(self, file_path, snapshot_manager: SnapshotManager, parent=None):
         super().__init__(parent)
         self.file_path = file_path
-        self.sm = SnapshotManager()
+        self.sm = snapshot_manager
         self.doc_name = os.path.basename(file_path)
 
         self.layout = QVBoxLayout()
@@ -16,6 +17,8 @@ class HistoryPage(QWidget):
         self.list_widget.setSelectionMode(QListWidget.SingleSelection)
         self.load_snapshots()
         self.list_widget.itemSelectionChanged.connect(self.handle_selection_changed)
+        self.sm.snapshot_created.connect(self.load_snapshots)
+        self.sm.snapshot_deleted.connect(self.load_snapshots)
 
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.list_widget)
@@ -23,9 +26,8 @@ class HistoryPage(QWidget):
 
     def load_snapshots(self):
         """加载快照数据到列表"""
-        self.sm.version_db.reload()
         self.list_widget.clear()
-        versions = self.sm.version_db.get_versions(self.doc_name)
+        versions = self.sm.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
             return
@@ -35,8 +37,8 @@ class HistoryPage(QWidget):
             timestamp = v.get("timestamp", "")
 
             item_widget = SnapshotItemWidget(title, timestamp)
-            item_widget.view_requested.connect(lambda w=item_widget: self.view_snapshot(w))
-            item_widget.delete_requested.connect(lambda w=item_widget: self.delete_snapshot(w))
+            item_widget.view_requested.connect(partial(self.view_snapshot, item_widget))
+            item_widget.delete_requested.connect(partial(self.delete_snapshot, item_widget))
             list_item = QListWidgetItem()
             list_item.setSizeHint(item_widget.sizeHint())
 
@@ -55,7 +57,7 @@ class HistoryPage(QWidget):
         """查看快照内容"""
         from PyQt5.QtWidgets import QMessageBox
         import docx
-        versions = self.sm.version_db.get_versions(self.doc_name)
+        versions = self.sm.list_snapshots(self.doc_name)
         target_version = None
         for v in versions:
             title = v.get("remark", "") or os.path.basename(v.get("snapshot_path", ""))
@@ -86,7 +88,7 @@ class HistoryPage(QWidget):
         confirm = QMessageBox.question(self, "删除快照", "确定要删除这个快照吗？", QMessageBox.Yes | QMessageBox.No)
         if confirm == QMessageBox.Yes:
             # Find the version info
-            versions = self.sm.version_db.get_versions(self.doc_name)
+            versions = self.sm.list_snapshots(self.doc_name)
             target_version = None
             for v in versions:
                 title = v.get("remark", "") or os.path.basename(v.get("snapshot_path", ""))
