@@ -4,6 +4,8 @@ from core.snapshot_manager import SnapshotManager
 from PyQt5.QtWidgets import QPlainTextEdit, QListWidgetItem
 from app.snapshot_list_widget import SnapshotListWidget
 from app.diff_viewer_widget import DiffViewerWidget
+from app.widgets.paragraph_diff_viewer import ParagraphDiffViewer
+
 class SnapshotComparePage(QWidget):
     def __init__(self, file_path, parent=None, snapshot_manager: SnapshotManager = None):
         if isinstance(parent, SnapshotManager) and snapshot_manager is None:
@@ -54,7 +56,16 @@ class SnapshotComparePage(QWidget):
             item.setData(1000, path)
             self.list_widget.addItem(item)
         # 清空旧 diff
-        self.diff_viewer.set_diff_content("")
+        # self.diff_viewer.set_diff_content("")
+        if isinstance(self.diff_viewer, DiffViewerWidget):
+            self.diff_viewer.set_diff_content("")
+        else:
+            # 若当前是 ParagraphDiffViewer → 切回空文本 viewer
+            new_v = DiffViewerWidget()
+            new_v.set_diff_content("")
+            self.layout.replaceWidget(self.diff_viewer, new_v)
+            self.diff_viewer.deleteLater()
+            self.diff_viewer = new_v
 
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
@@ -80,9 +91,26 @@ class SnapshotComparePage(QWidget):
 
         try:
             diff_result = self.manager.compare_snapshots(base_path, latest_path)
-            self.diff_viewer.set_diff_content(diff_result)
+
+            # Choose appropriate viewer
+            if hasattr(diff_result, "structured") and diff_result.structured:
+                new_viewer = ParagraphDiffViewer(diff_result.structured)
+            else:
+                new_viewer = DiffViewerWidget()
+                raw_text = getattr(diff_result, "raw", str(diff_result))
+                new_viewer.set_diff_content(raw_text)
+
+            # Replace old viewer
+            self.layout.replaceWidget(self.diff_viewer, new_viewer)
+            self.diff_viewer.deleteLater()
+            self.diff_viewer = new_viewer
+
         except Exception as e:
-            self.diff_viewer.set_diff_content(f"对比失败：{str(e)}")
+            error_viewer = DiffViewerWidget()
+            error_viewer.set_diff_content(f"对比失败：{str(e)}")
+            self.layout.replaceWidget(self.diff_viewer, error_viewer)
+            self.diff_viewer.deleteLater()
+            self.diff_viewer = error_viewer
 
     def check_selection_limit(self):
         items = self.list_widget.selectedItems()

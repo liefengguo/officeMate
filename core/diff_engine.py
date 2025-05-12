@@ -22,7 +22,6 @@ Design principles
   not concrete algorithms.
 """
 
-import os
 from pathlib import Path
 from typing import List
 
@@ -44,11 +43,9 @@ class DiffEngine:
         ]
 
     # --------------------------------------------------------------------- API
-    def compare_files(self, file_a: str, file_b: str) -> str:
+    def compare_files(self, file_a: str, file_b: str) -> DiffResult:
         """
-        Compare two snapshot files, returning unified diff text for display.
-        Structured diff information is preserved inside DiffResult for future
-        UI use, but currently only .raw is returned.
+        Compare two snapshot files, returning a `DiffResult` object that contains both unified diff text (`raw`) and optional structured data (`structured`).
         """
         ext_a = Path(file_a).suffix
         ext_b = Path(file_b).suffix
@@ -59,8 +56,8 @@ class DiffEngine:
             if strategy.supports(loader_a, loader_b):
                 try:
                     result: DiffResult = strategy.diff(file_a, file_b)
-                    return result.raw if result else "无差异"
+                    return result
                 except Exception as exc:
-                    return f"对比失败（{strategy.__class__.__name__}）：{exc}"
+                    return DiffResult(raw=f"对比失败（{strategy.__class__.__name__}）：{exc}")
 
-        return "未找到可用的差异算法"
+        return DiffResult(raw="未找到可用的差异算法")
