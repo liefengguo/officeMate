@@ -1,51 +1,66 @@
-import difflib
+"""
+DiffEngine
+==========
+
+Central coordinator that selects an appropriate DiffStrategy to compare
+two snapshot files.  The concrete strategies live in
+`core.diff_strategies` and are registered here in order of priority.
+
+Currently available strategies
+------------------------------
+1. ParagraphDiffStrategy  – structure‑aware paragraph diff for loaders
+   that implement `load_structured` (e.g., DocxLoader).
+2. TextDiffStrategy       – fallback line‑level unified diff.
+
+Design principles
+-----------------
+* Open/Closed – add new strategies without modifying core logic; just
+  create a new strategy class and insert it into `self.strategies`.
+* Single Responsibility – DiffEngine only handles strategy selection /
+  orchestration, not the diff algorithm itself.
+* Dependency Inversion – DiffEngine depends on abstract `DiffStrategy`,
+  not concrete algorithms.
+"""
+
 import os
+from pathlib import Path
+from typing import List
 
-def read_text(file_path):
-    """读取文件，尝试不同编码以防止 UnicodeDecodeError"""
-    encodings = ['utf-8', 'gbk', 'latin1']  # 支持的常见编码
-    for encoding in encodings:
-        try:
-            with open(file_path, "r", encoding=encoding) as f:
-                return f.readlines()
-        except UnicodeDecodeError:
-            continue
-    raise UnicodeDecodeError(f"文件 {file_path} 无法用已知编码读取，请检查文件编码。")
+# strategy imports
+from .diff_strategies.paragraph_strategy import ParagraphDiffStrategy
+from .diff_strategies.text_strategy import TextDiffStrategy
+from .diff_strategies.base_strategy import DiffResult, DiffStrategy
+from .snapshot_loaders.loader_registry import LoaderRegistry
 
-def read_docx(file_path):
-    """读取 .docx 文件内容"""
-    from docx import Document
-    doc = Document(file_path)
-    return [p.text for p in doc.paragraphs]
-
-def generate_diff(file1_path, file2_path):
-    """生成两个文件的差异内容"""
-    def resolve_reader(file_path):
-        # 根据内容判断是否是 docx
-        try:
-            if file_path.endswith('.docx') or file_path.endswith('.bak'):
-                from docx import Document
-                Document(file_path)  # 尝试读取，如果报错则不是 docx
-                return read_docx
-        except Exception:
-            pass
-        return read_text
-
-    read_func1 = resolve_reader(file1_path)
-    read_func2 = resolve_reader(file2_path)
-
-    text1 = read_func1(file1_path)
-    text2 = read_func2(file2_path)
-
-    diff = difflib.ndiff(text1, text2)
-    return list(diff)
 
 class DiffEngine:
-    def compare_files(self, file1, file2):
-        try:
-            diff_lines = generate_diff(file1, file2)
-            if not diff_lines:
-                return "两个快照内容无差异"
-            return ''.join(diff_lines)
-        except Exception as e:
-            return f"对比失败：{str(e)}"
+    """Selects and executes an appropriate diff strategy."""
+
+    def __init__(self) -> None:
+        # Priority‑ordered list of strategies (first to support wins)
+        self.strategies: List[DiffStrategy] = [
+            ParagraphDiffStrategy(),  # structure‑aware diff
+            TextDiffStrategy(),       # fallback
+        ]
+
+    # --------------------------------------------------------------------- API
+    def compare_files(self, file_a: str, file_b: str) -> str:
+        """
+        Compare two snapshot files, returning unified diff text for display.
+        Structured diff information is preserved inside DiffResult for future
+        UI use, but currently only .raw is returned.
+        """
+        ext_a = Path(file_a).suffix
+        ext_b = Path(file_b).suffix
+        loader_a = LoaderRegistry.get_loader(ext_a)
+        loader_b = LoaderRegistry.get_loader(ext_b)
+
+        for strategy in self.strategies:
+            if strategy.supports(loader_a, loader_b):
+                try:
+                    result: DiffResult = strategy.diff(file_a, file_b)
+                    return result.raw if result else "无差异"
+                except Exception as exc:
+                    return f"对比失败（{strategy.__class__.__name__}）：{exc}"
+
+        return "未找到可用的差异算法"

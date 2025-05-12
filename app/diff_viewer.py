@@ -2,7 +2,7 @@
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor, QFont
-from core.diff_engine import generate_diff
+from core.diff_engine import DiffEngine
 
 class DiffViewer(QWidget):
     def __init__(self, file1_path, file2_path):
@@ -19,7 +19,9 @@ class DiffViewer(QWidget):
         self.show_diff(file1_path, file2_path)
 
     def show_diff(self, file1, file2):
-        diff_lines = generate_diff(file1, file2)
+        engine = DiffEngine()
+        diff_text = engine.compare_files(file1, file2)
+        diff_lines = diff_text.splitlines()
 
         for line in diff_lines:
             if line.startswith("-"):

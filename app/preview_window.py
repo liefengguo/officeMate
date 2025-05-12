@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtGui import QFont
-from core.diff_engine import read_text, read_docx
+import os
+from core.snapshot_loaders.loader_registry import LoaderRegistry
 
 class PreviewWindow(QWidget):
     def __init__(self, file_path):
@@ -15,20 +16,18 @@ class PreviewWindow(QWidget):
         self.setLayout(layout)
         self.load_content(file_path)
 
-    def load_content(self, path):
+    def load_content(self, path: str):
+        """Load snapshot content using LoaderRegistry."""
         try:
-            content = ""
-            if path.endswith(".docx") or path.endswith(".bak"):
-                try:
-                    from docx import Document
-                    Document(path)  # 尝试读取验证
-                    content = read_docx(path)
-                except Exception:
-                    content = read_text(path)
+            _, ext = os.path.splitext(path)
+            loader = LoaderRegistry.get_loader(ext)
+            if loader:
+                text = loader.get_text(path)
             else:
-                content = read_text(path)
-
+                # Fallback plain UTF‑8 read
+                with open(path, "r", encoding="utf-8", errors="ignore") as fp:
+                    text = fp.read()
             self.text_edit.setFont(QFont("Courier", 10))
-            self.text_edit.setPlainText("".join(content))
+            self.text_edit.setPlainText(text)
         except Exception as e:
             self.text_edit.setPlainText(f"加载内容失败：{e}")
