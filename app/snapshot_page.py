@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QListWidgetItem  # if needed (not used here)
 from core.snapshot_manager import SnapshotManager
 from app.diff_viewer_widget import DiffViewerWidget
-from app.widgets.paragraph_diff_viewer import ParagraphDiffViewer
+from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
 import os
 class SnapshotPage(QWidget):
     """页面通过共享的 SnapshotManager 进行快照操作"""
@@ -79,7 +79,7 @@ class SnapshotPage(QWidget):
 
             # 选择合适的 viewer
             if diff_result.structured:
-                new_viewer = ParagraphDiffViewer(diff_result.structured)
+                new_viewer = ParagraphDiffTableView(diff_result.structured)
             else:
                 new_viewer = DiffViewerWidget()
                 new_viewer.set_diff_content(diff_result.raw or "当前文档与最新快照没有任何差异。")

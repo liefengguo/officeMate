@@ -4,7 +4,7 @@ from core.snapshot_manager import SnapshotManager
 from PyQt5.QtWidgets import QPlainTextEdit, QListWidgetItem
 from app.snapshot_list_widget import SnapshotListWidget
 from app.diff_viewer_widget import DiffViewerWidget
-from app.widgets.paragraph_diff_viewer import ParagraphDiffViewer
+from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
 
 class SnapshotComparePage(QWidget):
     def __init__(self, file_path, parent=None, snapshot_manager: SnapshotManager = None):
@@ -60,7 +60,7 @@ class SnapshotComparePage(QWidget):
         if isinstance(self.diff_viewer, DiffViewerWidget):
             self.diff_viewer.set_diff_content("")
         else:
-            # 若当前是 ParagraphDiffViewer → 切回空文本 viewer
+            # 若当前是 ParagraphDiffTableView → 切回空文本 viewer
             new_v = DiffViewerWidget()
             new_v.set_diff_content("")
             self.layout.replaceWidget(self.diff_viewer, new_v)
@@ -94,7 +94,7 @@ class SnapshotComparePage(QWidget):
 
             # Choose appropriate viewer
             if hasattr(diff_result, "structured") and diff_result.structured:
-                new_viewer = ParagraphDiffViewer(diff_result.structured)
+                new_viewer = ParagraphDiffTableView(diff_result.structured)
             else:
                 new_viewer = DiffViewerWidget()
                 raw_text = getattr(diff_result, "raw", str(diff_result))
