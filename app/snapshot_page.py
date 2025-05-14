@@ -1,103 +1,82 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QListWidgetItem  # if needed (not used here)
-from core.snapshot_manager import SnapshotManager
-from app.diff_viewer_widget import DiffViewerWidget
-from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
+# app/snapshot_page.py
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QMessageBox
 import os
+
+from core.snapshot_manager import SnapshotManager
+from app.widgets.snapshot_panels import (
+    SnapshotMiddlePanel,
+    SnapshotDisplayPanel,
+)
+from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
+from app.diff_viewer_widget import DiffViewerWidget
+
+
 class SnapshotPage(QWidget):
-    """页面通过共享的 SnapshotManager 进行快照操作"""
-    def __init__(self, file_path, snapshot_manager: SnapshotManager, parent=None):
+    """
+    “添加快照”页：中间交互区(备注输入/按钮) + 右侧显示区(差异或提示)
+    """
+
+    def __init__(self, file_path: str, snapshot_manager: SnapshotManager, parent=None):
         super().__init__(parent)
         self.file_path = file_path
         self.manager = snapshot_manager
 
-        layout = QVBoxLayout()
+        # ---------- 中间交互面板（备注模式） ----------
+        self.middle_panel = SnapshotMiddlePanel(mode="note")
+        # ---------- 右侧显示面板 ----------
+        self.display_panel = SnapshotDisplayPanel()
 
-        self.label = QLabel("📸 创建新快照")
-        self.remark_input = QLineEdit()
-        self.remark_input.setPlaceholderText("请输入快照备注（可选）")
-        self.create_button = QPushButton("创建快照")
-
-        self.compare_button = QPushButton("对比当前文档与最新快照")
-        # self.diff_result_view = DiffViewerWidget()
-        self.diff_viewer = DiffViewerWidget()        # 初始用行级文本视图
-        # layout.addWidget(self.diff_viewer)
-
-        layout.addWidget(self.label)
-        layout.addWidget(self.remark_input)
-        layout.addWidget(self.create_button)
-        layout.addWidget(self.compare_button)
-        layout.addWidget(self.diff_viewer)
-        layout.addStretch()
-
+        # ---------- 主水平布局 ----------
+        layout = QHBoxLayout(self)
+        layout.addWidget(self.middle_panel, 1)   # stretch 1
+        layout.addWidget(self.display_panel, 2)  # stretch 2
         self.setLayout(layout)
 
-        self.create_button.clicked.connect(self.create_snapshot)
-        self.compare_button.clicked.connect(self.compare_with_latest)
+        # ---------- 连接信号 ----------
+        self.middle_panel.snapshotCreated.connect(self.on_create_snapshot)
+        self.middle_panel.compareRequested.connect(self.compare_with_latest)
 
-    def create_snapshot(self):
-        remark = self.remark_input.text()
+        # 初始右侧提示
+        self.display_panel.set_widget(QLabel("👉 在左侧填写备注并点击“创建快照”"))
+
+    # ----------------------------------------------------------------- 槽函数
+    def on_create_snapshot(self, remark: str):
         try:
             info = self.manager.create_snapshot(self.file_path, remark=remark)
             QMessageBox.information(self, "成功", f"快照已创建！\n时间：{info['timestamp']}")
-            self.remark_input.clear()
-
+            # 清空备注输入框
+            self.middle_panel.clear()
+            # 更新右侧提示
+            self.display_panel.set_widget(QLabel("✅ 快照已创建！"))
         except Exception as e:
-            QMessageBox.critical(self, "错误", f"创建快照失败：{str(e)}")
+            QMessageBox.critical(self, "错误", f"创建快照失败：{e}")
 
-    # def compare_with_latest(self):
-    #     try:
-    #         doc_name = os.path.basename(self.file_path)
-    #         versions = self.manager.list_snapshots(doc_name)
-    #         if not versions:
-    #             self.diff_result_view.set_diff_content("没有可用的快照进行对比。")
-    #             return
-
-    #         latest_version = sorted(versions, key=lambda v: v.get("timestamp", ""), reverse=True)[0]
-    #         latest_snapshot_path = latest_version.get("snapshot_path")
-
-    #         diff_result = self.manager.compare_snapshots(latest_snapshot_path, self.file_path)
-
-    #         if not diff_result.strip():
-    #             self.diff_result_view.set_diff_content("当前文档与最新快照没有任何差异。")
-    #         else:
-    #             self.diff_result_view.set_diff_content(diff_result)
-
-    #     except Exception as e:
-    #         self.diff_result_view.set_diff_content(f"对比失败：{str(e)}")
     def compare_with_latest(self):
         try:
+            # 找到最新快照文件
             doc_name = os.path.basename(self.file_path)
             versions = self.manager.list_snapshots(doc_name)
             if not versions:
-                self._set_text("没有可用的快照进行对比。")
+                self.display_panel.set_widget(QLabel("⚠️ 没有可用快照进行对比"))
                 return
 
             latest_version = max(versions, key=lambda v: v.get("timestamp", ""))
             latest_snapshot_path = latest_version["snapshot_path"]
 
+            # 获取 diff 结果
             diff_result = self.manager.compare_snapshots(latest_snapshot_path, self.file_path)
 
-            # 选择合适的 viewer
+            # 选择合适 viewer
             if diff_result.structured:
-                new_viewer = ParagraphDiffTableView(diff_result.structured)
+                viewer = ParagraphDiffTableView(diff_result.structured, self)
             else:
-                new_viewer = DiffViewerWidget()
-                new_viewer.set_diff_content(diff_result.raw or "当前文档与最新快照没有任何差异。")
+                viewer = DiffViewerWidget(self)
+                viewer.set_diff_content(diff_result.raw or "当前文档与最新快照没有任何差异。")
 
-            # 置换旧 viewer
-            self.layout().replaceWidget(self.diff_viewer, new_viewer)
-            self.diff_viewer.deleteLater()
-            self.diff_viewer = new_viewer
+            self.display_panel.set_widget(viewer)
 
         except Exception as e:
-            self._set_text(f"对比失败：{e}")
-
-    # 辅助：在文本 viewer 上显示信息
-    def _set_text(self, text: str):
-        if not isinstance(self.diff_viewer, DiffViewerWidget):
-            # 替换为文本 viewer
-            temp = DiffViewerWidget()
-            self.layout().replaceWidget(self.diff_viewer, temp)
-            self.diff_viewer.deleteLater()
-            self.diff_viewer = temp
-        self.diff_viewer.set_diff_content(text)
+            err_view = DiffViewerWidget(self)
+            err_view.set_diff_content(f"对比失败：{e}")
+            self.display_panel.set_widget(err_view)

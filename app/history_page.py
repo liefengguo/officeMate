@@ -1,141 +1,171 @@
+# app/history_page.py
 import os
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton, QMessageBox
+import docx
 from functools import partial
+
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
+    QPushButton, QMessageBox
+)
+
 from core.snapshot_manager import SnapshotManager
-from app.snapshot_item_widget import SnapshotItemWidget
+from app.widgets.snapshot_panels import SnapshotDisplayPanel           # 新增
+from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
+from app.diff_viewer_widget import DiffViewerWidget
+
 
 class HistoryPage(QWidget):
+    """快照历史页：中间快照列表 + 右侧预览 / diff"""
+
     def __init__(self, file_path, snapshot_manager: SnapshotManager, parent=None):
         super().__init__(parent)
         self.file_path = file_path
         self.sm = snapshot_manager
         self.doc_name = os.path.basename(file_path)
 
-        self.layout = QVBoxLayout()
+        # ---------- 中间列：快照列表 + 操作按钮 ----------
+        mid_widget = QWidget()
+        mid_layout = QVBoxLayout(mid_widget)
         self.label = QLabel(f"📜 {self.doc_name} 的快照历史")
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QListWidget.SingleSelection)
-        # --- restore / undo buttons ---
+
         self.btn_restore = QPushButton("恢复所选快照")
-        self.btn_undo    = QPushButton("撤销上次恢复")
+        self.btn_undo = QPushButton("撤销上次恢复")
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_undo.clicked.connect(self.sm.undo_restore)
         self.btn_undo.setEnabled(False)
-        self.load_snapshots()
+
+        mid_layout.addWidget(self.label)
+        mid_layout.addWidget(self.list_widget)
+        mid_layout.addWidget(self.btn_restore)
+        mid_layout.addWidget(self.btn_undo)
+        self.btn_delete = QPushButton("删除所选快照")
+        self.btn_delete.clicked.connect(self.delete_selected)
+        mid_layout.addWidget(self.btn_delete)
+        mid_layout.addStretch(1)
+
+        # ---------- 右侧显示面板 ----------
+        self.display_panel = SnapshotDisplayPanel()
+
+        # ---------- 主水平布局 ----------
+        hbox = QHBoxLayout(self)
+        hbox.addWidget(mid_widget, 1)
+        hbox.addWidget(self.display_panel, 2)
+        self.setLayout(hbox)
+
+        # ---------- 连接信号 ----------
         self.list_widget.itemSelectionChanged.connect(self.handle_selection_changed)
+        self.list_widget.itemClicked.connect(self.preview_selected)
         self.sm.snapshot_created.connect(self.load_snapshots)
         self.sm.snapshot_deleted.connect(self.load_snapshots)
-        # 挂接刷新按钮启用状态
         self.sm.snapshot_created.connect(self._toggle_undo_button)
         self.sm.snapshot_deleted.connect(self._toggle_undo_button)
 
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.list_widget)
-        self.layout.addWidget(self.btn_restore)
-        self.layout.addWidget(self.btn_undo)
-        self.setLayout(self.layout)
+        # 初始加载
+        self.load_snapshots()
+        if self.list_widget.count() == 0:
+            self.display_panel.set_widget(QLabel("👉 选择快照查看内容或恢复"))
+        else:
+            self.display_panel.set_widget(QLabel("👉 选择快照查看内容或恢复"))
 
+    # ---------------------------------------------------------------- list
     def load_snapshots(self):
-        """加载快照数据到列表"""
         self.list_widget.clear()
         versions = self.sm.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
             self._toggle_undo_button()
             return
+
         versions.sort(key=lambda v: v.get("timestamp", ""), reverse=True)
         for v in versions:
             title = v.get("remark", "") or os.path.basename(v.get("snapshot_path", ""))
-            timestamp = v.get("timestamp", "")
-
-            item_widget = SnapshotItemWidget(title, timestamp)
-            item_widget.view_requested.connect(partial(self.view_snapshot, item_widget))
-            item_widget.delete_requested.connect(partial(self.delete_snapshot, item_widget))
-            list_item = QListWidgetItem()
-            list_item.setSizeHint(item_widget.sizeHint())
-            # 将元数据存入 item，便于后续恢复/删除
+            ts = v.get("timestamp", "")
+            text = f"{title}\n{ts}"
+            list_item = QListWidgetItem(text)
             list_item.setData(Qt.UserRole, v)
-
             self.list_widget.addItem(list_item)
-            self.list_widget.setItemWidget(list_item, item_widget)
         self._toggle_undo_button()
 
-
     def handle_selection_changed(self):
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            widget = self.list_widget.itemWidget(item)
-            if widget:
-                widget.set_selected(item.isSelected())
+        # no custom widget highlighting needed
+        pass
 
-    # ---------- restore / undo helpers ----------
+    # ---------------------------------------------------------------- restore / undo
     def _toggle_undo_button(self, *_):
-        """根据管理器 undo 栈状态启用/禁用撤销按钮"""
         self.btn_undo.setEnabled(self.sm.can_undo())
 
     def restore_selected(self):
-        """恢复为所选快照"""
         items = self.list_widget.selectedItems()
         if not items:
             QMessageBox.information(self, "提示", "请先选择要恢复的快照")
             return
+        meta = items[0].data(Qt.UserRole)
+        if not isinstance(meta, dict):
+            QMessageBox.warning(self, "提示", "无法获取快照信息")
+            return
+        self.sm.restore_snapshot(meta)
 
-        target_meta = items[0].data(Qt.UserRole)
-        if not isinstance(target_meta, dict):
+    def delete_selected(self):
+        row = self.list_widget.currentRow()          # 先拿行号
+        if row < 0:
+            QMessageBox.information(self, "提示", "请先选择要删除的快照")
+            return
+
+        meta_item = self.list_widget.item(row)
+        meta = meta_item.data(Qt.UserRole)
+        if not isinstance(meta, dict):
             QMessageBox.warning(self, "提示", "无法获取快照信息")
             return
 
-        self.sm.restore_snapshot(target_meta)
+        # 二次确认
+        if QMessageBox.question(self, "删除快照",
+                                "确定删除该快照？",
+                                QMessageBox.Yes | QMessageBox.No) != QMessageBox.Yes:
+            return
 
-    def view_snapshot(self, widget):
-        """查看快照内容"""
-        from PyQt5.QtWidgets import QMessageBox
-        import docx
-        versions = self.sm.list_snapshots(self.doc_name)
-        target_version = None
-        for v in versions:
-            title = v.get("remark", "") or os.path.basename(v.get("snapshot_path", ""))
-            if title == widget.label_title.text():
-                target_version = v
-                break
-        if target_version:
-            path = target_version.get("snapshot_path")
-            try:
-                if path.endswith(".txt"):
-                    with open(path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                elif path.endswith(".docx"):
-                    doc = docx.Document(path)
-                    content = "\n".join([para.text for para in doc.paragraphs])
-                else:
-                    content = "(不支持的文件格式)"
+        # 删除数据文件 / 元数据
+        self.sm.delete_snapshot(self.doc_name, meta)
 
-                QMessageBox.information(self, "快照内容", content[:1000] + "..." if len(content) > 1000 else content)
-            except Exception as e:
-                QMessageBox.critical(self, "错误", f"无法读取快照内容：{str(e)}")
-        else:
-            QMessageBox.warning(self, "警告", "未找到对应快照。")
+        # 解除预览 & 从列表移除
+        self.display_panel.set_widget(QLabel("✂️ 已删除快照"))
+        self.list_widget.takeItem(row)               # 直接按行删除，避免引用 item
 
-    def delete_snapshot(self, widget):
-        """删除快照"""
-        from PyQt5.QtWidgets import QMessageBox
-        confirm = QMessageBox.question(self, "删除快照", "确定要删除这个快照吗？", QMessageBox.Yes | QMessageBox.No)
-        if confirm == QMessageBox.Yes:
-            # Find the version info
-            versions = self.sm.list_snapshots(self.doc_name)
-            target_version = None
-            for v in versions:
-                title = v.get("remark", "") or os.path.basename(v.get("snapshot_path", ""))
-                if title == widget.label_title.text():
-                    target_version = v
-                    break
-            if target_version:
-                self.sm.delete_snapshot(self.doc_name, target_version)
+        # 如需刷新按钮状态
+        self._toggle_undo_button()
+    # ---------------------------------------------------------------- view / delete
+    def _build_preview_widget(self, path: str):
+        """根据文件类型构建预览控件"""
+        try:
+            if path.endswith(".txt"):
+                with open(path, "r", encoding="utf-8") as f:
+                    txt = f.read()
+                vw = DiffViewerWidget()
+                vw.set_diff_content(txt)
+                return vw
+            elif path.endswith(".docx"):
+                doc = docx.Document(path)
+                paragraphs = [p.text for p in doc.paragraphs]
+                diff_tbl = ParagraphDiffTableView(
+                    [{"tag": "equal", "a_idx": i, "b_idx": i, "a_text": p, "b_text": p}
+                     for i, p in enumerate(paragraphs)]
+                )
+                return diff_tbl
+            else:
+                label = QLabel("(不支持的文件格式)")
+                label.setAlignment(Qt.AlignCenter)
+                return label
+        except Exception as e:
+            err = QLabel(f"无法读取快照内容：{e}")
+            err.setAlignment(Qt.AlignCenter)
+            return err
 
-            # Remove from list
-            for i in range(self.list_widget.count()):
-                item = self.list_widget.item(i)
-                if self.list_widget.itemWidget(item) == widget:
-                    self.list_widget.takeItem(i)
-                    break
+    # ----------- new direct preview ------------
+    def preview_selected(self, item):
+        meta = item.data(Qt.UserRole)
+        if not isinstance(meta, dict):
+            return
+        widget = self._build_preview_widget(meta["snapshot_path"])
+        self.display_panel.set_widget(widget)

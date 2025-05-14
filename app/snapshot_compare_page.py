@@ -1,121 +1,131 @@
+# app/snapshot_compare_page.py
 import os
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox
+from functools import partial
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QWidget, QHBoxLayout, QVBoxLayout, QLabel,
+    QPushButton, QListWidgetItem, QMessageBox
+)
+
 from core.snapshot_manager import SnapshotManager
-from PyQt5.QtWidgets import QPlainTextEdit, QListWidgetItem
 from app.snapshot_list_widget import SnapshotListWidget
-from app.diff_viewer_widget import DiffViewerWidget
 from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
+from app.diff_viewer_widget import DiffViewerWidget
+from app.widgets.snapshot_panels import SnapshotDisplayPanel
+
 
 class SnapshotComparePage(QWidget):
+    """
+    快照对比页
+    左侧(中间列)：快照多选列表 + “对比”按钮
+    右侧       ：显示 ParagraphDiffTableView / DiffViewerWidget
+    """
+
     def __init__(self, file_path, parent=None, snapshot_manager: SnapshotManager = None):
+        # 兼容老调用顺序
         if isinstance(parent, SnapshotManager) and snapshot_manager is None:
-            # Handle legacy call order: (file_path, snapshot_manager)
             snapshot_manager = parent
             parent = None
         super().__init__(parent)
 
-        # ensure we have a manager instance
         self.manager: SnapshotManager = snapshot_manager
-
         self.file_path = file_path
-        # 同步刷新：监听快照增删信号
-        self.manager.snapshot_created.connect(self.load_snapshots)
-        self.manager.snapshot_deleted.connect(self.load_snapshots)
         self.doc_name = os.path.basename(file_path)
 
-        self.layout = QVBoxLayout()
+        # ------------------------ 左侧交互区 ------------------------ #
+        mid_widget = QWidget()
+        mid_layout = QVBoxLayout(mid_widget)
         self.label = QLabel(f"🔍 {self.doc_name} 快照对比")
         self.list_widget = SnapshotListWidget(file_path, single_selection=False)
         self.compare_button = QPushButton("对比选中的两个快照")
+        mid_layout.addWidget(self.label)
+        mid_layout.addWidget(self.list_widget, 1)
+        mid_layout.addWidget(self.compare_button)
+        mid_layout.addStretch()
 
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.list_widget)
-        self.layout.addWidget(self.compare_button)
-        self.setLayout(self.layout)
+        # ------------------------ 右侧显示区 ------------------------ #
+        self.display_panel = SnapshotDisplayPanel()
+        self.display_panel.set_widget(QLabel("👉 请选择两个快照后点击“对比”"))
 
+        # ------------------------ 主水平布局 ------------------------ #
+        hbox = QHBoxLayout(self)
+        hbox.addWidget(mid_widget, 1)
+        hbox.addWidget(self.display_panel, 2)
+        self.setLayout(hbox)
+
+        # ------------------------ 信号连接 ------------------------ #
+        self.manager.snapshot_created.connect(self.load_snapshots)
+        self.manager.snapshot_deleted.connect(self.load_snapshots)
         self.compare_button.clicked.connect(self.compare_snapshots)
         self.list_widget.itemSelectionChanged.connect(self.check_selection_limit)
 
-        self.diff_viewer = DiffViewerWidget()
+        self.load_snapshots()
 
-        self.layout.addWidget(self.diff_viewer)
-
+    # ---------------------------------------------------------------- list
     def load_snapshots(self):
-        """重新加载快照数据（使用 SnapshotManager 列表接口）"""
+        """重新加载快照数据"""
         self.list_widget.clear()
         versions = self.manager.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
+            self.display_panel.set_widget(QLabel("📭 没有快照可用"))
             return
-        for v in versions:
+
+        for v in sorted(versions, key=lambda x: x.get("timestamp", ""), reverse=True):
             path = v.get("snapshot_path")
             title = v.get("remark", "") or os.path.basename(path)
-            timestamp = v.get("timestamp", "")
-            display = f"{title}\n{timestamp}"
+            ts = v.get("timestamp", "")
+            display = f"{title}\n{ts}"
             item = QListWidgetItem(display)
-            item.setData(1000, path)
+            item.setData(Qt.UserRole, path)
             self.list_widget.addItem(item)
-        # 清空旧 diff
-        # self.diff_viewer.set_diff_content("")
-        if isinstance(self.diff_viewer, DiffViewerWidget):
-            self.diff_viewer.set_diff_content("")
-        else:
-            # 若当前是 ParagraphDiffTableView → 切回空文本 viewer
-            new_v = DiffViewerWidget()
-            new_v.set_diff_content("")
-            self.layout.replaceWidget(self.diff_viewer, new_v)
-            self.diff_viewer.deleteLater()
-            self.diff_viewer = new_v
 
+        # 清空右侧旧内容
+        self.display_panel.set_widget(QLabel("👉 请选择两个快照后点击“对比”"))
+
+    # ---------------------------------------------------------------- compare
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
         if len(items) != 2:
             QMessageBox.warning(self, "提示", "请选择两个快照进行对比")
             return
 
+        paths = [it.data(Qt.UserRole) for it in items]
         versions = self.manager.list_snapshots(self.doc_name)
 
-        selected_versions = []
-        for item in items:
-            path = item.data(1000)
-            match = next((v for v in versions if v.get("snapshot_path") == path), None)
-            if match:
-                selected_versions.append((path, match.get("timestamp", "")))
-
-        if len(selected_versions) != 2:
+        meta_map = {v["snapshot_path"]: v for v in versions}
+        try:
+            v1, v2 = (meta_map[p] for p in paths)
+        except KeyError:
             QMessageBox.warning(self, "错误", "读取快照信息失败")
             return
 
-        selected_versions.sort(key=lambda x: x[1])
-        base_path, latest_path = selected_versions[0][0], selected_versions[1][0]
+        # 按时间排序：旧 -> 新
+        if v1["timestamp"] > v2["timestamp"]:
+            base_path, latest_path = v2["snapshot_path"], v1["snapshot_path"]
+        else:
+            base_path, latest_path = v1["snapshot_path"], v2["snapshot_path"]
 
         try:
             diff_result = self.manager.compare_snapshots(base_path, latest_path)
 
-            # Choose appropriate viewer
-            if hasattr(diff_result, "structured") and diff_result.structured:
-                new_viewer = ParagraphDiffTableView(diff_result.structured)
+            if diff_result.structured:
+                viewer = ParagraphDiffTableView(diff_result.structured, self)
             else:
-                new_viewer = DiffViewerWidget()
-                raw_text = getattr(diff_result, "raw", str(diff_result))
-                new_viewer.set_diff_content(raw_text)
+                viewer = DiffViewerWidget(self)
+                viewer.set_diff_content(diff_result.raw or "两个快照无差异。")
 
-            # Replace old viewer
-            self.layout.replaceWidget(self.diff_viewer, new_viewer)
-            self.diff_viewer.deleteLater()
-            self.diff_viewer = new_viewer
+            self.display_panel.set_widget(viewer)
 
         except Exception as e:
-            error_viewer = DiffViewerWidget()
-            error_viewer.set_diff_content(f"对比失败：{str(e)}")
-            self.layout.replaceWidget(self.diff_viewer, error_viewer)
-            self.diff_viewer.deleteLater()
-            self.diff_viewer = error_viewer
+            err = DiffViewerWidget(self)
+            err.set_diff_content(f"对比失败：{e}")
+            self.display_panel.set_widget(err)
 
+    # ---------------------------------------------------------------- utils
     def check_selection_limit(self):
+        """只保留最新的两条选中"""
         items = self.list_widget.selectedItems()
-        if len(items) > 2:
-            first_selected_item = items[0]
-            self.list_widget.blockSignals(True)  # 防止触发死循环
-            first_selected_item.setSelected(False)
-            self.list_widget.blockSignals(False)
+        while len(items) > 2:
+            items[0].setSelected(False)
+            items = self.list_widget.selectedItems()
