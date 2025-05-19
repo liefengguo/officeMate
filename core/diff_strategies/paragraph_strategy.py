@@ -1,37 +1,9 @@
-
-
 """
-ParagraphDiffStrategy
-=====================
-Structure‑aware diff strategy operating on **paragraph lists** extracted
-by SnapshotLoader implementations (e.g., DocxLoader).
-
-A loader is considered paragraph‑aware if it implements
-`load_structured()` and returns an **ordered list** where the `.text`
-field (or the item itself if it is str) represents the paragraph text.
-
-This strategy:
-1. Calls `loader.load_structured()` to obtain paragraph sequences for
-   both snapshots.
-2. Uses `difflib.SequenceMatcher` on the *text* sequence to compute
-   opcodes (equal / insert / delete / replace).
-3. Builds a human‑readable unified diff (paragraph‑level) for fallback
-   display (`DiffResult.raw`).
-4. Builds a machine‑readable list of diff chunks (`DiffResult.structured`)
-   each with:
-        {
-            "tag": "equal|insert|delete|replace",
-            "a_idx": index in old snapshot or -1,
-            "b_idx": index in new snapshot or -1,
-            "a_text": old paragraph text,
-            "b_text": new paragraph text
-        }
-   This will later be consumed by UI for coloured rendering.
-
-If either loader lacks `load_structured`, `supports()` returns False so
-that DiffEngine falls back to TextDiffStrategy.
-
-Author: DocSnap team
+ParagraphDiffStrategy 2.0
+=========================
+• 段落级 diff（equal / delete / insert / replace）
+• "replace" 段生成行内增删列表 inline_ops，用于词/字符级高亮
+• 连续 equal 段落 > CONTEXT_LINES*2 折叠为 "skip" 块
 """
 
 from pathlib import Path
@@ -42,39 +14,40 @@ from .base_strategy import DiffStrategy, DiffResult
 from ..snapshot_loaders.loader_registry import LoaderRegistry
 
 
-class ParagraphDiffStrategy(DiffStrategy):
-    """Docx paragraph‑level diff."""
+CONTEXT_LINES = 3           # 保留前后上下文段落数
 
-    # ---------------------------------------------------- helper: extract list
-    def _paragraph_texts(self, loader, path: str) -> List[str]:
-        """Return list of paragraph strings using loader.load_structured()."""
+
+class ParagraphDiffStrategy(DiffStrategy):
+    """Docx / 富文本 段落级 diff（支持行内变化和折叠）"""
+
+    # ------------------------------------------------ helper
+    @staticmethod
+    def _paragraph_texts(loader, path: str) -> List[str]:
+        """调用 loader.load_structured → 返回纯文本段落列表"""
         try:
             struct = loader.load_structured(path)
         except Exception:
             return []
-
         if not struct:
             return []
-
-        # Accept either list[str] or list[dict] with 'text' key
         if isinstance(struct[0], str):
             return struct
-        try:
-            return [para["text"] for para in struct]
-        except Exception:
-            # Fallback: best‑effort str() on each element
-            return [str(p) for p in struct]
+        return [p.get("text", "") for p in struct]
 
-    # ------------------------------------------------------- DiffStrategy API
+    @staticmethod
+    def _inline_ops(a: str, b: str):
+        """计算段内增删，返回 [tag, a_chunk, b_chunk] 列表"""
+        sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
+        return [[tag, a[i1:i2], b[j1:j2]]
+                for tag, i1, i2, j1, j2 in sm.get_opcodes()]
+
+    # ------------------------------------------------ strategy API
     def supports(self, loader_a, loader_b) -> bool:
-        """Support if both loaders implement load_structured()."""
         return all(
-            hasattr(loader, "load_structured") and callable(getattr(loader, "load_structured"))
-            for loader in (loader_a, loader_b)
+            hasattr(loader, "load_structured") for loader in (loader_a, loader_b)
         )
 
     def diff(self, path_a: str, path_b: str) -> DiffResult:
-        """Return paragraph‑level DiffResult (raw + structured)."""
         loader_a = LoaderRegistry.get_loader(Path(path_a).suffix)
         loader_b = LoaderRegistry.get_loader(Path(path_b).suffix)
 
@@ -83,38 +56,56 @@ class ParagraphDiffStrategy(DiffStrategy):
 
         sm = difflib.SequenceMatcher(None, para_a, para_b, autojunk=False)
         chunks: List[Dict] = []
-        raw_lines: List[str] = []
+        raw: List[str] = []
+
+        def add_equal(idx_a: int, idx_b: int):
+            text = para_a[idx_a]
+            chunks.append({"tag": "equal", "a_idx": idx_a, "b_idx": idx_b,
+                           "a_text": text, "b_text": text})
+            raw.append(f"  {text}")
+
+        def add_skip(n: int):
+            chunks.append({"tag": "skip", "count": n})
+            raw.append(f"... {n} unchanged paragraphs ...")
 
         for tag, i1, i2, j1, j2 in sm.get_opcodes():
             if tag == "equal":
-                for idx in range(i1, i2):
-                    raw_lines.append(f"  {para_a[idx]}")
-                chunks.append(
-                    {"tag": "equal", "a_idx": i1, "b_idx": j1, "a_text": "\n".join(para_a[i1:i2]),
-                     "b_text": "\n".join(para_b[j1:j2])}
-                )
+                span = i2 - i1
+                if span > CONTEXT_LINES * 2:
+                    # 头 N + skip + 尾 N
+                    for off in range(CONTEXT_LINES):
+                        add_equal(i1 + off, j1 + off)
+                    add_skip(span - 2 * CONTEXT_LINES)
+                    for off in range(CONTEXT_LINES):
+                        add_equal(i2 - CONTEXT_LINES + off,
+                                  j2 - CONTEXT_LINES + off)
+                else:
+                    for off in range(span):
+                        add_equal(i1 + off, j1 + off)
+
             elif tag == "delete":
                 for idx in range(i1, i2):
-                    raw_lines.append(f"- {para_a[idx]}")
+                    text = para_a[idx]
                     chunks.append({"tag": "delete", "a_idx": idx, "b_idx": -1,
-                                   "a_text": para_a[idx], "b_text": ""})
+                                   "a_text": text, "b_text": ""})
+                    raw.append(f"- {text}")
+
             elif tag == "insert":
                 for idx in range(j1, j2):
-                    raw_lines.append(f"+ {para_b[idx]}")
+                    text = para_b[idx]
                     chunks.append({"tag": "insert", "a_idx": -1, "b_idx": idx,
-                                   "a_text": "", "b_text": para_b[idx]})
-            elif tag == "replace":
-                # mark old paragraphs
-                for idx in range(i1, i2):
-                    raw_lines.append(f"- {para_a[idx]}")
-                # mark new paragraphs
-                for idx in range(j1, j2):
-                    raw_lines.append(f"+ {para_b[idx]}")
-                chunks.append(
-                    {"tag": "replace",
-                     "a_idx": i1, "b_idx": j1,
-                     "a_text": "\n".join(para_a[i1:i2]),
-                     "b_text": "\n".join(para_b[j1:j2])}
-                )
+                                   "a_text": "", "b_text": text})
+                    raw.append(f"+ {text}")
 
-        return DiffResult(raw="\n".join(raw_lines), structured=chunks)
+            elif tag == "replace":
+                a_text = "\n".join(para_a[i1:i2])
+                b_text = "\n".join(para_b[j1:j2])
+                inline = self._inline_ops(a_text, b_text)
+                chunks.append({"tag": "replace",
+                               "a_idx": i1, "b_idx": j1,
+                               "a_text": a_text, "b_text": b_text,
+                               "inline": inline})
+                raw.append(f"- {a_text}")
+                raw.append(f"+ {b_text}")
+
+        return DiffResult("\n".join(raw), structured=chunks)

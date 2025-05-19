@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import (
 
 from core.snapshot_manager import SnapshotManager
 from app.snapshot_list_widget import SnapshotListWidget
-from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
+# from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
+from app.widgets.parallel_diff_view import ParallelDiffView
 from app.diff_viewer_widget import DiffViewerWidget
 from app.widgets.snapshot_panels import SnapshotDisplayPanel
 
@@ -110,7 +111,9 @@ class SnapshotComparePage(QWidget):
             diff_result = self.manager.compare_snapshots(base_path, latest_path)
 
             if diff_result.structured:
-                viewer = ParagraphDiffTableView(diff_result.structured, self)
+                # viewer = ParagraphDiffTableView(diff_result.structured, self)
+                viewer = ParallelDiffView(self)
+                viewer.load_chunks(diff_result.structured)
             else:
                 viewer = DiffViewerWidget(self)
                 viewer.set_diff_content(diff_result.raw or "两个快照无差异。")

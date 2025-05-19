@@ -1,0 +1,116 @@
+# core/diff_strategies/paragraph_strategy.py
+"""
+ParagraphDiffStrategy 2.0
+-------------------------
+* 段落级 diff
+* 行内增删词高亮 (inline ops)
+* 折叠连续 equal 段落为 skip 块
+"""
+
+from pathlib import Path
+from typing import List, Dict
+import difflib
+
+from .base_strategy import DiffStrategy, DiffResult
+from ..snapshot_loaders.loader_registry import LoaderRegistry
+
+
+CONTEXT_LINES = 3           # 折叠时保留上下文行数
+
+
+class ParagraphDiffStrategy(DiffStrategy):
+
+    # ------------------------- helpers
+    @staticmethod
+    def _paragraph_texts(loader, path: str) -> List[str]:
+        struct = loader.load_structured(path)
+        if not struct:
+            return []
+        if isinstance(struct[0], str):
+            return struct
+        return [p.get("text", "") for p in struct]
+
+    @staticmethod
+    def _inline_ops(a: str, b: str):
+        """Return list[tag, a_chunk, b_chunk] for replace lines."""
+        sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
+        ops = []
+        for tag, i1, i2, j1, j2 in sm.get_opcodes():
+            ops.append([tag, a[i1:i2], b[j1:j2]])
+        return ops
+
+    # ------------------------- DiffStrategy API
+    def supports(self, loader_a, loader_b) -> bool:
+        return all(
+            hasattr(loader, "load_structured") for loader in (loader_a, loader_b)
+        )
+
+    def diff(self, path_a: str, path_b: str) -> DiffResult:
+        loader_a = LoaderRegistry.get_loader(Path(path_a).suffix)
+        loader_b = LoaderRegistry.get_loader(Path(path_b).suffix)
+
+        para_a = self._paragraph_texts(loader_a, path_a)
+        para_b = self._paragraph_texts(loader_b, path_b)
+
+        sm = difflib.SequenceMatcher(None, para_a, para_b, autojunk=False)
+        chunks: List[Dict] = []
+        raw_lines: List[str] = []
+
+        def add_skip(count: int):
+            chunks.append({"tag": "skip", "count": count})
+            raw_lines.append(f"... {count} unchanged paragraphs ...")
+
+        for tag, i1, i2, j1, j2 in sm.get_opcodes():
+            if tag == "equal":
+                span_len = i2 - i1
+                if span_len > 2 * CONTEXT_LINES:
+                    # 保留首尾 context，折叠中间
+                    head = range(i1, i1 + CONTEXT_LINES)
+                    tail = range(i2 - CONTEXT_LINES, i2)
+                    for idx in head:
+                        chunks.append({"tag": "equal",
+                                       "a_idx": idx, "b_idx": j1 + (idx - i1),
+                                       "a_text": para_a[idx],
+                                       "b_text": para_b[j1 + (idx - i1)]})
+                        raw_lines.append(f"  {para_a[idx]}")
+                    add_skip(span_len - 2 * CONTEXT_LINES)
+                    for idx in tail:
+                        chunks.append({"tag": "equal",
+                                       "a_idx": idx, "b_idx": j1 + (idx - i1),
+                                       "a_text": para_a[idx],
+                                       "b_text": para_b[j1 + (idx - i1)]})
+                        raw_lines.append(f"  {para_a[idx]}")
+                else:
+                    for idx in range(i1, i2):
+                        chunks.append({"tag": "equal",
+                                       "a_idx": idx, "b_idx": j1 + (idx - i1),
+                                       "a_text": para_a[idx],
+                                       "b_text": para_b[j1 + (idx - i1)]})
+                        raw_lines.append(f"  {para_a[idx]}")
+
+            elif tag == "delete":
+                for idx in range(i1, i2):
+                    chunks.append({"tag": "delete",
+                                   "a_idx": idx, "b_idx": -1,
+                                   "a_text": para_a[idx], "b_text": ""})
+                    raw_lines.append(f"- {para_a[idx]}")
+
+            elif tag == "insert":
+                for idx in range(j1, j2):
+                    chunks.append({"tag": "insert",
+                                   "a_idx": -1, "b_idx": idx,
+                                   "a_text": "", "b_text": para_b[idx]})
+                    raw_lines.append(f"+ {para_b[idx]}")
+
+            elif tag == "replace":
+                a_text = "\n".join(para_a[i1:i2])
+                b_text = "\n".join(para_b[j1:j2])
+                inline = self._inline_ops(a_text, b_text)
+                chunks.append({"tag": "replace",
+                               "a_idx": i1, "b_idx": j1,
+                               "a_text": a_text, "b_text": b_text,
+                               "inline": inline})
+                raw_lines.append(f"- {a_text}")
+                raw_lines.append(f"+ {b_text}")
+
+        return DiffResult("\n".join(raw_lines), structured=chunks)
