@@ -23,6 +23,7 @@ class ParallelDiffView(QSplitter):
     def __init__(self, parent=None):
         super().__init__(Qt.Horizontal, parent)
 
+        
         # 左旧版本
         self.left = QTextBrowser()
         self.right = QTextBrowser()
@@ -81,55 +82,107 @@ class ParallelDiffView(QSplitter):
         return "".join(html_parts) or "&nbsp;"
 
     # ---------------------------------------------------------------- main API
-    def load_chunks(self, chunks: List[Dict]):
-        """
-        把 paragraph_strategy 生成的 diff chunks 渲染到左右 QTextBrowser
-        """
-        left_lines = []
-        sym_lines  = []
-        right_lines = []
-        row = 1
+    # def load_chunks(self, chunks: List[Dict]):
+    #     """
+    #     把 paragraph_strategy 生成的 diff chunks 渲染到左右 QTextBrowser
+    #     """
+    #     left_lines = []
+    #     sym_lines  = []
+    #     right_lines = []
+    #     row = 1
 
-        def _add_line(sym, left_html, right_html):
-            nonlocal row
-            ln_html = f'<span class="ln">{row}</span>'
-            # sym_html = f'<span class="sym">{sym}</span>'
-            color = {"+" : "#34c759", "−": "#ff3b30", "~": "#ff9500"}.get(sym, "#888")
-            sym_html = f'<span style="color:{color}; font-weight:bold;">{sym}</span>'
-            left_lines.append(f"{ln_html}{sym_html}{left_html}")
-            right_lines.append(f"{ln_html}{sym_html}{right_html}")
-            row += 1
+    #     def _add_line(sym, left_html, right_html):
+    #         nonlocal row
+    #         ln_html = f'<span class="ln">{row}</span>'
+    #         # sym_html = f'<span class="sym">{sym}</span>'
+    #         color = {"+" : "#34c759", "−": "#ff3b30", "~": "#ff9500"}.get(sym, "#888")
+    #         sym_html = f'<span style="color:{color}; font-weight:bold;">{sym}</span>'
+    #         left_lines.append(f"{ln_html}{sym_html}{left_html}")
+    #         right_lines.append(f"{ln_html}{sym_html}{right_html}")
+    #         row += 1
+
+    #     for ch in chunks:
+    #         tag = ch.get("tag")
+    #         if tag == "equal":
+    #             html = escape(ch.get("a_text", "")) or "&nbsp;"
+    #             _add_line(" ", html, html)
+
+    #         elif tag == "insert":
+    #             # new = f'<span class="ins">{escape(ch.get("b_text",""))}</span>' or "&nbsp;"
+    #             new = f'<span style="background:#e6ffed;">{escape(ch.get("b_text",""))}</span>'
+    #             _add_line("+", "&nbsp;", new)
+
+    #         elif tag == "delete":
+    #             # old = f'<span class="del">{escape(ch.get("a_text",""))}</span>' or "&nbsp;"
+    #             old = f'<span style="background:#ffeef0; text-decoration:line-through;">{escape(ch.get("a_text",""))}</span>'
+    #             _add_line("−", old, "&nbsp;")
+
+    #         elif tag == "replace":
+    #             inline = ch.get("inline", [])
+    #             old_html = self._render_inline(inline, "a")
+    #             new_html = self._render_inline(inline, "b")
+    #             _add_line("~", old_html, new_html)
+
+    #         elif tag == "skip":
+    #             count = ch.get("count", 0)
+    #             skip_html = f'<span class="skip">… {count} unchanged …</span>'
+    #             _add_line(" ", skip_html, skip_html)
+
+    #     # 拼接成 <div> list
+    #     left_html_doc = "<br>".join(left_lines)
+    #     right_html_doc = "<br>".join(right_lines)
+    
+    #     self.left.setHtml(left_html_doc)
+    #     self.right.setHtml(right_html_doc)
+    def load_chunks(self, chunks: List[Dict]):
+        """渲染左右 HTML，带行号和符号"""
+        left_lines, right_lines = [], []
+        old_idx, new_idx = 1, 1        # 行号计数
+
+        def ln_html(n):    # 行号灰色
+            return f'<span class="ln">{n:>4}</span> '
+
+        def sym_html(sym):
+            color = {"-":"#ff3b30", "+":"#34c759", "~":"#ff9500"}.get(sym, "#888")
+            return f'<span class="sym" style="color:{color}">{sym}</span> '
 
         for ch in chunks:
-            tag = ch.get("tag")
-            if tag == "equal":
-                html = escape(ch.get("a_text", "")) or "&nbsp;"
-                _add_line(" ", html, html)
+            tag = ch["tag"]
 
-            elif tag == "insert":
-                # new = f'<span class="ins">{escape(ch.get("b_text",""))}</span>' or "&nbsp;"
-                new = f'<span style="background:#e6ffed;">{escape(ch.get("b_text",""))}</span>'
-                _add_line("+", "&nbsp;", new)
+            if tag == "equal":
+                text = escape(ch["a_text"] or "")
+                left_lines.append(ln_html(old_idx) + "&nbsp;" + text)
+                right_lines.append(ln_html(new_idx) + "&nbsp;" + text)
+                old_idx += 1
+                new_idx += 1
 
             elif tag == "delete":
-                # old = f'<span class="del">{escape(ch.get("a_text",""))}</span>' or "&nbsp;"
-                old = f'<span style="background:#ffeef0; text-decoration:line-through;">{escape(ch.get("a_text",""))}</span>'
-                _add_line("−", old, "&nbsp;")
+                text = escape(ch["a_text"])
+                left_lines.append(ln_html(old_idx) + sym_html("-") + text)
+                right_lines.append(ln_html("") + "&nbsp;")
+                old_idx += 1
+
+            elif tag == "insert":
+                text = escape(ch["b_text"])
+                left_lines.append(ln_html("") + "&nbsp;")
+                right_lines.append(ln_html(new_idx) + sym_html("+") + text)
+                new_idx += 1
 
             elif tag == "replace":
+                # 行内高亮
                 inline = ch.get("inline", [])
-                old_html = self._render_inline(inline, "a")
-                new_html = self._render_inline(inline, "b")
-                _add_line("~", old_html, new_html)
+                left_html = self._render_inline(inline, "a")
+                right_html = self._render_inline(inline, "b")
+                left_lines.append(ln_html(old_idx) + sym_html("~") + left_html)
+                right_lines.append(ln_html(new_idx) + sym_html("~") + right_html)
+                old_idx += 1
+                new_idx += 1
 
             elif tag == "skip":
-                count = ch.get("count", 0)
-                skip_html = f'<span class="skip">… {count} unchanged …</span>'
-                _add_line(" ", skip_html, skip_html)
+                skip_html = (f'<span class="skip">… {ch["count"]} unchanged '
+                                f'paragraphs …</span>')
+                left_lines.append(skip_html)
+                right_lines.append(skip_html)
 
-        # 拼接成 <div> list
-        left_html_doc = "<br>".join(left_lines)
-        right_html_doc = "<br>".join(right_lines)
-    
-        self.left.setHtml(left_html_doc)
-        self.right.setHtml(right_html_doc)
+        self.left.setHtml("<br>".join(left_lines))
+        self.right.setHtml("<br>".join(right_lines))
