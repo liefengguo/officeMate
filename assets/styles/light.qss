@@ -1,67 +1,54 @@
-/* ========= DocSnap – Light Theme ========= */
+/* ========= DocSnap – Light Theme =========
+ * 覆盖 _base.qss 颜色（仅放变动项）
+ * --------------------------------------- */
 
-/* -------- Global -------- */
+/* 1️⃣ 全局 ------------------------------------------------------- */
 QWidget {
-    background: #ffffff;
-    color: #000000;
-    font-family: "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-    font-size: 11pt;
+    background: #F7F7F7;    /* very light gray */
+    color:      #000000;    /* primary text */
 }
 
-/* QTextBrowser (diff panes) */
+/* 2️⃣ 滚动区域 / diff 浏览器 ------------------------------------ */
 QTextBrowser {
-    background: #ffffff;
-    border: 1px solid #d0d0d0;
+    background: #FFFFFF;
+    border: 1px solid #D0D0D0;
     padding: 4px;
 }
 
-/* QListWidget selection (for history / compare lists) */
-QListWidget::item:selected {
-    background: #e6f3ff;
+/* 3️⃣ 列表选中 (Finder 风格) ----------------------------------- */
+QListWidget::item:selected:active  { background: #0A84FF; color: #FFFFFF; }
+QListWidget::item:selected:!active { background: #E0E0E0; color: #000000; }
+
+/* 4️⃣ Splitter -------------------------------------------------- */
+QSplitter::handle            { background: #DADADA; }
+QSplitter::handle:hover       { background: #C0C0C0; }
+
+/* 5️⃣ 按钮 ------------------------------------------------------ */
+QPushButton {
+    background-color: #FFFFFF;
+    border: 1px solid #C3C3C3;
     color: #000;
 }
+QPushButton:hover   { background-color: #F2F2F2; }
+QPushButton:pressed { background-color: #E0E0E0; }
+QPushButton[type="primary"] {
+    background-color: #0A84FF;
+    border: none;
+    color: white;
+}
+QPushButton[type="primary"]:hover  { background-color: #3B9CFF; }
+QPushButton[type="primary"]:pressed{ background-color: #0067D9; }
 
-/* QSplitter handle – subtle indicator */
-QSplitter::handle {
-    background: #e0e0e0;
-}
-QSplitter::handle:hover {
-    background: #c0c0c0;
-}
+/* 6️⃣ Diff 专用 ------------------------------------------------- */
+.ln    { color: #666666; }      /* line numbers */
+.sym   { }                      /* inherits plus/minus */
 
-/* -------- Diff-specific classes -------- */
-.ln {                      /* line number */
-    color: #666666;
-    padding-right: 8px;
-    user-select: none;
-}
+.plus  { color: #27AE60; font-weight: bold; }     /* green */
+.minus { color: #C0392B; font-weight: bold; }     /* red */
 
-.plus {                    /* leading “+” sign */
-    color: #27ae60;        /* emerald green */
-    font-weight: bold;
-}
-.minus {                   /* leading “–” sign */
-    color: #c0392b;        /* alizarin red */
-    font-weight: bold;
-}
+.ins  { background: #E6FFED; color: #000000; }
+.del  { background: #FFEFF0; color: #000000; text-decoration: line-through; }
+.rpl, .replace { background: #FFF8D5; color: #000000; }
 
-.ins {                     /* inline insertion */
-    background: #d7ffd7;   /* pale green */
-    color: #000000;        /* keep text black for consistency */
-}
-.del {                     /* inline deletion */
-    background: #ffd8d8;   /* pale red */
-    color: #000000;        /* keep text black for consistency */
-    text-decoration: line-through;
-}
-.rpl, .replace {           /* inline replacement highlight */
-    background: #fff5cb;   /* pale yellow */
-    color: #000000;        /* black text */
-}
-.skip {                    /* folded unchanged block */
-    color: #999999;
-    font-style: italic;
-}
-.ins  { background: #97c8a5;  /* brighter emerald */ color: #0e0e0e; }
-.del  { background: #e0a0a0;  /* brighter crimson */ color: #231f1f; text-decoration: line-through; }
-.rpl, .replace { background: #bcb394; color: #322b1b; }
+/* 7️⃣ 折叠块 ---------------------------------------------------- */
+.skip { color: #999999; }

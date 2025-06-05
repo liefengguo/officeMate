@@ -1,47 +1,54 @@
-/* ========= DocSnap – Dark Theme ========= */
+/* ========= DocSnap – Dark Theme =========
+ * 覆盖 _base.qss 颜色（仅放变动项）
+ * --------------------------------------- */
 
-/* -------- Global -------- */
+/* 1️⃣ 全局窗口 / 文本 --------------------------------------------- */
 QWidget {
-    background: #1e1e1e;
-    color: #d6d6d6;
-    font-family: "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-    font-size: 11pt;
+    background: #1F1F1F;      /* 深石墨 */
+    color:      #E2E2E2;      /* 高对比软白 */
 }
 
-/* QTextBrowser (diff panes) */
+/* 2️⃣ 滚动区域 / diff 浏览器 -------------------------------------- */
 QTextBrowser {
-    background: #1e1e1e;
-    border: 1px solid #444444;
+    background: #1F1F1F;
+    border: 1px solid #3D3D3D;   /* 低对比边框 */
     padding: 4px;
 }
 
-/* QListWidget selection (for history / compare lists) */
-QListWidget::item:selected {
-    background: #264f78;    /* VS Code 深色系选中色 */
-    color: #ffffff;
+/* 3️⃣ 列表项选中（Finder 风格） --------------------------------- */
+QListWidget::item:selected:active  { background: #0A84FF; color: #FFFFFF; }  /* 系统强调蓝 */
+QListWidget::item:selected:!active { background: #3A3A3A; color: #FFFFFF; }  /* 非激活灰 */
+
+/* 4️⃣ Splitter 手柄 ------------------------------------------------ */
+QSplitter::handle            { background: #2C2C2C; }
+QSplitter::handle:hover       { background: #454545; }
+
+/* 5️⃣ 按钮（继承 _base 的圆角等） -------------------------------- */
+QPushButton {
+    background-color: #2C2C2C;
+    border: 1px solid #4A4A4A;
+    color: #E2E2E2;
 }
-
-/* QSplitter handle – subtle indicator */
-QSplitter::handle {
-    background: #3a3a3a;
+QPushButton:hover  { background-color: #373737; }
+QPushButton:pressed{ background-color: #1B1B1B; }
+QPushButton[type="primary"] {
+    background-color: #0A84FF;
+    border: none;
+    color: white;
 }
-QSplitter::handle:hover {
-    background: #555555;
-}
+QPushButton[type="primary"]:hover  { background-color: #3B9CFF; }
+QPushButton[type="primary"]:pressed{ background-color: #0067D9; }
 
-/* -------- Diff-specific classes -------- */
-.skip {                    /* folded unchanged block */
-    color: #777777;
-    font-style: italic;
-}
+/* 6️⃣ Diff 专用 --------------------------------------------------- */
+.ln    { color: #9A9A9A; }     /* 行号灰 */
+.sym   { }                     /* 颜色由 plus/minus 继承 */
 
-/* -------- High-contrast diff classes (override previous) -------- */
-.ln { color: #888888; padding-right: 8px; user-select: none; }
+.plus  { color: #57d957; font-weight: bold; }
+.minus { color: #ff6b6b; font-weight: bold; }
 
-.plus  { color: #3caf3c; font-weight: bold; }
-.minus { color: #ff4c4c; font-weight: bold; }
+.ins  { background: #1B4D2B; color: #8EDB8E; }
+.del  { background: #612828; color: #E28E8E; text-decoration: line-through; }
+.rpl, .replace { background: #50400C; color: #E8C676; }
 
-
-.ins  { background: #1a602e;  /* brighter emerald */ color: #9ddf9d; }
-.del  { background: #5e2a2a;  /* brighter crimson */ color: #e59a9a; text-decoration: line-through; }
-.rpl, .replace { background: #5b4b13; color: #e8c676; }
+/* 7️⃣ 折叠段标记 --------------------------------------------------- */
+.skip { color: #7D7D7D; }
