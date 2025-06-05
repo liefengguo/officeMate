@@ -1,0 +1,77 @@
+/* ===========================
+   Paragraph / Table 行背景色
+   =========================== */
+
+/* 新增段落 / 行 */
+QLabel#para[state="insert"],
+.ins {
+    background: #e6ffed;
+    color: #056000;               /* 深绿文字 */
+    border-left: 4px solid #34c759;
+    padding: 2px 4px;
+}
+
+/* 删除段落 / 行 */
+QLabel#para[state="delete"],
+.del {
+    background: #ffeef0;
+    color: #8b0000;               /* 深红文字 */
+    text-decoration: line-through;
+    border-left: 4px solid #ff3b30;
+    padding: 2px 4px;
+}
+
+/* 替换段落背景（行内差异用 .ins / .del 标示）*/
+QLabel#para[state="replace"] {
+    background: #fff5ca;
+    border-left: 4px solid #ff9500;
+    padding: 2px 4px;
+}
+
+/* 未变化 */
+QLabel#para[state="equal"] {
+    background: transparent;
+    padding: 2px 4px;
+}
+
+/* 折叠占位行  */
+.skip {
+    color: #888;
+    font-style: italic;
+}
+
+/* ===========================
+   表格列宽 & 对齐
+   =========================== */
+
+/* 行号与 ± 符号列文字居中 */
+QTableView::item {
+    padding: 2px;
+}
+QTableView::item:selected {
+    background: transparent;      /* 禁止蓝色选中背景 */
+}
+
+/* ===== 行内新增 / 删除 符号 & 行号样式 ===== */
+
+/* “+” 符号（insert 行 / 单词）*/
+.plus {
+    color: #34c759;        /* 绿色，保持与 insert 背景一致 */
+    font-weight: bold;
+}
+
+/* “–” 符号（delete 行 / 单词）*/
+.minus {
+    color: #ff3b30;        /* 红色，与 delete 背景一致 */
+    font-weight: bold;
+}
+
+
+/***** 行号 & 符号 *****/
+.ln   { color:#888; }
+.sym  { font-weight:bold; }
+
+/***** 行内高亮 *****/
+.ins  { background:#9fd1ad; }             /* 新增 */
+.del  { background:#ffeef0; text-decoration:line-through; }  /* 删除 */
+.skip { color:#888; font-style:italic; }

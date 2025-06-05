@@ -167,5 +167,22 @@ class HistoryPage(QWidget):
         meta = item.data(Qt.UserRole)
         if not isinstance(meta, dict):
             return
-        widget = self._build_preview_widget(meta["snapshot_path"])
-        self.display_panel.set_widget(widget)
+
+        # ---- 构建正文预览组件 ----
+        content_widget = self._build_preview_widget(meta["snapshot_path"])
+
+        # ---- 包装：标题 + 正文 ----
+        wrapper = QWidget()
+        vbox = QVBoxLayout(wrapper)
+        vbox.setContentsMargins(0, 0, 0, 0)
+        vbox.setSpacing(4)
+
+        remark = meta.get("remark") or os.path.basename(meta.get("snapshot_path", ""))
+        ts     = meta.get("timestamp", "")
+        header_lbl = QLabel(f"{remark}  –  {ts}")
+        header_lbl.setStyleSheet("font-weight: bold; padding: 2px 0;")
+
+        vbox.addWidget(header_lbl, 0)
+        vbox.addWidget(content_widget, 1)
+
+        self.display_panel.set_widget(wrapper)

@@ -107,12 +107,23 @@ class SnapshotComparePage(QWidget):
         else:
             base_path, latest_path = v1["snapshot_path"], v2["snapshot_path"]
 
+        base_meta   = meta_map.get(base_path, {})
+        latest_meta = meta_map.get(latest_path, {})
+
+        def _title(meta: dict) -> str:
+            ts     = meta.get("timestamp", "")
+            remark = meta.get("remark") or os.path.basename(meta.get("snapshot_path", ""))  # fallback
+            return f"{ts} – {remark}" if remark else ts
+
+        left_title  = _title(base_meta)
+        right_title = _title(latest_meta)
+
         try:
             diff_result = self.manager.compare_snapshots(base_path, latest_path)
 
             if diff_result.structured:
                 # viewer = ParagraphDiffTableView(diff_result.structured, self)
-                viewer = ParallelDiffView(self)
+                viewer = ParallelDiffView(left_title, right_title, self)
                 viewer.load_chunks(diff_result.structured)
             else:
                 viewer = DiffViewerWidget(self)

@@ -16,29 +16,62 @@ from html import escape
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QSplitter, QTextBrowser
+from PyQt5.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
 
+from core.platform_utils import is_dark_mode
+_IS_DARK = is_dark_mode()
 
 class ParallelDiffView(QSplitter):
-    def __init__(self, parent=None):
+    def __init__(self, left_title: str = "", right_title: str = "", parent=None):
         super().__init__(Qt.Horizontal, parent)
 
-        
-        # 左旧版本
-        self.left = QTextBrowser()
-        self.right = QTextBrowser()
+        # 左右容器：标题 QLabel + QTextBrowser
+        left_tb  = QTextBrowser()
+        right_tb = QTextBrowser()
 
-        for tb in (self.left, self.right):
+        # 统一 TextBrowser 外观
+        for tb in (left_tb, right_tb):
             tb.setReadOnly(True)
             tb.setOpenExternalLinks(False)
             tb.setFont(QFont("Menlo, Courier New, monospace", 10))
             tb.setStyleSheet("border: none;")  # 外部面板有边框即可
-            self.addWidget(tb)
+
+        # --- 组装左侧 ---
+        left_container = QWidget()
+        left_layout = QVBoxLayout(left_container)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        self.left_title_lbl = QLabel(left_title)
+        self.left_title_lbl.setStyleSheet("font-weight:bold; padding:4px 2px;")
+        left_layout.addWidget(self.left_title_lbl)
+        left_layout.addWidget(left_tb)
+
+        # --- 组装右侧 ---
+        right_container = QWidget()
+        right_layout = QVBoxLayout(right_container)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        self.right_title_lbl = QLabel(right_title)
+        self.right_title_lbl.setStyleSheet("font-weight:bold; padding:4px 2px;")
+        right_layout.addWidget(self.right_title_lbl)
+        right_layout.addWidget(right_tb)
+
+        # 将两侧容器加入 splitter
+        self.addWidget(left_container)
+        self.addWidget(right_container)
+
+        # 对外暴露的 QTextBrowser 引用（保持旧接口兼容）
+        self.left  = left_tb
+        self.right = right_tb
 
         # 滚动同步
         self._lock = False
         self.left.verticalScrollBar().valueChanged.connect(self._sync_left)
         self.right.verticalScrollBar().valueChanged.connect(self._sync_right)
+
+    # ---------------------------------------------------------------- public
+    def set_titles(self, left_title: str, right_title: str):
+        """Update header labels shown above the diff panes."""
+        self.left_title_lbl.setText(left_title)
+        self.right_title_lbl.setText(right_title)
 
     # ---------------------------------------------------------------- helpers
     def _sync_left(self, value):
@@ -67,73 +100,26 @@ class ParallelDiffView(QSplitter):
                 html_parts.append(escape(a_chunk))
             elif tag == "delete":
                 if side == "a":
-                    # html_parts.append(f'<span class="del">{escape(a_chunk)}</span>')
-                    html_parts.append(
-                        f'<span style="background:#ffeef0; text-decoration:line-through;">'
-                        f'{escape(a_chunk)}</span>')
+                    style = (
+                        "background:#ffd8d8; color:#000000; text-decoration:line-through;"
+                        if not _IS_DARK
+                        else "background:#4d1a1a; color:#bf7a7a; text-decoration:line-through;"
+                    )
+                    html_parts.append(f'<span style="{style}">{escape(a_chunk)}</span>')
             elif tag == "insert":
                 if side == "b":
-                    # html_parts.append(f'<span class="ins">{escape(b_chunk)}</span>')
-                    html_parts.append(
-                        f'<span style="background:#e6ffed;">{escape(b_chunk)}</span>')
+                    style = (
+                        "background:#d7ffd7; color:#000000;"
+                        if not _IS_DARK
+                        else "background:#0d3a18; color:#7abf7a;"
+                    )
+                    html_parts.append(f'<span style="{style}">{escape(b_chunk)}</span>')
             elif tag == "replace":
                 # 不会出现 (SequenceMatcher 不会产出 replace op 内层)
                 pass
         return "".join(html_parts) or "&nbsp;"
 
     # ---------------------------------------------------------------- main API
-    # def load_chunks(self, chunks: List[Dict]):
-    #     """
-    #     把 paragraph_strategy 生成的 diff chunks 渲染到左右 QTextBrowser
-    #     """
-    #     left_lines = []
-    #     sym_lines  = []
-    #     right_lines = []
-    #     row = 1
-
-    #     def _add_line(sym, left_html, right_html):
-    #         nonlocal row
-    #         ln_html = f'<span class="ln">{row}</span>'
-    #         # sym_html = f'<span class="sym">{sym}</span>'
-    #         color = {"+" : "#34c759", "−": "#ff3b30", "~": "#ff9500"}.get(sym, "#888")
-    #         sym_html = f'<span style="color:{color}; font-weight:bold;">{sym}</span>'
-    #         left_lines.append(f"{ln_html}{sym_html}{left_html}")
-    #         right_lines.append(f"{ln_html}{sym_html}{right_html}")
-    #         row += 1
-
-    #     for ch in chunks:
-    #         tag = ch.get("tag")
-    #         if tag == "equal":
-    #             html = escape(ch.get("a_text", "")) or "&nbsp;"
-    #             _add_line(" ", html, html)
-
-    #         elif tag == "insert":
-    #             # new = f'<span class="ins">{escape(ch.get("b_text",""))}</span>' or "&nbsp;"
-    #             new = f'<span style="background:#e6ffed;">{escape(ch.get("b_text",""))}</span>'
-    #             _add_line("+", "&nbsp;", new)
-
-    #         elif tag == "delete":
-    #             # old = f'<span class="del">{escape(ch.get("a_text",""))}</span>' or "&nbsp;"
-    #             old = f'<span style="background:#ffeef0; text-decoration:line-through;">{escape(ch.get("a_text",""))}</span>'
-    #             _add_line("−", old, "&nbsp;")
-
-    #         elif tag == "replace":
-    #             inline = ch.get("inline", [])
-    #             old_html = self._render_inline(inline, "a")
-    #             new_html = self._render_inline(inline, "b")
-    #             _add_line("~", old_html, new_html)
-
-    #         elif tag == "skip":
-    #             count = ch.get("count", 0)
-    #             skip_html = f'<span class="skip">… {count} unchanged …</span>'
-    #             _add_line(" ", skip_html, skip_html)
-
-    #     # 拼接成 <div> list
-    #     left_html_doc = "<br>".join(left_lines)
-    #     right_html_doc = "<br>".join(right_lines)
-    
-    #     self.left.setHtml(left_html_doc)
-    #     self.right.setHtml(right_html_doc)
     def load_chunks(self, chunks: List[Dict]):
         """渲染左右 HTML，带行号和符号"""
         left_lines, right_lines = [], []
@@ -157,15 +143,25 @@ class ParallelDiffView(QSplitter):
                 new_idx += 1
 
             elif tag == "delete":
-                text = escape(ch["a_text"])
-                left_lines.append(ln_html(old_idx) + sym_html("-") + text)
+                style = (
+                    "background:#ffd8d8; color:#000000; text-decoration:line-through;"
+                    if not _IS_DARK
+                    else "background:#4d1a1a; color:#bf7a7a; text-decoration:line-through;"
+                )
+                span = f'<span style="{style}">{escape(ch["a_text"])}</span>'
+                left_lines.append(ln_html(old_idx) + sym_html("-") + span)
                 right_lines.append(ln_html("") + "&nbsp;")
                 old_idx += 1
 
             elif tag == "insert":
-                text = escape(ch["b_text"])
+                style = (
+                    "background:#d7ffd7; color:#000000;"
+                    if not _IS_DARK
+                    else "background:#0d3a18; color:#7abf7a;"
+                )
+                span = f'<span style="{style}">{escape(ch["b_text"])}</span>'
                 left_lines.append(ln_html("") + "&nbsp;")
-                right_lines.append(ln_html(new_idx) + sym_html("+") + text)
+                right_lines.append(ln_html(new_idx) + sym_html("+") + span)
                 new_idx += 1
 
             elif tag == "replace":

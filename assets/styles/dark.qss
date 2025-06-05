@@ -1,0 +1,47 @@
+/* ========= DocSnap – Dark Theme ========= */
+
+/* -------- Global -------- */
+QWidget {
+    background: #1e1e1e;
+    color: #d6d6d6;
+    font-family: "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    font-size: 11pt;
+}
+
+/* QTextBrowser (diff panes) */
+QTextBrowser {
+    background: #1e1e1e;
+    border: 1px solid #444444;
+    padding: 4px;
+}
+
+/* QListWidget selection (for history / compare lists) */
+QListWidget::item:selected {
+    background: #264f78;    /* VS Code 深色系选中色 */
+    color: #ffffff;
+}
+
+/* QSplitter handle – subtle indicator */
+QSplitter::handle {
+    background: #3a3a3a;
+}
+QSplitter::handle:hover {
+    background: #555555;
+}
+
+/* -------- Diff-specific classes -------- */
+.skip {                    /* folded unchanged block */
+    color: #777777;
+    font-style: italic;
+}
+
+/* -------- High-contrast diff classes (override previous) -------- */
+.ln { color: #888888; padding-right: 8px; user-select: none; }
+
+.plus  { color: #3caf3c; font-weight: bold; }
+.minus { color: #ff4c4c; font-weight: bold; }
+
+
+.ins  { background: #1a602e;  /* brighter emerald */ color: #9ddf9d; }
+.del  { background: #5e2a2a;  /* brighter crimson */ color: #e59a9a; text-decoration: line-through; }
+.rpl, .replace { background: #5b4b13; color: #e8c676; }

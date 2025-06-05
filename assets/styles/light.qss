@@ -1,0 +1,67 @@
+/* ========= DocSnap – Light Theme ========= */
+
+/* -------- Global -------- */
+QWidget {
+    background: #ffffff;
+    color: #000000;
+    font-family: "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    font-size: 11pt;
+}
+
+/* QTextBrowser (diff panes) */
+QTextBrowser {
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    padding: 4px;
+}
+
+/* QListWidget selection (for history / compare lists) */
+QListWidget::item:selected {
+    background: #e6f3ff;
+    color: #000;
+}
+
+/* QSplitter handle – subtle indicator */
+QSplitter::handle {
+    background: #e0e0e0;
+}
+QSplitter::handle:hover {
+    background: #c0c0c0;
+}
+
+/* -------- Diff-specific classes -------- */
+.ln {                      /* line number */
+    color: #666666;
+    padding-right: 8px;
+    user-select: none;
+}
+
+.plus {                    /* leading “+” sign */
+    color: #27ae60;        /* emerald green */
+    font-weight: bold;
+}
+.minus {                   /* leading “–” sign */
+    color: #c0392b;        /* alizarin red */
+    font-weight: bold;
+}
+
+.ins {                     /* inline insertion */
+    background: #d7ffd7;   /* pale green */
+    color: #000000;        /* keep text black for consistency */
+}
+.del {                     /* inline deletion */
+    background: #ffd8d8;   /* pale red */
+    color: #000000;        /* keep text black for consistency */
+    text-decoration: line-through;
+}
+.rpl, .replace {           /* inline replacement highlight */
+    background: #fff5cb;   /* pale yellow */
+    color: #000000;        /* black text */
+}
+.skip {                    /* folded unchanged block */
+    color: #999999;
+    font-style: italic;
+}
+.ins  { background: #97c8a5;  /* brighter emerald */ color: #0e0e0e; }
+.del  { background: #e0a0a0;  /* brighter crimson */ color: #231f1f; text-decoration: line-through; }
+.rpl, .replace { background: #bcb394; color: #322b1b; }

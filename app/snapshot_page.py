@@ -1,17 +1,13 @@
 # app/snapshot_page.py
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
+from PyQt5.QtCore import Qt
+
 import os
 
 from core.snapshot_manager import SnapshotManager
-from app.widgets.snapshot_panels import (
-    SnapshotMiddlePanel,
-    SnapshotDisplayPanel,
-)
-# from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
+from app.widgets.snapshot_panels import SnapshotMiddlePanel, SnapshotDisplayPanel
 from app.widgets.parallel_diff_view import ParallelDiffView
 from app.diff_viewer_widget import DiffViewerWidget
-
 
 class SnapshotPage(QWidget):
     """
@@ -71,7 +67,7 @@ class SnapshotPage(QWidget):
             # 选择合适 viewer
             if diff_result.structured:
                 # viewer = ParagraphDiffTableView(diff_result.structured, self)
-                viewer = ParallelDiffView(self)
+                viewer = ParallelDiffView("历史对比", "最新文档", self)
                 viewer.load_chunks(diff_result.structured)
             else:
                 viewer = DiffViewerWidget(self)

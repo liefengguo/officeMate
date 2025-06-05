@@ -1,4 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QStackedWidget
+from PyQt5.QtWidgets import (
+    QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
+)
+from core.themes import apply_theme, load_theme_pref, save_theme_pref
+
 from app.main_dashboard import MainDashboard
 from app.snapshot_history import SnapshotHistoryWindow
 from app.project_page import ProjectPage
@@ -7,12 +11,16 @@ from core.snapshot_manager import SnapshotManager
 class MainWindow(QMainWindow):
     def __init__(self, snapshot_manager: SnapshotManager):
         super().__init__()
+        apply_theme()
         self.manager = snapshot_manager
         self.setWindowTitle("DocSnap 文档助手")
         self.setMinimumSize(300, 200)
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
+
+        # ---------------- 主题菜单 ----------------
+        self._create_theme_menu()
 
         # 初始化页面
         self.dashboard = MainDashboard(parent=self, snapshot_manager=self.manager)
@@ -38,3 +46,33 @@ class MainWindow(QMainWindow):
         self.project_page = ProjectPage(file_path, snapshot_manager=self.manager, parent=self)
         self.stack.addWidget(self.project_page)  # index 1
         self.stack.setCurrentWidget(self.project_page)
+
+    # ---------------------------------------------------------------- theme
+    def _create_theme_menu(self):
+        menubar = self.menuBar()
+
+        theme_menu = QMenu("主题(&T)", self)
+        act_auto  = QAction("跟随系统", self, checkable=True)
+        act_light = QAction("浅色", self, checkable=True)
+        act_dark  = QAction("深色", self, checkable=True)
+
+        group = QActionGroup(self)
+        for a in (act_auto, act_light, act_dark):
+            a.setActionGroup(group)
+            theme_menu.addAction(a)
+
+        # 读取用户偏好（若无则 auto）
+        pref = load_theme_pref()
+        {"auto": act_auto,
+         "light": act_light,
+         "dark": act_dark}.get(pref, act_auto).setChecked(True)
+
+        menubar.addMenu(theme_menu)
+
+        # 切换主题
+        def _on_triggered(action: QAction):
+            mapping = {act_auto: "auto", act_light: "light", act_dark: "dark"}
+            pref = mapping[action]
+            save_theme_pref(pref)
+            apply_theme(pref=pref)
+        group.triggered.connect(_on_triggered)
