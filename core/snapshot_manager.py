@@ -4,6 +4,12 @@ import datetime
 import uuid
 from typing import List, Dict, Optional
 from typing import Tuple
+from pathlib import Path
+from core.platform_utils import get_app_data_dir
+
+# Central snapshot directory (cross‑platform)
+SNAP_ROOT = Path(get_app_data_dir()) / "snapshots"
+SNAP_ROOT.mkdir(parents=True, exist_ok=True)
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -48,14 +54,15 @@ class SnapshotManager(QObject):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         doc_name = os.path.basename(file_path)
         ext = os.path.splitext(file_path)[1]  # keep original extension (e.g., ".txt")
-        # Snapshot file kept alongside original with .bak.<uuid> suffix
-        snapshot_dir = os.path.join(os.path.dirname(file_path), ".docsnap")
-        os.makedirs(snapshot_dir, exist_ok=True)
+        # Store snapshots under ~/Library/Application Support/DocSnap/snapshots/<doc_name>/
+        snapshot_dir = SNAP_ROOT / os.path.basename(file_path)
+        snapshot_dir.mkdir(parents=True, exist_ok=True)
+
         snapshot_id = f"{timestamp}_{uuid.uuid4().hex[:6]}"
-        snapshot_file = os.path.join(snapshot_dir, f"{snapshot_id}{ext}")
+        snapshot_file = snapshot_dir / f"{snapshot_id}{ext}"
 
         # 1. copy file bytes (default saver behaviour)
-        shutil.copyfile(file_path, snapshot_file)
+        shutil.copyfile(file_path, str(snapshot_file))
 
         # 2. prepare metadata & persist
         meta = {
@@ -64,7 +71,7 @@ class SnapshotManager(QObject):
             "file_path": file_path,          # absolute path of original doc
             "timestamp": timestamp,
             "remark": remark,
-            "snapshot_path": snapshot_file
+            "snapshot_path": str(snapshot_file)
         }
         self.repo.save_version(doc_name, meta)
         # register a fallback plain‑text loader for legacy '.bak' if not yet registered

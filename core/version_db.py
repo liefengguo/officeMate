@@ -1,18 +1,31 @@
 import os
 import json
+from pathlib import Path
+from core.platform_utils import get_app_data_dir
 
 class SnapshotRepository:
     """
     SnapshotRepository is responsible for managing snapshot metadata,
     including saving, retrieving, and deleting version entries from disk.
     """
-    def __init__(self):
-        self.db_path = os.path.expanduser("~/Documents/docsnap/versions.json")
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        if not os.path.exists(self.db_path):
-            with open(self.db_path, "w") as f:
-                json.dump({}, f)
-        with open(self.db_path, "r") as f:
+    def __init__(self, db_path: str | None = None):
+        """
+        If *db_path* is None, place the versions database in the
+        per‑user application data directory, e.g.:
+
+          • macOS : ~/Library/Application Support/DocSnap/versions.json
+          • Windows: %APPDATA%\DocSnap\versions.json
+        """
+        if db_path is None:
+            db_path = Path(get_app_data_dir()) / "versions.json"
+        self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if not self.db_path.exists():
+            self.db_path.write_text("{}")
+
+        # load existing data
+        with self.db_path.open("r", encoding="utf-8") as f:
             self.data = json.load(f)
 
     def save_version(self, doc_name, metadata: dict):
@@ -29,8 +42,8 @@ class SnapshotRepository:
         self.save()
 
     def save(self):
-        with open(self.db_path, "w") as f:
-            json.dump(self.data, f, indent=2)
+        with self.db_path.open("w", encoding="utf-8") as f:
+            json.dump(self.data, f, indent=2, ensure_ascii=False)
 
     def reload(self):
         """从磁盘重新加载版本数据"""
