@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QPushButton, QAbstractItemView
+    QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QAbstractItemView
 )
+from ui.components import FlatButton, PrimaryButton
 from core.snapshot_manager import SnapshotManager
 from app.diff_viewer import DiffViewer
 import os
@@ -21,15 +22,16 @@ class SnapshotHistoryWindow(QWidget):
         self.manager.snapshot_deleted.connect(self.load_snapshots)
 
         self.layout = QVBoxLayout()
-        self.back_button = QPushButton("← 返回主页")
+        self.back_button = FlatButton("← 返回主页")
         self.back_button.clicked.connect(self.go_back)
         self.layout.addWidget(self.back_button)
 
         self.label = QLabel(f"文档：{self.doc_name}")
         self.list_widget = QListWidget()
-        self.compare_button = QPushButton("对比选中快照")
+        self.compare_button = PrimaryButton("对比选中快照")
+        self.compare_button.setFixedHeight(28)
         self.compare_button.clicked.connect(self.compare_snapshots)
-        self.preview_button = QPushButton("查看快照内容")
+        self.preview_button = FlatButton("查看快照内容")
         self.preview_button.clicked.connect(self.preview_snapshots)
         self.list_widget.setSelectionMode(QAbstractItemView.MultiSelection)
 

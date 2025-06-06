@@ -1,0 +1,55 @@
+
+
+/*************************************************************
+ * DocSnap – Shared (base) QSS
+ * -----------------------------------------------------------
+ *  ❖ DO NOT change colors here that should vary between themes
+ *  ❖ Only put RESET rules, fonts, metrics, and helper classes
+ *************************************************************/
+
+/* ----------------------- 1. Font & Metrics ----------------------- */
+QWidget {
+    /* System font on macOS / Segoe UI fallback on Windows */
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;       /* default body size */
+}
+
+/* Heading helpers  (optional) */
+.h1 { font-size: 20px; font-weight: 600; }
+.h2 { font-size: 17px; font-weight: 600; }
+.h3 { font-size: 15px; font-weight: 600; }
+
+/* --------------------- 2. Common Layout hints -------------------- */
+QWidget[role="sidebar"] {
+    padding: 8px 6px;
+}
+
+QWidget[role="toolbar"] {
+    padding: 4px 6px;
+}
+
+QPushButton {
+    min-height: 26px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    /* Actual bg / border colors set in theme qss */
+}
+
+/* Primary vs flat buttons via property selector */
+QPushButton[type="primary"] { font-weight: 500; }
+QPushButton[type="flat"]    { border: none; }
+
+/* ----------------------- 3. Util Classes ------------------------ */
+
+/* Line numbers & diff symbols take color from theme */
+.ln    { padding-right: 8px; user-select: none; }
+.sym   { font-weight: bold; }
+
+/* diff .skip always italic gray; color overridden by theme if needed */
+.skip  { font-style: italic; }
+
+/* Column titles inside ParallelDiffView */
+.diff-title {
+    font-weight: 600;
+    padding: 2px 4px;
+}

@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QStackedWidget, QLabel, QSizePolicy
+    QWidget, QHBoxLayout, QVBoxLayout, QStackedWidget, QLabel, QSizePolicy
 )
+from ui.components import FlatButton
 from PyQt5.QtCore import Qt
 from app.snapshot_page import SnapshotPage
 from app.history_page import HistoryPage
@@ -18,16 +19,16 @@ class ProjectPage(QWidget):
         self.toolbar_layout = QVBoxLayout()
         self.toolbar_layout.setAlignment(Qt.AlignTop)
 
-        self.back_button = QPushButton("⬅")
+        self.back_button = FlatButton("⬅")
         self.back_button.setFixedSize(40, 40)
         self.back_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.toolbar_layout.addWidget(self.back_button)
 
         # Left toolbar
-        self.add_snapshot_btn = QPushButton("📸")
-        self.history_btn = QPushButton("📜")
-        self.compare_btn = QPushButton("🔍")
-        self.settings_btn = QPushButton("⚙️")
+        self.add_snapshot_btn = FlatButton("📸")
+        self.history_btn = FlatButton("📜")
+        self.compare_btn = FlatButton("🔍")
+        self.settings_btn = FlatButton("⚙️")
 
         for btn in (self.add_snapshot_btn, self.history_btn):
             btn.setFixedSize(40, 40)
@@ -41,6 +42,11 @@ class ProjectPage(QWidget):
         self.toolbar_layout.addStretch(1)
         self.settings_btn.setFixedSize(40, 40)
         self.toolbar_layout.addWidget(self.settings_btn)
+
+        # wrap toolbar in a sidebar widget for QSS
+        self.sidebar = QWidget()
+        self.sidebar.setProperty("role", "sidebar")
+        self.sidebar.setLayout(self.toolbar_layout)
 
         # Right content area
         self.stack = QStackedWidget()
@@ -61,7 +67,7 @@ class ProjectPage(QWidget):
 
         self.back_button.clicked.connect(self.back_to_home)
 
-        self.main_layout.addLayout(self.toolbar_layout)
+        self.main_layout.addWidget(self.sidebar)
         self.main_layout.addWidget(self.stack)
 
         self.stack.setCurrentIndex(0)

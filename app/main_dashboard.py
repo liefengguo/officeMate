@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QPushButton, QListWidget, QFileDialog, QMessageBox, QLabel, QSpacerItem, QSizePolicy, QListWidgetItem
+    QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
+    QListWidgetItem
 )
-from PyQt5.QtGui import QFont
+from ui.components import PrimaryButton
 from PyQt5.QtCore import Qt, QSize, QEvent
 import os
 from app.snapshot_history import SnapshotHistoryWindow
 from core.recent_db import RecentDocDB
-from PyQt5.QtGui import QBrush, QColor
 from app.project_delegate import ProjectItemDelegate
 from core.snapshot_manager import SnapshotManager
 
@@ -27,14 +27,8 @@ class MainDashboard(QWidget):
         self.doc_list.setMouseTracking(True)
         self.doc_list.setItemDelegate(ProjectItemDelegate())
         
-        self.add_button = QPushButton("➕ 添加项目")
-        self.add_button.setStyleSheet("padding: 6px; font-size: 14px;")
+        self.add_button = PrimaryButton("➕ 添加项目")
 
-        self.doc_list.setStyleSheet("""
-            QListWidget {
-                background-color: #f9f9f9;
-            }
-        """)
         self.doc_list.setSpacing(4)
 
         self.layout.addWidget(self.add_button)
