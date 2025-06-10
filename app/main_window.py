@@ -1,12 +1,11 @@
-from PyQt5.QtWidgets import (
-    QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
-)
+from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
 from app.main_dashboard import MainDashboard
 from app.snapshot_history import SnapshotHistoryWindow
 from app.project_page import ProjectPage
 from core.snapshot_manager import SnapshotManager
+
 
 class MainWindow(QMainWindow):
     def __init__(self, snapshot_manager: SnapshotManager):
@@ -27,7 +26,9 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.dashboard)  # index 0
 
     def open_snapshot_history(self, file_path):
-        self.snapshot_page = SnapshotHistoryWindow(file_path, parent=self, snapshot_manager=self.manager)
+        self.snapshot_page = SnapshotHistoryWindow(
+            file_path, parent=self, snapshot_manager=self.manager
+        )
         if self.stack.count() == 2:
             self.stack.removeWidget(self.stack.widget(1))
         self.stack.addWidget(self.snapshot_page)  # index 1
@@ -39,11 +40,13 @@ class MainWindow(QMainWindow):
     def open_project_page(self, file_path):
         """从主页打开项目页面"""
         # 如果之前已经打开过，先移除旧的
-        if hasattr(self, 'project_page'):
+        if hasattr(self, "project_page"):
             self.stack.removeWidget(self.project_page)
 
         # 创建新的项目页面并压入堆栈
-        self.project_page = ProjectPage(file_path, snapshot_manager=self.manager, parent=self)
+        self.project_page = ProjectPage(
+            file_path, snapshot_manager=self.manager, parent=self
+        )
         self.stack.addWidget(self.project_page)  # index 1
         self.stack.setCurrentWidget(self.project_page)
 
@@ -52,9 +55,9 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
 
         theme_menu = QMenu("主题(&T)", self)
-        act_auto  = QAction("跟随系统", self, checkable=True)
+        act_auto = QAction("跟随系统", self, checkable=True)
         act_light = QAction("浅色", self, checkable=True)
-        act_dark  = QAction("深色", self, checkable=True)
+        act_dark = QAction("深色", self, checkable=True)
 
         group = QActionGroup(self)
         for a in (act_auto, act_light, act_dark):
@@ -63,9 +66,9 @@ class MainWindow(QMainWindow):
 
         # 读取用户偏好（若无则 auto）
         pref = load_theme_pref()
-        {"auto": act_auto,
-         "light": act_light,
-         "dark": act_dark}.get(pref, act_auto).setChecked(True)
+        {"auto": act_auto, "light": act_light, "dark": act_dark}.get(
+            pref, act_auto
+        ).setChecked(True)
 
         menubar.addMenu(theme_menu)
 
@@ -75,4 +78,5 @@ class MainWindow(QMainWindow):
             pref = mapping[action]
             save_theme_pref(pref)
             apply_theme(pref=pref)
+
         group.triggered.connect(_on_triggered)

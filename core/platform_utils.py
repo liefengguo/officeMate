@@ -1,5 +1,3 @@
-
-
 """
 platform_utils.py
 ~~~~~~~~~~~~~~~~~
@@ -30,7 +28,7 @@ except ModuleNotFoundError:  # pragma: no cover
 def is_dark_mode() -> bool:  # noqa: D401 – simple function
     """Return **True** if the operating system is set to *dark* appearance.
 
-    Currently supports macOS (10.14+) and Windows 10/11.  
+    Currently supports macOS (10.14+) and Windows 10/11.
     Other platforms default to *False* (light).
     """
     if sys.platform == "darwin":

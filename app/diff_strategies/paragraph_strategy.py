@@ -15,7 +15,7 @@ from .base_strategy import DiffStrategy, DiffResult
 from ..snapshot_loaders.loader_registry import LoaderRegistry
 
 
-CONTEXT_LINES = 3           # 折叠时保留上下文行数
+CONTEXT_LINES = 3  # 折叠时保留上下文行数
 
 
 class ParagraphDiffStrategy(DiffStrategy):
@@ -68,48 +68,81 @@ class ParagraphDiffStrategy(DiffStrategy):
                     head = range(i1, i1 + CONTEXT_LINES)
                     tail = range(i2 - CONTEXT_LINES, i2)
                     for idx in head:
-                        chunks.append({"tag": "equal",
-                                       "a_idx": idx, "b_idx": j1 + (idx - i1),
-                                       "a_text": para_a[idx],
-                                       "b_text": para_b[j1 + (idx - i1)]})
+                        chunks.append(
+                            {
+                                "tag": "equal",
+                                "a_idx": idx,
+                                "b_idx": j1 + (idx - i1),
+                                "a_text": para_a[idx],
+                                "b_text": para_b[j1 + (idx - i1)],
+                            }
+                        )
                         raw_lines.append(f"  {para_a[idx]}")
                     add_skip(span_len - 2 * CONTEXT_LINES)
                     for idx in tail:
-                        chunks.append({"tag": "equal",
-                                       "a_idx": idx, "b_idx": j1 + (idx - i1),
-                                       "a_text": para_a[idx],
-                                       "b_text": para_b[j1 + (idx - i1)]})
+                        chunks.append(
+                            {
+                                "tag": "equal",
+                                "a_idx": idx,
+                                "b_idx": j1 + (idx - i1),
+                                "a_text": para_a[idx],
+                                "b_text": para_b[j1 + (idx - i1)],
+                            }
+                        )
                         raw_lines.append(f"  {para_a[idx]}")
                 else:
                     for idx in range(i1, i2):
-                        chunks.append({"tag": "equal",
-                                       "a_idx": idx, "b_idx": j1 + (idx - i1),
-                                       "a_text": para_a[idx],
-                                       "b_text": para_b[j1 + (idx - i1)]})
+                        chunks.append(
+                            {
+                                "tag": "equal",
+                                "a_idx": idx,
+                                "b_idx": j1 + (idx - i1),
+                                "a_text": para_a[idx],
+                                "b_text": para_b[j1 + (idx - i1)],
+                            }
+                        )
                         raw_lines.append(f"  {para_a[idx]}")
 
             elif tag == "delete":
                 for idx in range(i1, i2):
-                    chunks.append({"tag": "delete",
-                                   "a_idx": idx, "b_idx": -1,
-                                   "a_text": para_a[idx], "b_text": ""})
+                    chunks.append(
+                        {
+                            "tag": "delete",
+                            "a_idx": idx,
+                            "b_idx": -1,
+                            "a_text": para_a[idx],
+                            "b_text": "",
+                        }
+                    )
                     raw_lines.append(f"- {para_a[idx]}")
 
             elif tag == "insert":
                 for idx in range(j1, j2):
-                    chunks.append({"tag": "insert",
-                                   "a_idx": -1, "b_idx": idx,
-                                   "a_text": "", "b_text": para_b[idx]})
+                    chunks.append(
+                        {
+                            "tag": "insert",
+                            "a_idx": -1,
+                            "b_idx": idx,
+                            "a_text": "",
+                            "b_text": para_b[idx],
+                        }
+                    )
                     raw_lines.append(f"+ {para_b[idx]}")
 
             elif tag == "replace":
                 a_text = "\n".join(para_a[i1:i2])
                 b_text = "\n".join(para_b[j1:j2])
                 inline = self._inline_ops(a_text, b_text)
-                chunks.append({"tag": "replace",
-                               "a_idx": i1, "b_idx": j1,
-                               "a_text": a_text, "b_text": b_text,
-                               "inline": inline})
+                chunks.append(
+                    {
+                        "tag": "replace",
+                        "a_idx": i1,
+                        "b_idx": j1,
+                        "a_text": a_text,
+                        "b_text": b_text,
+                        "inline": inline,
+                    }
+                )
                 raw_lines.append(f"- {a_text}")
                 raw_lines.append(f"+ {b_text}")
 

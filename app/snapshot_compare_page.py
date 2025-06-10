@@ -3,12 +3,18 @@ import os
 from functools import partial
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-    QPushButton, QListWidgetItem, QMessageBox
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QListWidgetItem,
+    QMessageBox,
 )
 
 from core.snapshot_manager import SnapshotManager
 from app.snapshot_list_widget import SnapshotListWidget
+
 # from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
 from app.widgets.parallel_diff_view import ParallelDiffView
 from app.diff_viewer_widget import DiffViewerWidget
@@ -22,7 +28,9 @@ class SnapshotComparePage(QWidget):
     右侧       ：显示 ParagraphDiffTableView / DiffViewerWidget
     """
 
-    def __init__(self, file_path, parent=None, snapshot_manager: SnapshotManager = None):
+    def __init__(
+        self, file_path, parent=None, snapshot_manager: SnapshotManager = None
+    ):
         # 兼容老调用顺序
         if isinstance(parent, SnapshotManager) and snapshot_manager is None:
             snapshot_manager = parent
@@ -107,15 +115,17 @@ class SnapshotComparePage(QWidget):
         else:
             base_path, latest_path = v1["snapshot_path"], v2["snapshot_path"]
 
-        base_meta   = meta_map.get(base_path, {})
+        base_meta = meta_map.get(base_path, {})
         latest_meta = meta_map.get(latest_path, {})
 
         def _title(meta: dict) -> str:
-            ts     = meta.get("timestamp", "")
-            remark = meta.get("remark") or os.path.basename(meta.get("snapshot_path", ""))  # fallback
+            ts = meta.get("timestamp", "")
+            remark = meta.get("remark") or os.path.basename(
+                meta.get("snapshot_path", "")
+            )  # fallback
             return f"{ts} – {remark}" if remark else ts
 
-        left_title  = _title(base_meta)
+        left_title = _title(base_meta)
         right_title = _title(latest_meta)
 
         try:

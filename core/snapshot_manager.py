@@ -25,12 +25,14 @@ class SnapshotManager(QObject):
     class rather than talking directly to the repository or the file‑system.
     """
 
-    snapshot_created = pyqtSignal(dict)   # metadata dict emitted after creation
-    snapshot_deleted = pyqtSignal(dict)   # metadata dict emitted after deletion
+    snapshot_created = pyqtSignal(dict)  # metadata dict emitted after creation
+    snapshot_deleted = pyqtSignal(dict)  # metadata dict emitted after deletion
 
-    def __init__(self,
-                 repository: Optional[SnapshotRepository] = None,
-                 diff_engine: Optional[DiffEngine] = None):
+    def __init__(
+        self,
+        repository: Optional[SnapshotRepository] = None,
+        diff_engine: Optional[DiffEngine] = None,
+    ):
         super().__init__()
         # Dependency injection: allows easy replacement in tests or future cloud repo.
         self.repo = repository or SnapshotRepository()
@@ -68,14 +70,15 @@ class SnapshotManager(QObject):
         meta = {
             "snapshot_id": snapshot_id,
             "file": doc_name,
-            "file_path": file_path,          # absolute path of original doc
+            "file_path": file_path,  # absolute path of original doc
             "timestamp": timestamp,
             "remark": remark,
-            "snapshot_path": str(snapshot_file)
+            "snapshot_path": str(snapshot_file),
         }
         self.repo.save_version(doc_name, meta)
         # register a fallback plain‑text loader for legacy '.bak' if not yet registered
         if LoaderRegistry.get_loader(".bak") is None:
+
             class _BakFallbackLoader:
                 def get_text(self, fp):  # simplistic; tries text read
                     try:
@@ -83,8 +86,10 @@ class SnapshotManager(QObject):
                             return f.read()
                     except Exception:
                         return "(binary content)"
+
                 def load_structured(self, fp):
                     return self.get_text(fp)
+
             LoaderRegistry.register_loader(".bak", _BakFallbackLoader())
         # emit signal for UI refresh
         self.snapshot_created.emit(meta)
@@ -141,7 +146,6 @@ class SnapshotManager(QObject):
         """
         return self.diff_engine.compare_files(path1, path2)
 
-
     # ----------------- restore / undo -----------------
     def restore_snapshot(self, target_meta: Dict):
         """
@@ -150,26 +154,29 @@ class SnapshotManager(QObject):
         2) overwrite current doc with snapshot content
         3) create new snapshot entry 'Restore to <id>'
         """
-        snap_id = target_meta.get("snapshot_id") or os.path.splitext(os.path.basename(target_meta.get("snapshot_path", "")))[0]
+        snap_id = (
+            target_meta.get("snapshot_id")
+            or os.path.splitext(os.path.basename(target_meta.get("snapshot_path", "")))[
+                0
+            ]
+        )
         work_file = self._get_work_file(target_meta)
 
         # 1. backup current state
         backup_meta = self.create_snapshot(
-            work_file,
-            remark=f"Auto backup before restore -> {snap_id}"
+            work_file, remark=f"Auto backup before restore -> {snap_id}"
         )
 
         # 2. overwrite
         shutil.copyfile(target_meta["snapshot_path"], work_file)
 
         # 3. add new snapshot indicating restore
-        restore_meta = self.create_snapshot(
-            work_file,
-            remark=f"Restore to {snap_id}"
-        )
+        restore_meta = self.create_snapshot(work_file, remark=f"Restore to {snap_id}")
 
         # push undo stack
-        self._undo_stack.append((target_meta.get("file", ""), backup_meta, restore_meta))
+        self._undo_stack.append(
+            (target_meta.get("file", ""), backup_meta, restore_meta)
+        )
 
     def can_undo(self) -> bool:
         return bool(self._undo_stack)
@@ -183,7 +190,6 @@ class SnapshotManager(QObject):
         work_file = self._get_work_file(backup_meta)
         shutil.copyfile(backup_meta["snapshot_path"], work_file)
         self.create_snapshot(work_file, remark="Undo Restore")
-
 
     # ----------------- internal helpers -----------------
     def _get_work_file(self, meta: Dict) -> str:

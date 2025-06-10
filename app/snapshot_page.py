@@ -9,6 +9,7 @@ from app.widgets.snapshot_panels import SnapshotMiddlePanel, SnapshotDisplayPane
 from app.widgets.parallel_diff_view import ParallelDiffView
 from app.diff_viewer_widget import DiffViewerWidget
 
+
 class SnapshotPage(QWidget):
     """
     “添加快照”页：中间交互区(备注输入/按钮) + 右侧显示区(差异或提示)
@@ -26,7 +27,7 @@ class SnapshotPage(QWidget):
 
         # ---------- 主水平布局 ----------
         layout = QHBoxLayout(self)
-        layout.addWidget(self.middle_panel, 1)   # stretch 1
+        layout.addWidget(self.middle_panel, 1)  # stretch 1
         layout.addWidget(self.display_panel, 2)  # stretch 2
         self.setLayout(layout)
 
@@ -41,7 +42,9 @@ class SnapshotPage(QWidget):
     def on_create_snapshot(self, remark: str):
         try:
             info = self.manager.create_snapshot(self.file_path, remark=remark)
-            QMessageBox.information(self, "成功", f"快照已创建！\n时间：{info['timestamp']}")
+            QMessageBox.information(
+                self, "成功", f"快照已创建！\n时间：{info['timestamp']}"
+            )
             # 清空备注输入框
             self.middle_panel.clear()
             # 更新右侧提示
@@ -62,7 +65,9 @@ class SnapshotPage(QWidget):
             latest_snapshot_path = latest_version["snapshot_path"]
 
             # 获取 diff 结果
-            diff_result = self.manager.compare_snapshots(latest_snapshot_path, self.file_path)
+            diff_result = self.manager.compare_snapshots(
+                latest_snapshot_path, self.file_path
+            )
 
             # 选择合适 viewer
             if diff_result.structured:
@@ -74,7 +79,9 @@ class SnapshotPage(QWidget):
                 viewer.right.setProperty("class", "diff-pane")
             else:
                 viewer = DiffViewerWidget(self)
-                viewer.set_diff_content(diff_result.raw or "当前文档与最新快照没有任何差异。")
+                viewer.set_diff_content(
+                    diff_result.raw or "当前文档与最新快照没有任何差异。"
+                )
 
             self.display_panel.set_widget(viewer)
 

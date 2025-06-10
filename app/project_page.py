@@ -1,5 +1,10 @@
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QVBoxLayout, QStackedWidget, QLabel, QSizePolicy
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QStackedWidget,
+    QLabel,
+    QSizePolicy,
 )
 from ui.components import FlatButton
 from PyQt5.QtCore import Qt
@@ -7,6 +12,7 @@ from app.snapshot_page import SnapshotPage
 from app.history_page import HistoryPage
 from app.snapshot_compare_page import SnapshotComparePage
 from app.settings_page import SettingsPage
+
 
 class ProjectPage(QWidget):
     def __init__(self, file_path, snapshot_manager, parent=None):
@@ -56,9 +62,9 @@ class ProjectPage(QWidget):
         self.page_settings = SettingsPage()
 
         self.stack.addWidget(self.page_add_snapshot)  # index 0
-        self.stack.addWidget(self.page_history)       # index 1
-        self.stack.addWidget(self.page_compare)       # index 2
-        self.stack.addWidget(self.page_settings)      # index 3
+        self.stack.addWidget(self.page_history)  # index 1
+        self.stack.addWidget(self.page_compare)  # index 2
+        self.stack.addWidget(self.page_settings)  # index 3
 
         self.add_snapshot_btn.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         self.history_btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))

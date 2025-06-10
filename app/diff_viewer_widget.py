@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QPlainTextEdit
 
+
 class DiffViewerWidget(QPlainTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)

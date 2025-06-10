@@ -1,5 +1,10 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QAbstractItemView
+    QWidget,
+    QVBoxLayout,
+    QListWidget,
+    QLabel,
+    QMessageBox,
+    QAbstractItemView,
 )
 from ui.components import FlatButton, PrimaryButton
 from core.snapshot_manager import SnapshotManager
@@ -7,6 +12,7 @@ from app.diff_viewer import DiffViewer
 import os
 from functools import partial
 from app.preview_window import PreviewWindow
+
 
 class SnapshotHistoryWindow(QWidget):
     def __init__(self, file_path, snapshot_manager: SnapshotManager, parent=None):

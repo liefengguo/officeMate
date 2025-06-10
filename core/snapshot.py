@@ -11,6 +11,7 @@ from core.utils import get_file_hash
 
 class SnapshotSaver(ABC):
     """保存快照的策略接口"""
+
     @abstractmethod
     def save(self, source_path: str, content: str, dest_path: str) -> None:
         pass
@@ -41,6 +42,7 @@ class DocxSnapshot(SnapshotStrategy):
 
     def extract_text(self, file_path: str) -> str:
         from docx import Document
+
         doc = Document(file_path)
         return "\n".join(p.text for p in doc.paragraphs)
 

@@ -1,5 +1,3 @@
-
-
 """
 TextDiffStrategy
 ================
@@ -65,6 +63,6 @@ class TextDiffStrategy(DiffStrategy):
             text_b.splitlines(),
             fromfile=Path(path_a).name,
             tofile=Path(path_b).name,
-            lineterm=""
+            lineterm="",
         )
         return DiffResult(raw="\n".join(diff_lines))

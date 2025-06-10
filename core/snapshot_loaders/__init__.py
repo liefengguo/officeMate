@@ -10,7 +10,8 @@ implement additional formats.
 
 # Import loader plugins (auto‑register via LoaderRegistry)
 from . import txt_loader  # noqa: F401  (imported for side‑effects)
-from . import docx_loader   # noqa: F401
+from . import docx_loader  # noqa: F401
+
 # Future loaders:
 # from . import docx_loader
 # from . import json_loader

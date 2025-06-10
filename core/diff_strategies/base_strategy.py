@@ -1,5 +1,3 @@
-
-
 """
 Base diff strategy interface and result container
 =================================================
@@ -16,6 +14,7 @@ from typing import Any
 
 class DiffResult:
     """Container for diff output."""
+
     def __init__(self, raw: str, structured: Any = None):
         self.raw = raw
         self.structured = structured

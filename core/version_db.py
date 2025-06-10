@@ -3,11 +3,13 @@ import json
 from pathlib import Path
 from core.platform_utils import get_app_data_dir
 
+
 class SnapshotRepository:
     """
     SnapshotRepository is responsible for managing snapshot metadata,
     including saving, retrieving, and deleting version entries from disk.
     """
+
     def __init__(self, db_path: str | None = None):
         """
         If *db_path* is None, place the versions database in the
@@ -34,7 +36,7 @@ class SnapshotRepository:
 
     def get_versions(self, doc_name) -> list:
         return self.data.get(doc_name, [])
-    
+
     def remove_version(self, doc_name, target_version):
         if doc_name not in self.data:
             return

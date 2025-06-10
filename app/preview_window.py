@@ -3,6 +3,7 @@ from PyQt5.QtGui import QFont
 import os
 from core.snapshot_loaders.loader_registry import LoaderRegistry
 
+
 class PreviewWindow(QWidget):
     def __init__(self, file_path):
         super().__init__()

@@ -39,7 +39,7 @@ class DiffEngine:
         # Priority‑ordered list of strategies (first to support wins)
         self.strategies: List[DiffStrategy] = [
             ParagraphDiffStrategy(),  # structure‑aware diff
-            TextDiffStrategy(),       # fallback
+            TextDiffStrategy(),  # fallback
         ]
 
     # --------------------------------------------------------------------- API
@@ -58,6 +58,8 @@ class DiffEngine:
                     result: DiffResult = strategy.diff(file_a, file_b)
                     return result
                 except Exception as exc:
-                    return DiffResult(raw=f"对比失败（{strategy.__class__.__name__}）：{exc}")
+                    return DiffResult(
+                        raw=f"对比失败（{strategy.__class__.__name__}）：{exc}"
+                    )
 
         return DiffResult(raw="未找到可用的差异算法")

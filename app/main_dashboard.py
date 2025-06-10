@@ -1,6 +1,11 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
-    QListWidgetItem
+    QWidget,
+    QVBoxLayout,
+    QListWidget,
+    QFileDialog,
+    QMessageBox,
+    QLabel,
+    QListWidgetItem,
 )
 from ui.components import PrimaryButton
 from PyQt5.QtCore import Qt, QSize, QEvent
@@ -9,6 +14,7 @@ from app.snapshot_history import SnapshotHistoryWindow
 from core.recent_db import RecentDocDB
 from app.project_delegate import ProjectItemDelegate
 from core.snapshot_manager import SnapshotManager
+
 
 class MainDashboard(QWidget):
     def __init__(self, snapshot_manager: SnapshotManager, parent=None):
@@ -20,13 +26,15 @@ class MainDashboard(QWidget):
 
         self.db = RecentDocDB()
         title_label = QLabel("📂 已添加文档列表")
-        title_label.setStyleSheet("font-size: 18px; font-weight: bold; margin-top: 10px;")
-        
+        title_label.setStyleSheet(
+            "font-size: 18px; font-weight: bold; margin-top: 10px;"
+        )
+
         self.layout = QVBoxLayout()
         self.doc_list = QListWidget()
         self.doc_list.setMouseTracking(True)
         self.doc_list.setItemDelegate(ProjectItemDelegate())
-        
+
         self.add_button = PrimaryButton("➕ 添加项目")
         # print(self.add_button.property("type"))
         # print("lalala----: ",self.add_button.styleSheet())
@@ -61,6 +69,7 @@ class MainDashboard(QWidget):
                 item.setToolTip(doc_path)
                 item.setSizeHint(QSize(300, 50))
                 self.doc_list.addItem(item)
+
     def add_document(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, "选择文档", "", "文档 (*.txt *.docx);;所有文件 (*)"

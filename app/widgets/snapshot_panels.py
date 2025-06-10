@@ -9,14 +9,22 @@ snapshot_panels.py
 from typing import Optional
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QTextEdit, QListWidget, QListWidgetItem
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QTextEdit,
+    QListWidget,
+    QListWidgetItem,
 )
 from ui.components import PrimaryButton, FlatButton
 from core.themes import _STYLES_DIR, _read_qss
+
 print(_STYLES_DIR)
 print(_read_qss("_base.qss")[:50])
 print(_read_qss("light.qss")[:50])
+
+
 class SnapshotMiddlePanel(QWidget):
     """
     左 / 中交互面板
@@ -27,10 +35,10 @@ class SnapshotMiddlePanel(QWidget):
     """
 
     # 对外信号
-    snapshotCreated = pyqtSignal(str)                 # 备注
-    compareRequested = pyqtSignal()                   # 请求对比（note 模式）
-    snapshotSelected = pyqtSignal(str)                # 列表模式：选中一个快照
-    pairCompareRequested = pyqtSignal(str, str)       # compare 模式：两个版本
+    snapshotCreated = pyqtSignal(str)  # 备注
+    compareRequested = pyqtSignal()  # 请求对比（note 模式）
+    snapshotSelected = pyqtSignal(str)  # 列表模式：选中一个快照
+    pairCompareRequested = pyqtSignal(str, str)  # compare 模式：两个版本
 
     def __init__(self, mode: str = "note", parent: Optional[QWidget] = None):
         super().__init__(parent)
@@ -63,7 +71,7 @@ class SnapshotMiddlePanel(QWidget):
         btn_box = QHBoxLayout()
         self.create_btn = PrimaryButton("创建快照")
         self.compare_btn = FlatButton("对比当前与最新")
-        print("self.compare_btn----:",self.compare_btn.property("type"))
+        print("self.compare_btn----:", self.compare_btn.property("type"))
         btn_box.addWidget(self.create_btn)
         btn_box.addWidget(self.compare_btn)
         layout.addLayout(btn_box)

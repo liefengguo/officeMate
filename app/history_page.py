@@ -5,12 +5,18 @@ from functools import partial
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
-    QPushButton, QMessageBox
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QPushButton,
+    QMessageBox,
 )
 
 from core.snapshot_manager import SnapshotManager
-from app.widgets.snapshot_panels import SnapshotDisplayPanel           # 新增
+from app.widgets.snapshot_panels import SnapshotDisplayPanel  # 新增
 from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
 from app.diff_viewer_widget import DiffViewerWidget
 
@@ -33,7 +39,7 @@ class HistoryPage(QWidget):
 
         self.btn_restore = QPushButton("恢复所选快照")
         self.btn_undo = QPushButton("撤销上次恢复")
-        print("self.btn_undo:",self.btn_undo.property("type"))
+        print("self.btn_undo:", self.btn_undo.property("type"))
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_undo.clicked.connect(self.sm.undo_restore)
         self.btn_undo.setEnabled(False)
@@ -110,7 +116,7 @@ class HistoryPage(QWidget):
         self.sm.restore_snapshot(meta)
 
     def delete_selected(self):
-        row = self.list_widget.currentRow()          # 先拿行号
+        row = self.list_widget.currentRow()  # 先拿行号
         if row < 0:
             QMessageBox.information(self, "提示", "请先选择要删除的快照")
             return
@@ -122,9 +128,12 @@ class HistoryPage(QWidget):
             return
 
         # 二次确认
-        if QMessageBox.question(self, "删除快照",
-                                "确定删除该快照？",
-                                QMessageBox.Yes | QMessageBox.No) != QMessageBox.Yes:
+        if (
+            QMessageBox.question(
+                self, "删除快照", "确定删除该快照？", QMessageBox.Yes | QMessageBox.No
+            )
+            != QMessageBox.Yes
+        ):
             return
 
         # 删除数据文件 / 元数据
@@ -132,10 +141,11 @@ class HistoryPage(QWidget):
 
         # 解除预览 & 从列表移除
         self.display_panel.set_widget(QLabel("✂️ 已删除快照"))
-        self.list_widget.takeItem(row)               # 直接按行删除，避免引用 item
+        self.list_widget.takeItem(row)  # 直接按行删除，避免引用 item
 
         # 如需刷新按钮状态
         self._toggle_undo_button()
+
     # ---------------------------------------------------------------- view / delete
     def _build_preview_widget(self, path: str):
         """根据文件类型构建预览控件"""
@@ -150,8 +160,16 @@ class HistoryPage(QWidget):
                 doc = docx.Document(path)
                 paragraphs = [p.text for p in doc.paragraphs]
                 diff_tbl = ParagraphDiffTableView(
-                    [{"tag": "equal", "a_idx": i, "b_idx": i, "a_text": p, "b_text": p}
-                     for i, p in enumerate(paragraphs)]
+                    [
+                        {
+                            "tag": "equal",
+                            "a_idx": i,
+                            "b_idx": i,
+                            "a_text": p,
+                            "b_text": p,
+                        }
+                        for i, p in enumerate(paragraphs)
+                    ]
                 )
                 return diff_tbl
             else:
@@ -179,7 +197,7 @@ class HistoryPage(QWidget):
         vbox.setSpacing(4)
 
         remark = meta.get("remark") or os.path.basename(meta.get("snapshot_path", ""))
-        ts     = meta.get("timestamp", "")
+        ts = meta.get("timestamp", "")
         header_lbl = QLabel(f"{remark}  –  {ts}")
         header_lbl.setStyleSheet("font-weight: bold; padding: 2px 0;")
 

@@ -1,6 +1,7 @@
 import os
 import json
 
+
 class RecentDocDB:
     def __init__(self):
         self.path = os.path.expanduser("~/.docsnap/recent_docs.json")

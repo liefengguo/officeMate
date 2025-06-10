@@ -14,7 +14,7 @@ from .base_strategy import DiffStrategy, DiffResult
 from ..snapshot_loaders.loader_registry import LoaderRegistry
 
 
-CONTEXT_LINES = 3           # 保留前后上下文段落数
+CONTEXT_LINES = 3  # 保留前后上下文段落数
 
 
 class ParagraphDiffStrategy(DiffStrategy):
@@ -38,8 +38,7 @@ class ParagraphDiffStrategy(DiffStrategy):
     def _inline_ops(a: str, b: str):
         """计算段内增删，返回 [tag, a_chunk, b_chunk] 列表"""
         sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
-        return [[tag, a[i1:i2], b[j1:j2]]
-                for tag, i1, i2, j1, j2 in sm.get_opcodes()]
+        return [[tag, a[i1:i2], b[j1:j2]] for tag, i1, i2, j1, j2 in sm.get_opcodes()]
 
     # ------------------------------------------------ strategy API
     def supports(self, loader_a, loader_b) -> bool:
@@ -60,8 +59,15 @@ class ParagraphDiffStrategy(DiffStrategy):
 
         def add_equal(idx_a: int, idx_b: int):
             text = para_a[idx_a]
-            chunks.append({"tag": "equal", "a_idx": idx_a, "b_idx": idx_b,
-                           "a_text": text, "b_text": text})
+            chunks.append(
+                {
+                    "tag": "equal",
+                    "a_idx": idx_a,
+                    "b_idx": idx_b,
+                    "a_text": text,
+                    "b_text": text,
+                }
+            )
             raw.append(f"  {text}")
 
         def add_skip(n: int):
@@ -77,8 +83,7 @@ class ParagraphDiffStrategy(DiffStrategy):
                         add_equal(i1 + off, j1 + off)
                     add_skip(span - 2 * CONTEXT_LINES)
                     for off in range(CONTEXT_LINES):
-                        add_equal(i2 - CONTEXT_LINES + off,
-                                  j2 - CONTEXT_LINES + off)
+                        add_equal(i2 - CONTEXT_LINES + off, j2 - CONTEXT_LINES + off)
                 else:
                     for off in range(span):
                         add_equal(i1 + off, j1 + off)
@@ -86,25 +91,45 @@ class ParagraphDiffStrategy(DiffStrategy):
             elif tag == "delete":
                 for idx in range(i1, i2):
                     text = para_a[idx]
-                    chunks.append({"tag": "delete", "a_idx": idx, "b_idx": -1,
-                                   "a_text": text, "b_text": ""})
+                    chunks.append(
+                        {
+                            "tag": "delete",
+                            "a_idx": idx,
+                            "b_idx": -1,
+                            "a_text": text,
+                            "b_text": "",
+                        }
+                    )
                     raw.append(f"- {text}")
 
             elif tag == "insert":
                 for idx in range(j1, j2):
                     text = para_b[idx]
-                    chunks.append({"tag": "insert", "a_idx": -1, "b_idx": idx,
-                                   "a_text": "", "b_text": text})
+                    chunks.append(
+                        {
+                            "tag": "insert",
+                            "a_idx": -1,
+                            "b_idx": idx,
+                            "a_text": "",
+                            "b_text": text,
+                        }
+                    )
                     raw.append(f"+ {text}")
 
             elif tag == "replace":
                 a_text = "\n".join(para_a[i1:i2])
                 b_text = "\n".join(para_b[j1:j2])
                 inline = self._inline_ops(a_text, b_text)
-                chunks.append({"tag": "replace",
-                               "a_idx": i1, "b_idx": j1,
-                               "a_text": a_text, "b_text": b_text,
-                               "inline": inline})
+                chunks.append(
+                    {
+                        "tag": "replace",
+                        "a_idx": i1,
+                        "b_idx": j1,
+                        "a_text": a_text,
+                        "b_text": b_text,
+                        "inline": inline,
+                    }
+                )
                 raw.append(f"- {a_text}")
                 raw.append(f"+ {b_text}")
 

@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 import os
 from core.snapshot import SnapshotManager
 
+
 class SnapshotListWidget(QListWidget):
     def __init__(self, file_path, single_selection=True, parent=None):
         super().__init__(parent)

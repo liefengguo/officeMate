@@ -35,6 +35,7 @@ from core.platform_utils import is_dark_mode
 _STYLES_DIR = Path(__file__).resolve().parent.parent / "assets" / "styles"
 _BASE_QSS_NAME = "_base.qss"
 
+
 def _read_qss(filename: str) -> str:
     """Return stylesheet contents if the .qss file exists, else empty str."""
     fp = _STYLES_DIR / filename
@@ -78,7 +79,7 @@ def apply_theme(app: Optional[QApplication] = None, pref: str | None = None) -> 
     elif pref not in ("auto", "light", "dark"):
         raise ValueError("pref must be 'auto', 'light' or 'dark'")
 
-    base_qss  = _read_qss(_BASE_QSS_NAME)
+    base_qss = _read_qss(_BASE_QSS_NAME)
     theme_qss = _read_qss(_pick_theme_file(pref))
     # 最终样式 = 公共样式 + 当前主题样式
     app.setStyleSheet(base_qss + "\n" + theme_qss)

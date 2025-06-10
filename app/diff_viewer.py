@@ -1,8 +1,7 @@
-
-
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor, QFont
 from core.diff_engine import DiffEngine
+
 
 class DiffViewer(QWidget):
     def __init__(self, file1_path, file2_path):

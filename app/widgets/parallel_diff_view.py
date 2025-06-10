@@ -19,14 +19,16 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
 
 from core.platform_utils import is_dark_mode
+
 _IS_DARK = is_dark_mode()
+
 
 class ParallelDiffView(QSplitter):
     def __init__(self, left_title: str = "", right_title: str = "", parent=None):
         super().__init__(Qt.Horizontal, parent)
 
         # 左右容器：标题 QLabel + QTextBrowser
-        left_tb  = QTextBrowser()
+        left_tb = QTextBrowser()
         right_tb = QTextBrowser()
 
         # 统一 TextBrowser 外观
@@ -59,7 +61,7 @@ class ParallelDiffView(QSplitter):
         self.addWidget(right_container)
 
         # 对外暴露的 QTextBrowser 引用（保持旧接口兼容）
-        self.left  = left_tb
+        self.left = left_tb
         self.right = right_tb
 
         # 滚动同步
@@ -123,13 +125,13 @@ class ParallelDiffView(QSplitter):
     def load_chunks(self, chunks: List[Dict]):
         """渲染左右 HTML，带行号和符号"""
         left_lines, right_lines = [], []
-        old_idx, new_idx = 1, 1        # 行号计数
+        old_idx, new_idx = 1, 1  # 行号计数
 
-        def ln_html(n):    # 行号灰色
+        def ln_html(n):  # 行号灰色
             return f'<span class="ln">{n:>4}</span> '
 
         def sym_html(sym):
-            color = {"-":"#ff3b30", "+":"#34c759", "~":"#ff9500"}.get(sym, "#888")
+            color = {"-": "#ff3b30", "+": "#34c759", "~": "#ff9500"}.get(sym, "#888")
             return f'<span class="sym" style="color:{color}">{sym}</span> '
 
         for ch in chunks:
@@ -175,8 +177,10 @@ class ParallelDiffView(QSplitter):
                 new_idx += 1
 
             elif tag == "skip":
-                skip_html = (f'<span class="skip">… {ch["count"]} unchanged '
-                                f'paragraphs …</span>')
+                skip_html = (
+                    f'<span class="skip">… {ch["count"]} unchanged '
+                    f"paragraphs …</span>"
+                )
                 left_lines.append(skip_html)
                 right_lines.append(skip_html)
 

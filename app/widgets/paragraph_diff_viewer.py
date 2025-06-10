@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QTextBrowser, QWidget, QHBoxLayout
 
+
 class ParallelDiffView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        left_tb  = QTextBrowser()
+        left_tb = QTextBrowser()
         right_tb = QTextBrowser()
         # mark for QSS styling
         left_tb.setProperty("class", "diff-pane")

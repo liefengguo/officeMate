@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import Qt, pyqtSignal
 
+
 class SnapshotItemWidget(QWidget):
     view_requested = pyqtSignal()
     delete_requested = pyqtSignal()
@@ -18,7 +19,8 @@ class SnapshotItemWidget(QWidget):
         self.delete_button.clicked.connect(self.delete_requested.emit)
 
         # 设置按钮的样式，初始透明
-        self.view_button.setStyleSheet("""
+        self.view_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: transparent;
                 border: none;
@@ -28,9 +30,11 @@ class SnapshotItemWidget(QWidget):
             QPushButton:hover {
                 color: rgba(0, 0, 0, 1);  /* 鼠标悬停时显示完整颜色 */
             }
-        """)
+        """
+        )
 
-        self.delete_button.setStyleSheet("""
+        self.delete_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: transparent;
                 border: none;
@@ -40,7 +44,8 @@ class SnapshotItemWidget(QWidget):
             QPushButton:hover {
                 color: rgba(0, 0, 0, 1);  /* 鼠标悬停时显示完整颜色 */
             }
-        """)
+        """
+        )
 
         # 布局
         layout = QHBoxLayout()
@@ -58,7 +63,8 @@ class SnapshotItemWidget(QWidget):
     def set_selected(self, selected):
         """根据是否选中控制按钮透明度"""
         if selected:
-            self.view_button.setStyleSheet("""
+            self.view_button.setStyleSheet(
+                """
                 QPushButton {
                     background-color: transparent;
                     border: none;
@@ -68,8 +74,10 @@ class SnapshotItemWidget(QWidget):
                 QPushButton:hover {
                     color: rgba(0, 0, 0, 1);  /* 鼠标悬停时显示完整颜色 */
                 }
-            """)
-            self.delete_button.setStyleSheet("""
+            """
+            )
+            self.delete_button.setStyleSheet(
+                """
                 QPushButton {
                     background-color: transparent;
                     border: none;
@@ -79,9 +87,11 @@ class SnapshotItemWidget(QWidget):
                 QPushButton:hover {
                     color: rgba(0, 0, 0, 1);  /* 鼠标悬停时显示完整颜色 */
                 }
-            """)
+            """
+            )
         else:
-            self.view_button.setStyleSheet("""
+            self.view_button.setStyleSheet(
+                """
                 QPushButton {
                     background-color: transparent;
                     border: none;
@@ -91,8 +101,10 @@ class SnapshotItemWidget(QWidget):
                 QPushButton:hover {
                     color: rgba(0, 0, 0, 1);  /* 鼠标悬停时显示完整颜色 */
                 }
-            """)
-            self.delete_button.setStyleSheet("""
+            """
+            )
+            self.delete_button.setStyleSheet(
+                """
                 QPushButton {
                     background-color: transparent;
                     border: none;
@@ -102,4 +114,5 @@ class SnapshotItemWidget(QWidget):
                 QPushButton:hover {
                     color: rgba(0, 0, 0, 1);  /* 鼠标悬停时显示完整颜色 */
                 }
-            """)
+            """
+            )
