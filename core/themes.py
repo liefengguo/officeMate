@@ -22,7 +22,6 @@ apply_theme(app: QApplication | None = None, pref: str | None = None) -> None
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from typing import Optional
 
@@ -31,54 +30,61 @@ from PyQt5.QtWidgets import QApplication
 
 from core.platform_utils import is_dark_mode
 
-# --------------------------------------------------------------------------- fs
-_STYLES_DIR = Path(__file__).resolve().parent.parent / "assets" / "styles"
-_BASE_QSS_NAME = "_base.qss"
 
-def _read_qss(filename: str) -> str:
-    """Return stylesheet contents if the .qss file exists, else empty str."""
-    fp = _STYLES_DIR / filename
-    return fp.read_text(encoding="utf-8") if fp.exists() else ""
+class ThemeManager:
+    """Load, save and apply QSS themes."""
+
+    STYLES_DIR = Path(__file__).resolve().parent.parent / "assets" / "styles"
+    BASE_QSS_NAME = "_base.qss"
+
+    # -------------- filesystem helpers -----------------
+    def _read_qss(self, filename: str) -> str:
+        fp = self.STYLES_DIR / filename
+        return fp.read_text(encoding="utf-8") if fp.exists() else ""
+
+    def _pick_theme_file(self, pref: str) -> str:
+        if pref == "auto":
+            pref = "dark" if is_dark_mode() else "light"
+        return f"{pref}.qss"
+
+    # ----------------- settings API --------------------
+    def load_pref(self) -> str:
+        """Return stored preference ('auto' by default)."""
+        return QSettings().value("ui/theme", "auto")
+
+    def save_pref(self, pref: str) -> None:
+        if pref not in ("auto", "light", "dark"):
+            raise ValueError("pref must be 'auto', 'light' or 'dark'")
+        QSettings().setValue("ui/theme", pref)
+
+    # ------------------- main API ----------------------
+    def apply(self, app: Optional[QApplication] = None, pref: str | None = None) -> None:
+        if app is None:
+            app = QApplication.instance()
+            if app is None:
+                raise RuntimeError("No QApplication instance available")
+
+        if pref is None:
+            pref = self.load_pref()
+        elif pref not in ("auto", "light", "dark"):
+            raise ValueError("pref must be 'auto', 'light' or 'dark'")
+
+        base_qss = self._read_qss(self.BASE_QSS_NAME)
+        theme_qss = self._read_qss(self._pick_theme_file(pref))
+        app.setStyleSheet(base_qss + "\n" + theme_qss)
 
 
-# ---------------------------------------------------------------------- public
+# ----------------------- module-level helpers -----------------------
+_manager = ThemeManager()
+
 def load_theme_pref() -> str:
-    """Return stored preference: 'auto' (default) | 'light' | 'dark'."""
-    return QSettings().value("ui/theme", "auto")
+    return _manager.load_pref()
 
 
 def save_theme_pref(pref: str) -> None:
-    """Persist preference in QSettings."""
-    if pref not in ("auto", "light", "dark"):
-        raise ValueError("pref must be 'auto', 'light' or 'dark'")
-    QSettings().setValue("ui/theme", pref)
-
-
-def _pick_theme_file(pref: str) -> str:
-    """Translate preference into qss filename."""
-    if pref == "auto":
-        pref = "dark" if is_dark_mode() else "light"
-    return f"{pref}.qss"  # 'light.qss' / 'dark.qss'
+    _manager.save_pref(pref)
 
 
 def apply_theme(app: Optional[QApplication] = None, pref: str | None = None) -> None:
-    """
-    Apply (or re-apply) theme to *app*.
+    _manager.apply(app, pref)
 
-    If *pref* is None -> use stored preference (or 'auto').
-    If *app* is None  -> use QApplication.instance().
-    """
-    if app is None:
-        app = QApplication.instance()
-        if app is None:
-            raise RuntimeError("No QApplication instance available")
-
-    if pref is None:
-        pref = load_theme_pref()
-    elif pref not in ("auto", "light", "dark"):
-        raise ValueError("pref must be 'auto', 'light' or 'dark'")
-
-    base_qss  = _read_qss(_BASE_QSS_NAME)
-    theme_qss = _read_qss(_pick_theme_file(pref))
-    # 最终样式 = 公共样式 + 当前主题样式
-    app.setStyleSheet(base_qss + "\n" + theme_qss)
