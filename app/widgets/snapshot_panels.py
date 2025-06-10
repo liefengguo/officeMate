@@ -13,10 +13,7 @@ from PyQt5.QtWidgets import (
     QLabel, QTextEdit, QListWidget, QListWidgetItem
 )
 from ui.components import PrimaryButton, FlatButton
-from core.themes import _STYLES_DIR, _read_qss
-print(_STYLES_DIR)
-print(_read_qss("_base.qss")[:50])
-print(_read_qss("light.qss")[:50])
+
 class SnapshotMiddlePanel(QWidget):
     """
     左 / 中交互面板
@@ -63,7 +60,6 @@ class SnapshotMiddlePanel(QWidget):
         btn_box = QHBoxLayout()
         self.create_btn = PrimaryButton("创建快照")
         self.compare_btn = FlatButton("对比当前与最新")
-        print("self.compare_btn----:",self.compare_btn.property("type"))
         btn_box.addWidget(self.create_btn)
         btn_box.addWidget(self.compare_btn)
         layout.addLayout(btn_box)
