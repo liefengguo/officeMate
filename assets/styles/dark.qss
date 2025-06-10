@@ -33,12 +33,20 @@ QSplitter::handle:hover       { background: #454545; }
 
 /* 5️⃣ 按钮 ------------------------------------------------------ */
 
+/* generic buttons use same styling as [type="default"] */
+QPushButton {
+    background: #2C2C2C;
+    border: 1px solid #4A4A4A;
+    color: #E2E2E2;
+}
 /* default buttons (rare) — dark card, subtle border */
 QPushButton[type="default"] {
     background: #2C2C2C;
     border: 1px solid #4A4A4A;
     color: #E2E2E2;
 }
+QPushButton:hover   { background: #373737; }
+QPushButton:pressed { background: #1B1B1B; }
 QPushButton[type="default"]:hover   { background: #373737; }
 QPushButton[type="default"]:pressed { background: #1B1B1B; }
 
