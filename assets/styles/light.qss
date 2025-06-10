@@ -9,10 +9,20 @@ QWidget {
 }
 
 /* 2️⃣ 滚动区域 / diff 浏览器 ------------------------------------ */
-QTextBrowser {
+/* QTextBrowser:not([class="diff-pane"]) {
     background: #FFFFFF;
-    border: 1px solid #D0D0D0;
+    border: 1px solid #a98a8a;
     padding: 4px;
+} */
+
+/* 4b️⃣ Text / List / Diff cards -------------------------------- */
+QWidget[class="textinput"],
+QListWidget[class="snapshot-list"],
+QTextBrowser[class="diff-pane"] {
+    background: #FFFFFF;          
+    border: 1px solid #C3C3C3;    
+    border-radius: 6px;
+    padding: 6px;
 }
 
 /* 3️⃣ 列表选中 (Finder 风格) ----------------------------------- */

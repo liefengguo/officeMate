@@ -1,12 +1,10 @@
-
-
 /*************************************************************
  * DocSnap – Shared (base) QSS
  * -----------------------------------------------------------
  *  ❖ DO NOT change colors here that should vary between themes
  *  ❖ Only put RESET rules, fonts, metrics, and helper classes
  *************************************************************/
-
+QPushButton { border: none; background: transparent; }
 /* ----------------------- 1. Font & Metrics ----------------------- */
 QWidget {
     /* System font on macOS / Segoe UI fallback on Windows */
@@ -52,4 +50,31 @@ QPushButton[type="flat"]    { border: none; }
 .diff-title {
     font-weight: 600;
     padding: 2px 4px;
+}
+
+/* ----------------------- 4. Shared Controls ------------------------
+   NOTE: Only geometry here.  Colors / backgrounds are set
+         by each theme (light.qss / dark.qss).
+-------------------------------------------------------------------- */
+
+/* Text input area, snapshot list, diff panes share same geometry */
+QWidget[class="textinput"],
+QListWidget[class="snapshot-list"],
+QTextBrowser[class="diff-pane"] {
+    border-width: 1px;          /* color comes from theme */
+    border-style: solid;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+/* Focus outline (accent color supplied by theme) */
+QWidget[class="textinput"]:focus,
+QListWidget[class="snapshot-list"]:focus,
+QTextBrowser[class="diff-pane"]:focus {
+    border-width: 2px;          /* thicker when focused */
+}
+
+/* Thin splitter (visual width set via handleWidth) */
+QSplitter::handle {
+    /* background-color set in theme */
 }

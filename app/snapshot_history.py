@@ -28,13 +28,13 @@ class SnapshotHistoryWindow(QWidget):
 
         self.label = QLabel(f"文档：{self.doc_name}")
         self.list_widget = QListWidget()
+        self.list_widget.setProperty("class", "snapshot-list")
         self.compare_button = PrimaryButton("对比选中快照")
         self.compare_button.setFixedHeight(28)
         self.compare_button.clicked.connect(self.compare_snapshots)
         self.preview_button = FlatButton("查看快照内容")
         self.preview_button.clicked.connect(self.preview_snapshots)
         self.list_widget.setSelectionMode(QAbstractItemView.MultiSelection)
-
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.list_widget)
         self.layout.addWidget(self.compare_button)

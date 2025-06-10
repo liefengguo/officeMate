@@ -69,6 +69,9 @@ class SnapshotPage(QWidget):
                 # viewer = ParagraphDiffTableView(diff_result.structured, self)
                 viewer = ParallelDiffView("历史对比", "最新文档", self)
                 viewer.load_chunks(diff_result.structured)
+                # ① 让左右浏览器走统一 QSS
+                viewer.left.setProperty("class", "diff-pane")
+                viewer.right.setProperty("class", "diff-pane")
             else:
                 viewer = DiffViewerWidget(self)
                 viewer.set_diff_content(diff_result.raw or "当前文档与最新快照没有任何差异。")

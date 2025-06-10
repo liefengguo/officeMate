@@ -8,8 +8,16 @@ QWidget {
     color:      #E2E2E2;      /* 高对比软白 */
 }
 
+/* 1b️⃣ Shared controls color overrides -------------------------- */
+QWidget[class="textinput"],
+QListWidget[class="snapshot-list"],
+QTextBrowser[class="diff-pane"] {
+    background: #2B2B2B;
+    border-color: #3D3D3D;
+}
+
 /* 2️⃣ 滚动区域 / diff 浏览器 -------------------------------------- */
-QTextBrowser {
+QTextBrowser:not([class="diff-pane"]) {
     background: #1F1F1F;
     border: 1px solid #3D3D3D;   /* 低对比边框 */
     padding: 4px;
@@ -23,21 +31,35 @@ QListWidget::item:selected:!active { background: #3A3A3A; color: #FFFFFF; }  /* 
 QSplitter::handle            { background: #2C2C2C; }
 QSplitter::handle:hover       { background: #454545; }
 
-/* 5️⃣ 按钮（继承 _base 的圆角等） -------------------------------- */
-QPushButton {
-    background-color: #2C2C2C;
+/* 5️⃣ 按钮 ------------------------------------------------------ */
+
+/* default buttons (rare) — dark card, subtle border */
+QPushButton[type="default"] {
+    background: #2C2C2C;
     border: 1px solid #4A4A4A;
     color: #E2E2E2;
 }
-QPushButton:hover  { background-color: #373737; }
-QPushButton:pressed{ background-color: #1B1B1B; }
+QPushButton[type="default"]:hover   { background: #373737; }
+QPushButton[type="default"]:pressed { background: #1B1B1B; }
+
+/* primary (accent) */
 QPushButton[type="primary"] {
-    background-color: #0A84FF;
+    background: #0A84FF;
     border: none;
-    color: white;
+    color: #FFFFFF;
+    border-radius: 6px;
 }
-QPushButton[type="primary"]:hover  { background-color: #3B9CFF; }
-QPushButton[type="primary"]:pressed{ background-color: #0067D9; }
+QPushButton[type="primary"]:hover   { background: #3B9CFF; }
+QPushButton[type="primary"]:pressed { background: #0067D9; }
+
+/* flat — text-only button */
+QPushButton[type="flat"] {
+    background: transparent;
+    border: none;
+    color: #E2E2E2;
+}
+QPushButton[type="flat"]:hover   { background: #3A3A3A; }
+QPushButton[type="flat"]:pressed { background: #1F1F1F; }
 
 /* 6️⃣ Diff 专用 --------------------------------------------------- */
 .ln    { color: #9A9A9A; }     /* 行号灰 */

@@ -10,10 +10,13 @@ from typing import Optional
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QTextEdit, QListWidget, QListWidgetItem, QPushButton
+    QLabel, QTextEdit, QListWidget, QListWidgetItem
 )
-
-
+from ui.components import PrimaryButton, FlatButton
+from core.themes import _STYLES_DIR, _read_qss
+print(_STYLES_DIR)
+print(_read_qss("_base.qss")[:50])
+print(_read_qss("light.qss")[:50])
 class SnapshotMiddlePanel(QWidget):
     """
     左 / 中交互面板
@@ -52,17 +55,18 @@ class SnapshotMiddlePanel(QWidget):
     def _init_note(self, layout: QVBoxLayout):
         layout.addWidget(QLabel("快照备注："))
         self.remark_edit = QTextEdit()
+        self.remark_edit.setProperty("class", "textinput")
         self.remark_edit.setPlaceholderText("输入此版本的备注信息…")
         self.remark_edit.setFixedHeight(80)
         layout.addWidget(self.remark_edit)
 
         btn_box = QHBoxLayout()
-        self.create_btn = QPushButton("创建快照")
-        self.compare_btn = QPushButton("对比当前与最新")
+        self.create_btn = PrimaryButton("创建快照")
+        self.compare_btn = FlatButton("对比当前与最新")
+        print("self.compare_btn----:",self.compare_btn.property("type"))
         btn_box.addWidget(self.create_btn)
         btn_box.addWidget(self.compare_btn)
         layout.addLayout(btn_box)
-
         # 连接信号
         self.create_btn.clicked.connect(self._emit_create)
         self.compare_btn.clicked.connect(self.compareRequested)
@@ -100,7 +104,7 @@ class SnapshotMiddlePanel(QWidget):
         lists_box.addWidget(self.second_list)
         layout.addLayout(lists_box)
 
-        self.compare_btn = QPushButton("开始对比")
+        self.compare_btn = PrimaryButton("开始对比")
         layout.addWidget(self.compare_btn)
         self.compare_btn.clicked.connect(self._emit_pair_compare)
 

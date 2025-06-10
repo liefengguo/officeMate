@@ -33,6 +33,7 @@ class HistoryPage(QWidget):
 
         self.btn_restore = QPushButton("恢复所选快照")
         self.btn_undo = QPushButton("撤销上次恢复")
+        print("self.btn_undo:",self.btn_undo.property("type"))
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_undo.clicked.connect(self.sm.undo_restore)
         self.btn_undo.setEnabled(False)

@@ -28,6 +28,8 @@ class MainDashboard(QWidget):
         self.doc_list.setItemDelegate(ProjectItemDelegate())
         
         self.add_button = PrimaryButton("➕ 添加项目")
+        # print(self.add_button.property("type"))
+        # print("lalala----: ",self.add_button.styleSheet())
 
         self.doc_list.setSpacing(4)
 
