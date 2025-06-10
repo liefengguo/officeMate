@@ -76,24 +76,29 @@ class SnapshotManager(QObject):
             "snapshot_path": str(snapshot_file),
         }
         self.repo.save_version(doc_name, meta)
-        # register a fallback plain‑text loader for legacy '.bak' if not yet registered
-        if LoaderRegistry.get_loader(".bak") is None:
-
-            class _BakFallbackLoader:
-                def get_text(self, fp):  # simplistic; tries text read
-                    try:
-                        with open(fp, "r", encoding="utf-8", errors="ignore") as f:
-                            return f.read()
-                    except Exception:
-                        return "(binary content)"
-
-                def load_structured(self, fp):
-                    return self.get_text(fp)
-
-            LoaderRegistry.register_loader(".bak", _BakFallbackLoader())
+        self._ensure_bak_loader()
         # emit signal for UI refresh
         self.snapshot_created.emit(meta)
         return meta
+
+    # ------------------------------------------------------- helpers
+    def _ensure_bak_loader(self) -> None:
+        """Register a simple text loader for legacy ``.bak`` files."""
+        if LoaderRegistry.get_loader(".bak") is not None:
+            return
+
+        class _BakFallbackLoader:
+            def get_text(self, fp):
+                try:
+                    with open(fp, "r", encoding="utf-8", errors="ignore") as f:
+                        return f.read()
+                except Exception:
+                    return "(binary content)"
+
+            def load_structured(self, fp):
+                return self.get_text(fp)
+
+        LoaderRegistry.register_loader(".bak", _BakFallbackLoader())
 
     def delete_snapshot(self, doc_name: str, version_meta: Dict) -> None:
         """

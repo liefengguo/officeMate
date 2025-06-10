@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 import os
-from core.snapshot import SnapshotManager
+from core.snapshot_manager import SnapshotManager
 
 
 class SnapshotListWidget(QListWidget):

@@ -9,15 +9,16 @@ DiffResult.structured: optional rich diff object for advanced UI.
 """
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any
 
 
+@dataclass
 class DiffResult:
     """Container for diff output."""
 
-    def __init__(self, raw: str, structured: Any = None):
-        self.raw = raw
-        self.structured = structured
+    raw: str
+    structured: Any | None = None
 
 
 class DiffStrategy(ABC):
