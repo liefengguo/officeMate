@@ -13,10 +13,7 @@ from PyQt5.QtWidgets import (
     QLabel, QTextEdit, QListWidget, QListWidgetItem
 )
 from ui.components import PrimaryButton, FlatButton
-from core.themes import _STYLES_DIR, _read_qss
-print(_STYLES_DIR)
-print(_read_qss("_base.qss")[:50])
-print(_read_qss("light.qss")[:50])
+
 class SnapshotMiddlePanel(QWidget):
     """
     左 / 中交互面板
@@ -79,6 +76,7 @@ class SnapshotMiddlePanel(QWidget):
     def _init_list(self, layout: QVBoxLayout):
         layout.addWidget(QLabel("快照历史："))
         self.list_widget = QListWidget()
+        self.list_widget.setProperty("class", "snapshot-list")
         self.list_widget.itemClicked.connect(
             lambda item: self.snapshotSelected.emit(item.data(256))
         )
@@ -98,7 +96,9 @@ class SnapshotMiddlePanel(QWidget):
     def _init_compare(self, layout: QVBoxLayout):
         layout.addWidget(QLabel("选择需要对比的两个快照："))
         self.first_list = QListWidget()
+        self.first_list.setProperty("class", "snapshot-list")
         self.second_list = QListWidget()
+        self.second_list.setProperty("class", "snapshot-list")
         lists_box = QHBoxLayout()
         lists_box.addWidget(self.first_list)
         lists_box.addWidget(self.second_list)
@@ -140,5 +140,13 @@ class SnapshotDisplayPanel(QWidget):
         if self._curr_widget:
             self._layout.removeWidget(self._curr_widget)
             self._curr_widget.setParent(None)
-        self._curr_widget = widget
-        self._layout.addWidget(widget)
+
+        # wrap in a preview-pane container
+        wrapper = QWidget()
+        wrapper.setProperty("class", "preview-pane")
+        v = QVBoxLayout(wrapper)
+        v.setContentsMargins(0, 0, 0, 0)
+        v.addWidget(widget)
+
+        self._curr_widget = wrapper
+        self._layout.addWidget(wrapper)

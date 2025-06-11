@@ -6,12 +6,12 @@ from functools import partial
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
-    QPushButton, QMessageBox
+    QMessageBox
 )
+from ui.components import PrimaryButton, FlatButton
 
 from core.snapshot_manager import SnapshotManager
 from app.widgets.snapshot_panels import SnapshotDisplayPanel           # 新增
-from app.widgets.paragraph_diff_table_view import ParagraphDiffTableView
 from app.diff_viewer_widget import DiffViewerWidget
 
 
@@ -29,11 +29,14 @@ class HistoryPage(QWidget):
         mid_layout = QVBoxLayout(mid_widget)
         self.label = QLabel(f"📜 {self.doc_name} 的快照历史")
         self.list_widget = QListWidget()
+        self.list_widget.setProperty("class", "snapshot-list")
         self.list_widget.setSelectionMode(QListWidget.SingleSelection)
 
-        self.btn_restore = QPushButton("恢复所选快照")
-        self.btn_undo = QPushButton("撤销上次恢复")
-        print("self.btn_undo:",self.btn_undo.property("type"))
+        self.btn_restore = FlatButton("恢复所选快照")
+        self.btn_restore.setFixedHeight(28)
+        self.btn_undo = FlatButton("撤销上次恢复")
+        self.btn_undo.setFixedHeight(28)
+        # print("self.btn_undo:",self.btn_undo.property("type"))
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_undo.clicked.connect(self.sm.undo_restore)
         self.btn_undo.setEnabled(False)
@@ -42,7 +45,8 @@ class HistoryPage(QWidget):
         mid_layout.addWidget(self.list_widget)
         mid_layout.addWidget(self.btn_restore)
         mid_layout.addWidget(self.btn_undo)
-        self.btn_delete = QPushButton("删除所选快照")
+        self.btn_delete = PrimaryButton("删除所选快照")
+        self.btn_delete.setFixedHeight(28)
         self.btn_delete.clicked.connect(self.delete_selected)
         mid_layout.addWidget(self.btn_delete)
         mid_layout.addStretch(1)
@@ -148,12 +152,14 @@ class HistoryPage(QWidget):
                 return vw
             elif path.endswith(".docx"):
                 doc = docx.Document(path)
-                paragraphs = [p.text for p in doc.paragraphs]
-                diff_tbl = ParagraphDiffTableView(
-                    [{"tag": "equal", "a_idx": i, "b_idx": i, "a_text": p, "b_text": p}
-                     for i, p in enumerate(paragraphs)]
-                )
-                return diff_tbl
+                paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+                from PyQt5.QtWidgets import QTextBrowser
+                browser = QTextBrowser()
+                browser.setProperty("class", "diff-pane")
+                browser.setOpenExternalLinks(False)
+                browser.setReadOnly(True)
+                browser.setText("\n".join(paragraphs) or "(空文档)")
+                return browser
             else:
                 label = QLabel("(不支持的文件格式)")
                 label.setAlignment(Qt.AlignCenter)

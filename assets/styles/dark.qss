@@ -17,11 +17,11 @@ QTextBrowser[class="diff-pane"] {
 }
 
 /* 2️⃣ 滚动区域 / diff 浏览器 -------------------------------------- */
-QTextBrowser:not([class="diff-pane"]) {
+/* QTextBrowser:not([class="diff-pane"]) {
     background: #1F1F1F;
-    border: 1px solid #3D3D3D;   /* 低对比边框 */
+    border: 1px solid #3D3D3D;   
     padding: 4px;
-}
+} */
 
 /* 3️⃣ 列表项选中（Finder 风格） --------------------------------- */
 QListWidget::item:selected:active  { background: #0A84FF; color: #FFFFFF; }  /* 系统强调蓝 */
@@ -52,14 +52,19 @@ QPushButton[type="primary"] {
 QPushButton[type="primary"]:hover   { background: #3B9CFF; }
 QPushButton[type="primary"]:pressed { background: #0067D9; }
 
-/* flat — text-only button */
+/* flat — secondary button (text with border) */
 QPushButton[type="flat"] {
-    background: transparent;
-    border: none;
+    background-color: #2B2B2B;   /* match panel background */
+    border: 1px solid #3D3D3D;  /* subtle border for contrast */
     color: #E2E2E2;
+    border-radius: 6px;
 }
-QPushButton[type="flat"]:hover   { background: #3A3A3A; }
-QPushButton[type="flat"]:pressed { background: #1F1F1F; }
+QPushButton[type="flat"]:hover {
+    background-color: #3A3A3A;
+}
+QPushButton[type="flat"]:pressed {
+    background-color: #292929;
+}
 
 /* 6️⃣ Diff 专用 --------------------------------------------------- */
 .ln    { color: #9A9A9A; }     /* 行号灰 */
@@ -74,3 +79,9 @@ QPushButton[type="flat"]:pressed { background: #1F1F1F; }
 
 /* 7️⃣ 折叠段标记 --------------------------------------------------- */
 .skip { color: #7D7D7D; }
+QWidget[class="preview-pane"] {
+    background: #2B2B2B;
+    border: 1px solid #3D3D3D;
+    border-radius: 6px;
+    padding: 6px;
+}

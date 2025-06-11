@@ -4,8 +4,9 @@ from functools import partial
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-    QPushButton, QListWidgetItem, QMessageBox
+    QListWidgetItem, QMessageBox
 )
+from ui.components import PrimaryButton
 
 from core.snapshot_manager import SnapshotManager
 from app.snapshot_list_widget import SnapshotListWidget
@@ -38,7 +39,9 @@ class SnapshotComparePage(QWidget):
         mid_layout = QVBoxLayout(mid_widget)
         self.label = QLabel(f"🔍 {self.doc_name} 快照对比")
         self.list_widget = SnapshotListWidget(file_path, single_selection=False)
-        self.compare_button = QPushButton("对比选中的两个快照")
+        self.list_widget.setProperty("class", "snapshot-list")
+        self.compare_button = PrimaryButton("对比选中的两个快照")
+        self.compare_button.setFixedHeight(28)
         mid_layout.addWidget(self.label)
         mid_layout.addWidget(self.list_widget, 1)
         mid_layout.addWidget(self.compare_button)
@@ -125,6 +128,8 @@ class SnapshotComparePage(QWidget):
                 # viewer = ParagraphDiffTableView(diff_result.structured, self)
                 viewer = ParallelDiffView(left_title, right_title, self)
                 viewer.load_chunks(diff_result.structured)
+                viewer.left.setProperty("class", "diff-pane")
+                viewer.right.setProperty("class", "diff-pane")
             else:
                 viewer = DiffViewerWidget(self)
                 viewer.set_diff_content(diff_result.raw or "两个快照无差异。")

@@ -24,7 +24,12 @@ QTextBrowser[class="diff-pane"] {
     border-radius: 6px;
     padding: 6px;
 }
-
+QWidget[class="preview-pane"] {
+    background: #FFFFFF;
+    border: 1px solid #D0D0D0;
+    border-radius: 6px;
+    padding: 6px;
+}
 /* 3️⃣ 列表选中 (Finder 风格) ----------------------------------- */
 QListWidget::item:selected:active  { background: #0A84FF; color: #FFFFFF; }
 QListWidget::item:selected:!active { background: #E0E0E0; color: #000000; }
