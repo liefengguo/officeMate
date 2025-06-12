@@ -28,7 +28,8 @@ class ProjectPage(QWidget):
         self.add_snapshot_btn = FlatButton("📸")
         self.history_btn = FlatButton("📜")
         self.compare_btn = FlatButton("🔍")
-        self.settings_btn = FlatButton("⚙️")
+        # Gear emoji with text presentation avoids font issues on some systems
+        self.settings_btn = FlatButton("⚙")
 
         for btn in (self.add_snapshot_btn, self.history_btn):
             btn.setFixedSize(40, 40)
