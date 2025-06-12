@@ -35,7 +35,9 @@ class SnapshotPage(QWidget):
         self.middle_panel.compareRequested.connect(self.compare_with_latest)
 
         # 初始右侧提示
-        self.display_panel.set_widget(QLabel("👉 在左侧填写备注并点击“创建快照”"))
+        hint_lbl = QLabel("👉 在左侧填写备注并点击“创建快照”")
+        hint_lbl.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(hint_lbl)
 
     # ----------------------------------------------------------------- 槽函数
     def on_create_snapshot(self, remark: str):
@@ -45,7 +47,9 @@ class SnapshotPage(QWidget):
             # 清空备注输入框
             self.middle_panel.clear()
             # 更新右侧提示
-            self.display_panel.set_widget(QLabel("✅ 快照已创建！"))
+            lbl = QLabel("✅ 快照已创建！")
+            lbl.setAlignment(Qt.AlignCenter)
+            self.display_panel.set_widget(lbl)
         except Exception as e:
             QMessageBox.critical(self, "错误", f"创建快照失败：{e}")
 
@@ -55,7 +59,9 @@ class SnapshotPage(QWidget):
             doc_name = os.path.basename(self.file_path)
             versions = self.manager.list_snapshots(doc_name)
             if not versions:
-                self.display_panel.set_widget(QLabel("⚠️ 没有可用快照进行对比"))
+                warn_lbl = QLabel("⚠️ 没有可用快照进行对比")
+                warn_lbl.setAlignment(Qt.AlignCenter)
+                self.display_panel.set_widget(warn_lbl)
                 return
 
             latest_version = max(versions, key=lambda v: v.get("timestamp", ""))

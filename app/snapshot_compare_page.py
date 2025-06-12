@@ -49,7 +49,9 @@ class SnapshotComparePage(QWidget):
 
         # ------------------------ 右侧显示区 ------------------------ #
         self.display_panel = SnapshotDisplayPanel()
-        self.display_panel.set_widget(QLabel("👉 请选择两个快照后点击“对比”"))
+        hint_lbl = QLabel("👉 请选择两个快照后点击“对比”")
+        hint_lbl.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(hint_lbl)
 
         # ------------------------ 主水平布局 ------------------------ #
         hbox = QHBoxLayout(self)
@@ -72,7 +74,9 @@ class SnapshotComparePage(QWidget):
         versions = self.manager.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
-            self.display_panel.set_widget(QLabel("📭 没有快照可用"))
+            empty_lbl = QLabel("📭 没有快照可用")
+            empty_lbl.setAlignment(Qt.AlignCenter)
+            self.display_panel.set_widget(empty_lbl)
             return
 
         for v in sorted(versions, key=lambda x: x.get("timestamp", ""), reverse=True):
@@ -85,7 +89,9 @@ class SnapshotComparePage(QWidget):
             self.list_widget.addItem(item)
 
         # 清空右侧旧内容
-        self.display_panel.set_widget(QLabel("👉 请选择两个快照后点击“对比”"))
+        reset_lbl = QLabel("👉 请选择两个快照后点击“对比”")
+        reset_lbl.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(reset_lbl)
 
     # ---------------------------------------------------------------- compare
     def compare_snapshots(self):
