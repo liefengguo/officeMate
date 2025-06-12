@@ -14,7 +14,7 @@ Note: Ensure `python-docx` is installed:
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Dict, Any
 from pathlib import Path
 
 try:
@@ -46,17 +46,56 @@ class DocxLoader(SnapshotLoader):
             'text'   : paragraph text
             'style'  : style name (if any)
             'index'  : paragraph index (0-based)
+            'runs'   : list of run dicts with rich style info
+
+        Run dict example::
+
+            {
+                "type": "text",         # or "image" placeholder
+                "text": "Hello",
+                "font": "Arial",
+                "bold": True,
+                "italic": False,
+                "underline": False,
+            }
         """
         doc = Document(file_path)
-        structured = []
+        structured: List[Dict[str, Any]] = []
+
         for idx, para in enumerate(doc.paragraphs):
+            runs = []
+            for run in para.runs:
+                # detect drawing (images) within the run
+                has_img = False
+                try:
+                    if run._element.xpath('.//pic:pic') or run._element.xpath('.//w:drawing'):
+                        has_img = True
+                except Exception:
+                    pass
+                if has_img:
+                    runs.append({"type": "image"})
+                    continue
+
+                runs.append(
+                    {
+                        "type": "text",
+                        "text": run.text,
+                        "font": getattr(run.font, "name", None),
+                        "bold": bool(run.bold),
+                        "italic": bool(run.italic),
+                        "underline": bool(run.underline),
+                    }
+                )
+
             structured.append(
                 {
                     "index": idx,
                     "text": para.text,
                     "style": para.style.name if para.style else None,
+                    "runs": runs,
                 }
             )
+
         return structured
 
 
