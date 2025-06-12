@@ -27,7 +27,7 @@ MONO_STYLE = "font-family:Menlo, Courier New, monospace; white-space:pre-wrap"
 
 
 _TOKEN_RE = re.compile(
-    r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<size:[^>]+>|</size>|<ls:[^>]+/>|<image/>|<table>|</table>|<table/>)'
+    r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<size:[^>]+>|</size>|<ls:[^>]+/>|<align:[^>]+/>|<num/>|<color:[^>]+>|</color>|<image/>|<table>|</table>|<table/>)'
 )
 
 
@@ -50,7 +50,17 @@ def _tokens_to_html(text: str) -> str:
             elif part.startswith('<ls:'):
                 ls = part[4:-2]
                 html_parts.append(f'<span class="docx-ls">[ls:{escape(ls)}]</span>')
+            elif part.startswith('<align:'):
+                align = part[7:-2]
+                html_parts.append(f'<span class="docx-align">[align:{escape(align)}]</span>')
+            elif part == '<num/>':
+                html_parts.append('<span class="docx-num">[num]</span>')
             elif part == '</font>':
+                html_parts.append('</span>')
+            elif part.startswith('<color:'):
+                color = part[7:-1]
+                html_parts.append(f'<span style="color:{escape(color)}">')
+            elif part == '</color>':
                 html_parts.append('</span>')
             elif part == '<image/>':
                 html_parts.append('<span class="docx-image">[image]</span>')

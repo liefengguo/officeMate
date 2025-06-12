@@ -43,6 +43,11 @@ class ParagraphDiffStrategy(DiffStrategy):
             ls = p.get("line_spacing")
             if ls is not None:
                 parts.append(f"<ls:{ls}/>" )
+            align = p.get("alignment")
+            if align:
+                parts.append(f"<align:{align}/>")
+            if p.get("numbering"):
+                parts.append("<num/>")
             if not runs:
                 parts.append(p.get("text", ""))
                 texts.append("".join(parts))
@@ -72,6 +77,9 @@ class ParagraphDiffStrategy(DiffStrategy):
                 size = r.get("size")
                 if size is not None:
                     txt = f"<size:{size}>{txt}</size>"
+                color = r.get("color")
+                if color:
+                    txt = f"<color:{color}>{txt}</color>"
                 parts.append(txt)
 
             texts.append("".join(parts))

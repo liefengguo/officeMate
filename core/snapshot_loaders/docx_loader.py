@@ -74,6 +74,8 @@ class DocxLoader(SnapshotLoader):
                 para = Paragraph(element, doc)
                 runs = []
                 line_spacing = None
+                align_type = None
+                numbered = False
                 try:
                     ls_val = para.paragraph_format.line_spacing
                     if ls_val is not None:
@@ -81,6 +83,17 @@ class DocxLoader(SnapshotLoader):
                             line_spacing = float(ls_val.pt)
                         else:
                             line_spacing = float(ls_val)
+                except Exception:
+                    pass
+                try:
+                    align_enum = para.paragraph_format.alignment
+                    if align_enum is not None:
+                        align_type = str(align_enum).split('.')[-1]
+                except Exception:
+                    pass
+                try:
+                    if para._p.pPr is not None and para._p.pPr.numPr is not None:
+                        numbered = True
                 except Exception:
                     pass
 
@@ -97,9 +110,12 @@ class DocxLoader(SnapshotLoader):
                         continue
 
                     size_val = None
+                    color_val = None
                     try:
                         if run.font.size is not None:
                             size_val = float(run.font.size.pt)
+                        if run.font.color is not None and run.font.color.rgb is not None:
+                            color_val = str(run.font.color.rgb)
                     except Exception:
                         pass
 
@@ -112,6 +128,7 @@ class DocxLoader(SnapshotLoader):
                             "bold": bool(run.bold),
                             "italic": bool(run.italic),
                             "underline": bool(run.underline),
+                            "color": color_val,
                         }
                     )
 
@@ -122,6 +139,8 @@ class DocxLoader(SnapshotLoader):
                         "style": para.style.name if para.style else None,
                         "runs": runs,
                         "line_spacing": line_spacing,
+                        "alignment": align_type,
+                        "numbering": numbered,
                     }
                 )
                 idx += 1
