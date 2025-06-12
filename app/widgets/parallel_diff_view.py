@@ -13,13 +13,68 @@ parallel_diff_view.py
 
 from typing import List, Dict
 from html import escape
+import re
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
 
+
 from core.platform_utils import is_dark_mode
 _IS_DARK = is_dark_mode()
+
+MONO_STYLE = "font-family:Menlo, Courier New, monospace; white-space:pre-wrap"
+
+
+_TOKEN_RE = re.compile(
+    r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<size:[^>]+>|</size>|<ls:[^>]+/>|<align:[^>]+/>|<num/>|<color:[^>]+>|</color>|<image/>|<table>|</table>|<table/>)'
+)
+
+
+def _tokens_to_html(text: str) -> str:
+    """Convert style tokens produced by ParagraphDiffStrategy to HTML."""
+    parts = _TOKEN_RE.split(text)
+    html_parts: List[str] = []
+    for part in parts:
+        if not part:
+            continue
+        if _TOKEN_RE.fullmatch(part):
+            if part.startswith('<font:'):
+                font = part[6:-1]
+                html_parts.append(f'<span style="font-family:{escape(font)}">')
+            elif part.startswith('<size:'):
+                size = part[6:-1]
+                html_parts.append(f'<span style="font-size:{escape(size)}pt">')
+            elif part == '</size>':
+                html_parts.append('</span>')
+            elif part.startswith('<ls:'):
+                ls = part[4:-2]
+                html_parts.append(f'<span class="docx-ls">[ls:{escape(ls)}]</span>')
+            elif part.startswith('<align:'):
+                align = part[7:-2]
+                html_parts.append(f'<span class="docx-align">[align:{escape(align)}]</span>')
+            elif part == '<num/>':
+                html_parts.append('<span class="docx-num">[num]</span>')
+            elif part == '</font>':
+                html_parts.append('</span>')
+            elif part.startswith('<color:'):
+                color = part[7:-1]
+                html_parts.append(f'<span style="color:{escape(color)}">')
+            elif part == '</color>':
+                html_parts.append('</span>')
+            elif part == '<image/>':
+                html_parts.append('<span class="docx-image">[image]</span>')
+            elif part == '<table/>':
+                html_parts.append('<span class="docx-table">[table]</span>')
+            elif part == '<table>':
+                html_parts.append('<span class="docx-table">')
+            elif part == '</table>':
+                html_parts.append('</span>')
+            else:
+                html_parts.append(part)
+        else:
+            html_parts.append(escape(part).replace('\n', '<br>'))
+    return ''.join(html_parts)
 
 class ParallelDiffView(QSplitter):
     def __init__(self, left_title: str = "", right_title: str = "", parent=None):
@@ -34,7 +89,7 @@ class ParallelDiffView(QSplitter):
             tb.setReadOnly(True)
             tb.setOpenExternalLinks(False)
             tb.setFont(QFont("Menlo, Courier New, monospace", 10))
-            tb.setStyleSheet("border: none;")  # 外部面板有边框即可
+            tb.setStyleSheet(f"border: none; {MONO_STYLE};")  # 保留空格及换行
 
         # --- 组装左侧 ---
         left_container = QWidget()
@@ -97,7 +152,7 @@ class ParallelDiffView(QSplitter):
         html_parts = []
         for tag, a_chunk, b_chunk in inline_ops:
             if tag == "equal":
-                html_parts.append(escape(a_chunk))
+                html_parts.append(_tokens_to_html(a_chunk))
             elif tag == "delete":
                 if side == "a":
                     style = (
@@ -105,7 +160,7 @@ class ParallelDiffView(QSplitter):
                         if not _IS_DARK
                         else "background:#4d1a1a; color:#bf7a7a; text-decoration:line-through;"
                     )
-                    html_parts.append(f'<span style="{style}">{escape(a_chunk)}</span>')
+                    html_parts.append(f'<span style="{style}">{_tokens_to_html(a_chunk)}</span>')
             elif tag == "insert":
                 if side == "b":
                     style = (
@@ -113,7 +168,7 @@ class ParallelDiffView(QSplitter):
                         if not _IS_DARK
                         else "background:#0d3a18; color:#7abf7a;"
                     )
-                    html_parts.append(f'<span style="{style}">{escape(b_chunk)}</span>')
+                    html_parts.append(f'<span style="{style}">{_tokens_to_html(b_chunk)}</span>')
             elif tag == "replace":
                 # 不会出现 (SequenceMatcher 不会产出 replace op 内层)
                 pass
@@ -136,7 +191,7 @@ class ParallelDiffView(QSplitter):
             tag = ch["tag"]
 
             if tag == "equal":
-                text = escape(ch["a_text"] or "")
+                text = _tokens_to_html(ch["a_text"] or "")
                 left_lines.append(ln_html(old_idx) + "&nbsp;" + text)
                 right_lines.append(ln_html(new_idx) + "&nbsp;" + text)
                 old_idx += 1
@@ -148,7 +203,7 @@ class ParallelDiffView(QSplitter):
                     if not _IS_DARK
                     else "background:#4d1a1a; color:#bf7a7a; text-decoration:line-through;"
                 )
-                span = f'<span style="{style}">{escape(ch["a_text"])}</span>'
+                span = f'<span style="{style}">{_tokens_to_html(ch["a_text"])}</span>'
                 left_lines.append(ln_html(old_idx) + sym_html("-") + span)
                 right_lines.append(ln_html("") + "&nbsp;")
                 old_idx += 1
@@ -159,7 +214,7 @@ class ParallelDiffView(QSplitter):
                     if not _IS_DARK
                     else "background:#0d3a18; color:#7abf7a;"
                 )
-                span = f'<span style="{style}">{escape(ch["b_text"])}</span>'
+                span = f'<span style="{style}">{_tokens_to_html(ch["b_text"])}</span>'
                 left_lines.append(ln_html("") + "&nbsp;")
                 right_lines.append(ln_html(new_idx) + sym_html("+") + span)
                 new_idx += 1

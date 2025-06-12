@@ -1,7 +1,7 @@
 # app/history_page.py
 import os
-import docx
 from functools import partial
+from html import escape
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -13,6 +13,9 @@ from ui.components import PrimaryButton, FlatButton
 from core.snapshot_manager import SnapshotManager
 from app.widgets.snapshot_panels import SnapshotDisplayPanel           # 新增
 from app.diff_viewer_widget import DiffViewerWidget
+from core.snapshot_loaders.loader_registry import LoaderRegistry
+from core.diff_strategies.paragraph_strategy import ParagraphDiffStrategy
+from app.widgets.parallel_diff_view import _tokens_to_html, MONO_STYLE
 
 
 class HistoryPage(QWidget):
@@ -145,46 +148,50 @@ class HistoryPage(QWidget):
     def _build_preview_widget(self, path: str):
         """根据文件类型构建预览控件"""
         try:
-            if path.endswith(".txt"):
-                with open(path, "r", encoding="utf-8") as f:
-                    lines = f.readlines()
+            ext = os.path.splitext(path)[1]
+            loader = LoaderRegistry.get_loader(ext)
 
-                width = len(str(len(lines)))
-                numbered = [
-                    f'<span class="ln">{str(i).rjust(width)}</span>  {line.rstrip()}'
-                    for i, line in enumerate(lines, 1)
-                ]
-                html = "<pre style='margin:0'>" + "\n".join(numbered) + "</pre>"
+            from PyQt5.QtWidgets import QTextBrowser
 
-                from PyQt5.QtWidgets import QTextBrowser
-                browser = QTextBrowser()
-                browser.setProperty("class", "diff-pane")
-                browser.setOpenExternalLinks(False)
-                browser.setReadOnly(True)
-                browser.setHtml(html)
-                return browser
-
-            elif path.endswith(".docx"):
-                doc = docx.Document(path)
-                paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+            if loader and hasattr(loader, "load_structured"):
+                paragraphs = ParagraphDiffStrategy._paragraph_texts(loader, path)
                 width = len(str(len(paragraphs)))
                 numbered = [
-                    f'<span class="ln">{str(i).rjust(width)}</span>  {p}'
+                    f'<span class="ln">{str(i).rjust(width)}</span> ' +
+                    (_tokens_to_html(p) or "&nbsp;")
                     for i, p in enumerate(paragraphs, 1)
                 ]
-                html = "<pre style='margin:0'>" + "\n".join(numbered) + "</pre>"
+                html = f"<div style='{MONO_STYLE}'>" + "<br>".join(numbered) + "</div>"
 
-                from PyQt5.QtWidgets import QTextBrowser
                 browser = QTextBrowser()
                 browser.setProperty("class", "diff-pane")
                 browser.setOpenExternalLinks(False)
                 browser.setReadOnly(True)
                 browser.setHtml(html)
                 return browser
+
             else:
-                label = QLabel("(不支持的文件格式)")
-                label.setAlignment(Qt.AlignCenter)
-                return label
+                if loader:
+                    text = loader.get_text(path)
+                else:
+                    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                        text = f.read()
+
+                lines = text.splitlines()
+                width = len(str(len(lines)))
+                numbered = [
+                    f'<span class="ln">{str(i).rjust(width)}</span> {escape(line)}'
+                    for i, line in enumerate(lines, 1)
+                ]
+                html = f"<div style='{MONO_STYLE}'>" + "<br>".join(numbered) + "</div>"
+
+                browser = QTextBrowser()
+                browser.setProperty("class", "diff-pane")
+                browser.setOpenExternalLinks(False)
+                browser.setReadOnly(True)
+                browser.setHtml(html)
+                return browser
+
         except Exception as e:
             err = QLabel(f"无法读取快照内容：{e}")
             err.setAlignment(Qt.AlignCenter)
