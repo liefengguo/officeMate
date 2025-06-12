@@ -62,39 +62,57 @@ class DocxLoader(SnapshotLoader):
         doc = Document(file_path)
         structured: List[Dict[str, Any]] = []
 
-        for idx, para in enumerate(doc.paragraphs):
-            runs = []
-            for run in para.runs:
-                # detect drawing (images) within the run
-                has_img = False
-                try:
-                    if run._element.xpath('.//pic:pic') or run._element.xpath('.//w:drawing'):
-                        has_img = True
-                except Exception:
-                    pass
-                if has_img:
-                    runs.append({"type": "image"})
-                    continue
+        from docx.text.paragraph import Paragraph
+        from docx.oxml.text.paragraph import CT_P
+        from docx.oxml.table import CT_Tbl
 
-                runs.append(
+        idx = 0
+        for element in doc.element.body:
+            if isinstance(element, CT_P):
+                para = Paragraph(element, doc)
+                runs = []
+                for run in para.runs:
+                    # detect drawing (images) within the run
+                    has_img = False
+                    try:
+                        if run._element.xpath('.//pic:pic') or run._element.xpath('.//w:drawing'):
+                            has_img = True
+                    except Exception:
+                        pass
+                    if has_img:
+                        runs.append({"type": "image"})
+                        continue
+
+                    runs.append(
+                        {
+                            "type": "text",
+                            "text": run.text,
+                            "font": getattr(run.font, "name", None),
+                            "bold": bool(run.bold),
+                            "italic": bool(run.italic),
+                            "underline": bool(run.underline),
+                        }
+                    )
+
+                structured.append(
                     {
-                        "type": "text",
-                        "text": run.text,
-                        "font": getattr(run.font, "name", None),
-                        "bold": bool(run.bold),
-                        "italic": bool(run.italic),
-                        "underline": bool(run.underline),
+                        "index": idx,
+                        "text": para.text,
+                        "style": para.style.name if para.style else None,
+                        "runs": runs,
                     }
                 )
-
-            structured.append(
-                {
-                    "index": idx,
-                    "text": para.text,
-                    "style": para.style.name if para.style else None,
-                    "runs": runs,
-                }
-            )
+                idx += 1
+            elif isinstance(element, CT_Tbl):
+                structured.append(
+                    {
+                        "index": idx,
+                        "text": "[table]",
+                        "style": None,
+                        "runs": [{"type": "table"}],
+                    }
+                )
+                idx += 1
 
         return structured
 
