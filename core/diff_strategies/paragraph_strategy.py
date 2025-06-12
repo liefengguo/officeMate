@@ -50,7 +50,9 @@ class ParagraphDiffStrategy(DiffStrategy):
                     parts.append("<image/>")
                     continue
                 if r_type == "table":
-                    parts.append("<table/>")
+                    rows = r.get("rows", [])
+                    table_text = "\n".join(" | ".join(row) for row in rows)
+                    parts.append(f"<table>{table_text}</table>")
                     continue
 
                 txt = r.get("text", "")

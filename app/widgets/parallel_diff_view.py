@@ -23,7 +23,7 @@ from core.platform_utils import is_dark_mode
 _IS_DARK = is_dark_mode()
 
 
-_TOKEN_RE = re.compile(r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<image/>|<table/>)')
+_TOKEN_RE = re.compile(r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<image/>|<table>|</table>|<table/>)')
 
 
 def _tokens_to_html(text: str) -> str:
@@ -43,10 +43,14 @@ def _tokens_to_html(text: str) -> str:
                 html_parts.append('<span class="docx-image">[image]</span>')
             elif part == '<table/>':
                 html_parts.append('<span class="docx-table">[table]</span>')
+            elif part == '<table>':
+                html_parts.append('<span class="docx-table">')
+            elif part == '</table>':
+                html_parts.append('</span>')
             else:
                 html_parts.append(part)
         else:
-            html_parts.append(escape(part))
+            html_parts.append(escape(part).replace('\n', '<br>'))
     return ''.join(html_parts)
 
 class ParallelDiffView(QSplitter):

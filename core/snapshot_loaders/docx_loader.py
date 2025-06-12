@@ -63,6 +63,7 @@ class DocxLoader(SnapshotLoader):
         structured: List[Dict[str, Any]] = []
 
         from docx.text.paragraph import Paragraph
+        from docx.table import Table
         from docx.oxml.text.paragraph import CT_P
         from docx.oxml.table import CT_Tbl
 
@@ -104,12 +105,24 @@ class DocxLoader(SnapshotLoader):
                 )
                 idx += 1
             elif isinstance(element, CT_Tbl):
+                tbl = Table(element, doc)
+                rows_data = []
+                for row in tbl.rows:
+                    cell_texts = []
+                    for cell in row.cells:
+                        # join all paragraph texts within the cell
+                        text = " ".join(p.text for p in cell.paragraphs).strip()
+                        cell_texts.append(text)
+                    rows_data.append(cell_texts)
+
+                text_lines = [" | ".join(r) for r in rows_data]
+
                 structured.append(
                     {
                         "index": idx,
-                        "text": "[table]",
+                        "text": "\n".join(text_lines),
                         "style": None,
-                        "runs": [{"type": "table"}],
+                        "runs": [{"type": "table", "rows": rows_data}],
                     }
                 )
                 idx += 1
