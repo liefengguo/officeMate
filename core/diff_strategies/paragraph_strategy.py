@@ -8,6 +8,7 @@ ParagraphDiffStrategy 2.0
 
 from pathlib import Path
 from typing import List, Dict
+from PyQt5.QtCore import QSettings
 import difflib
 
 from .base_strategy import DiffStrategy, DiffResult
@@ -33,6 +34,12 @@ class ParagraphDiffStrategy(DiffStrategy):
         if isinstance(struct[0], str):
             return struct
 
+        settings = QSettings()
+        detect_color = settings.value("diff/detect_color", True, type=bool)
+        detect_size = settings.value("diff/detect_size", True, type=bool)
+        detect_ls = settings.value("diff/detect_line_spacing", True, type=bool)
+        detect_media = settings.value("diff/detect_images", True, type=bool)
+
         texts: List[str] = []
         for p in struct:
             if not isinstance(p, dict):
@@ -41,7 +48,7 @@ class ParagraphDiffStrategy(DiffStrategy):
             runs = p.get("runs")
             parts = []
             ls = p.get("line_spacing")
-            if ls is not None:
+            if ls is not None and detect_ls:
                 parts.append(f"<ls:{ls}/>" )
             align = p.get("alignment")
             if align:
@@ -56,12 +63,16 @@ class ParagraphDiffStrategy(DiffStrategy):
             for r in runs:
                 r_type = r.get("type", "text")
                 if r_type == "image":
-                    parts.append("<image/>")
+                    if detect_media:
+                        parts.append("<image/>")
                     continue
                 if r_type == "table":
                     rows = r.get("rows", [])
                     table_text = "\n".join(" | ".join(row) for row in rows)
-                    parts.append(f"<table>{table_text}</table>")
+                    if detect_media:
+                        parts.append(f"<table>{table_text}</table>")
+                    else:
+                        parts.append(table_text)
                     continue
 
                 txt = r.get("text", "")
@@ -75,10 +86,10 @@ class ParagraphDiffStrategy(DiffStrategy):
                 if font:
                     txt = f"<font:{font}>{txt}</font>"
                 size = r.get("size")
-                if size is not None:
+                if size is not None and detect_size:
                     txt = f"<size:{size}>{txt}</size>"
                 color = r.get("color")
-                if color:
+                if color and detect_color:
                     txt = f"<color:{color}>{txt}</color>"
                 parts.append(txt)
 

@@ -52,6 +52,27 @@ class SettingsPage(QWidget):
         chk_exp.toggled.connect(lambda v: self.settings.setValue("options/experimental", v))
         layout.addWidget(chk_exp)
 
+        # -------------------- Diff detection options --------------------
+        chk_color = QCheckBox("检测字体颜色差异")
+        chk_color.setChecked(self.settings.value("diff/detect_color", True, type=bool))
+        chk_color.toggled.connect(lambda v: self.settings.setValue("diff/detect_color", v))
+        layout.addWidget(chk_color)
+
+        chk_size = QCheckBox("检测字体大小差异")
+        chk_size.setChecked(self.settings.value("diff/detect_size", True, type=bool))
+        chk_size.toggled.connect(lambda v: self.settings.setValue("diff/detect_size", v))
+        layout.addWidget(chk_size)
+
+        chk_ls = QCheckBox("检测行间距差异")
+        chk_ls.setChecked(self.settings.value("diff/detect_line_spacing", True, type=bool))
+        chk_ls.toggled.connect(lambda v: self.settings.setValue("diff/detect_line_spacing", v))
+        layout.addWidget(chk_ls)
+
+        chk_media = QCheckBox("检测图片/表格变动")
+        chk_media.setChecked(self.settings.value("diff/detect_images", True, type=bool))
+        chk_media.toggled.connect(lambda v: self.settings.setValue("diff/detect_images", v))
+        layout.addWidget(chk_media)
+
         layout.addStretch(1)
 
         self.setLayout(layout)
