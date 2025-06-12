@@ -20,16 +20,17 @@ class MainDashboard(QWidget):
 
         self.db = RecentDocDB()
         title_label = QLabel("📂 已添加文档列表")
-        title_label.setStyleSheet("font-size: 18px; font-weight: bold; margin-top: 10px;")
+        title_label.setProperty("class", "h2")
         
         self.layout = QVBoxLayout()
         self.doc_list = QListWidget()
+        self.doc_list.setProperty("class", "snapshot-list")
+        self.doc_list.setFrameShape(QListWidget.NoFrame)
         self.doc_list.setMouseTracking(True)
         self.doc_list.setItemDelegate(ProjectItemDelegate())
         
         self.add_button = PrimaryButton("➕ 添加项目")
         # print(self.add_button.property("type"))
-        # print("lalala----: ",self.add_button.styleSheet())
 
         self.doc_list.setSpacing(4)
 

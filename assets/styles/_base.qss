@@ -78,3 +78,7 @@ QTextBrowser[class="diff-pane"]:focus {
 QSplitter::handle {
     /* background-color set in theme */
 }
+/* ► 快照列表项标题加粗 */
+QListWidget[class="snapshot-list"]::item {
+    font-weight: bold;
+}

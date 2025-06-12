@@ -67,3 +67,4 @@ QPushButton[type="primary"]:pressed{ background-color: #0067D9; }
 
 /* 7️⃣ 折叠块 ---------------------------------------------------- */
 .skip { color: #999999; }
+

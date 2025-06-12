@@ -27,6 +27,8 @@ QTextBrowser[class="diff-pane"] {
 QListWidget::item:selected:active  { background: #0A84FF; color: #FFFFFF; }  /* 系统强调蓝 */
 QListWidget::item:selected:!active { background: #3A3A3A; color: #FFFFFF; }  /* 非激活灰 */
 
+
+
 /* 4️⃣ Splitter 手柄 ------------------------------------------------ */
 QSplitter::handle            { background: #2C2C2C; }
 QSplitter::handle:hover       { background: #454545; }
