@@ -35,10 +35,17 @@ class ParagraphDiffStrategy(DiffStrategy):
             return struct
 
         settings = QSettings()
+        detect_bold = settings.value("diff/detect_bold", True, type=bool)
+        detect_italic = settings.value("diff/detect_italic", True, type=bool)
+        detect_underline = settings.value("diff/detect_underline", True, type=bool)
+        detect_font = settings.value("diff/detect_font", True, type=bool)
         detect_color = settings.value("diff/detect_color", True, type=bool)
         detect_size = settings.value("diff/detect_size", True, type=bool)
         detect_ls = settings.value("diff/detect_line_spacing", True, type=bool)
-        detect_media = settings.value("diff/detect_images", True, type=bool)
+        detect_align = settings.value("diff/detect_alignment", True, type=bool)
+        detect_num = settings.value("diff/detect_numbering", True, type=bool)
+        detect_img = settings.value("diff/detect_images", True, type=bool)
+        detect_table = settings.value("diff/detect_tables", True, type=bool)
 
         texts: List[str] = []
         for p in struct:
@@ -49,11 +56,11 @@ class ParagraphDiffStrategy(DiffStrategy):
             parts = []
             ls = p.get("line_spacing")
             if ls is not None and detect_ls:
-                parts.append(f"<ls:{ls}/>" )
+                parts.append(f"<ls:{ls}/>")
             align = p.get("alignment")
-            if align:
+            if align and detect_align:
                 parts.append(f"<align:{align}/>")
-            if p.get("numbering"):
+            if p.get("numbering") and detect_num:
                 parts.append("<num/>")
             if not runs:
                 parts.append(p.get("text", ""))
@@ -63,27 +70,27 @@ class ParagraphDiffStrategy(DiffStrategy):
             for r in runs:
                 r_type = r.get("type", "text")
                 if r_type == "image":
-                    if detect_media:
+                    if detect_img:
                         parts.append("<image/>")
                     continue
                 if r_type == "table":
                     rows = r.get("rows", [])
                     table_text = "\n".join(" | ".join(row) for row in rows)
-                    if detect_media:
+                    if detect_table:
                         parts.append(f"<table>{table_text}</table>")
                     else:
                         parts.append(table_text)
                     continue
 
                 txt = r.get("text", "")
-                if r.get("bold"):
+                if r.get("bold") and detect_bold:
                     txt = f"<b>{txt}</b>"
-                if r.get("italic"):
+                if r.get("italic") and detect_italic:
                     txt = f"<i>{txt}</i>"
-                if r.get("underline"):
+                if r.get("underline") and detect_underline:
                     txt = f"<u>{txt}</u>"
                 font = r.get("font")
-                if font:
+                if font and detect_font:
                     txt = f"<font:{font}>{txt}</font>"
                 size = r.get("size")
                 if size is not None and detect_size:

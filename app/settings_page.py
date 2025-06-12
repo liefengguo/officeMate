@@ -53,6 +53,26 @@ class SettingsPage(QWidget):
         layout.addWidget(chk_exp)
 
         # -------------------- Diff detection options --------------------
+        chk_bold = QCheckBox("检测粗体变化")
+        chk_bold.setChecked(self.settings.value("diff/detect_bold", True, type=bool))
+        chk_bold.toggled.connect(lambda v: self.settings.setValue("diff/detect_bold", v))
+        layout.addWidget(chk_bold)
+
+        chk_italic = QCheckBox("检测斜体变化")
+        chk_italic.setChecked(self.settings.value("diff/detect_italic", True, type=bool))
+        chk_italic.toggled.connect(lambda v: self.settings.setValue("diff/detect_italic", v))
+        layout.addWidget(chk_italic)
+
+        chk_underline = QCheckBox("检测下划线变化")
+        chk_underline.setChecked(self.settings.value("diff/detect_underline", True, type=bool))
+        chk_underline.toggled.connect(lambda v: self.settings.setValue("diff/detect_underline", v))
+        layout.addWidget(chk_underline)
+
+        chk_font = QCheckBox("检测字体名称差异")
+        chk_font.setChecked(self.settings.value("diff/detect_font", True, type=bool))
+        chk_font.toggled.connect(lambda v: self.settings.setValue("diff/detect_font", v))
+        layout.addWidget(chk_font)
+
         chk_color = QCheckBox("检测字体颜色差异")
         chk_color.setChecked(self.settings.value("diff/detect_color", True, type=bool))
         chk_color.toggled.connect(lambda v: self.settings.setValue("diff/detect_color", v))
@@ -68,10 +88,25 @@ class SettingsPage(QWidget):
         chk_ls.toggled.connect(lambda v: self.settings.setValue("diff/detect_line_spacing", v))
         layout.addWidget(chk_ls)
 
-        chk_media = QCheckBox("检测图片/表格变动")
-        chk_media.setChecked(self.settings.value("diff/detect_images", True, type=bool))
-        chk_media.toggled.connect(lambda v: self.settings.setValue("diff/detect_images", v))
-        layout.addWidget(chk_media)
+        chk_align = QCheckBox("检测段落对齐方式")
+        chk_align.setChecked(self.settings.value("diff/detect_alignment", True, type=bool))
+        chk_align.toggled.connect(lambda v: self.settings.setValue("diff/detect_alignment", v))
+        layout.addWidget(chk_align)
+
+        chk_num = QCheckBox("检测段落编号变化")
+        chk_num.setChecked(self.settings.value("diff/detect_numbering", True, type=bool))
+        chk_num.toggled.connect(lambda v: self.settings.setValue("diff/detect_numbering", v))
+        layout.addWidget(chk_num)
+
+        chk_img = QCheckBox("检测图片变动")
+        chk_img.setChecked(self.settings.value("diff/detect_images", True, type=bool))
+        chk_img.toggled.connect(lambda v: self.settings.setValue("diff/detect_images", v))
+        layout.addWidget(chk_img)
+
+        chk_table = QCheckBox("检测表格变动")
+        chk_table.setChecked(self.settings.value("diff/detect_tables", True, type=bool))
+        chk_table.toggled.connect(lambda v: self.settings.setValue("diff/detect_tables", v))
+        layout.addWidget(chk_table)
 
         layout.addStretch(1)
 
