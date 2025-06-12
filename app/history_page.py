@@ -70,10 +70,9 @@ class HistoryPage(QWidget):
 
         # 初始加载
         self.load_snapshots()
-        if self.list_widget.count() == 0:
-            self.display_panel.set_widget(QLabel("👉 选择快照查看内容或恢复"))
-        else:
-            self.display_panel.set_widget(QLabel("👉 选择快照查看内容或恢复"))
+        hint = QLabel("👉 选择快照查看内容或恢复")
+        hint.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(hint)
 
     # ---------------------------------------------------------------- list
     def load_snapshots(self):
@@ -135,7 +134,9 @@ class HistoryPage(QWidget):
         self.sm.delete_snapshot(self.doc_name, meta)
 
         # 解除预览 & 从列表移除
-        self.display_panel.set_widget(QLabel("✂️ 已删除快照"))
+        del_lbl = QLabel("✂️ 已删除快照")
+        del_lbl.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(del_lbl)
         # self.list_widget.takeItem(row)               # 直接按行删除，避免引用 item
 
         # 如需刷新按钮状态
