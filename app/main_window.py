@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (
     QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
 )
+from PyQt5.QtCore import QSettings
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
 from app.main_dashboard import MainDashboard
@@ -15,6 +16,18 @@ class MainWindow(QMainWindow):
         self.manager = snapshot_manager
         self.setWindowTitle("DocSnap 文档助手")
         self.setMinimumSize(300, 200)
+
+        # Restore previous window size if available
+        self._settings = QSettings()
+        width = self._settings.value("ui/window_width")
+        height = self._settings.value("ui/window_height")
+        try:
+            width = int(width)
+            height = int(height)
+        except (TypeError, ValueError):
+            width = height = None
+        if width and height:
+            self.resize(width, height)
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -76,3 +89,9 @@ class MainWindow(QMainWindow):
             save_theme_pref(pref)
             apply_theme(pref=pref)
         group.triggered.connect(_on_triggered)
+
+    def closeEvent(self, event):
+        """Persist window size on close."""
+        self._settings.setValue("ui/window_width", self.width())
+        self._settings.setValue("ui/window_height", self.height())
+        super().closeEvent(event)
