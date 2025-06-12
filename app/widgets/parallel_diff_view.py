@@ -19,8 +19,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
 
+
 from core.platform_utils import is_dark_mode
 _IS_DARK = is_dark_mode()
+
+MONO_STYLE = "font-family:Menlo, Courier New, monospace; white-space:pre-wrap"
 
 
 _TOKEN_RE = re.compile(r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<image/>|<table>|</table>|<table/>)')
@@ -66,7 +69,7 @@ class ParallelDiffView(QSplitter):
             tb.setReadOnly(True)
             tb.setOpenExternalLinks(False)
             tb.setFont(QFont("Menlo, Courier New, monospace", 10))
-            tb.setStyleSheet("border: none;")  # 外部面板有边框即可
+            tb.setStyleSheet(f"border: none; {MONO_STYLE};")  # 保留空格及换行
 
         # --- 组装左侧 ---
         left_container = QWidget()
