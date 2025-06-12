@@ -23,7 +23,7 @@ class ParagraphDiffStrategy(DiffStrategy):
     # ------------------------------------------------ helper
     @staticmethod
     def _paragraph_texts(loader, path: str) -> List[str]:
-        """调用 loader.load_structured → 返回纯文本段落列表"""
+        """调用 loader.load_structured → 返回带样式 token 的段落文本列表"""
         try:
             struct = loader.load_structured(path)
         except Exception:
@@ -32,7 +32,41 @@ class ParagraphDiffStrategy(DiffStrategy):
             return []
         if isinstance(struct[0], str):
             return struct
-        return [p.get("text", "") for p in struct]
+
+        texts: List[str] = []
+        for p in struct:
+            if not isinstance(p, dict):
+                texts.append(str(p))
+                continue
+            runs = p.get("runs")
+            if not runs:
+                texts.append(p.get("text", ""))
+                continue
+
+            parts = []
+            for r in runs:
+                r_type = r.get("type", "text")
+                if r_type == "image":
+                    parts.append("<image/>")
+                    continue
+                if r_type == "table":
+                    parts.append("<table/>")
+                    continue
+
+                txt = r.get("text", "")
+                if r.get("bold"):
+                    txt = f"<b>{txt}</b>"
+                if r.get("italic"):
+                    txt = f"<i>{txt}</i>"
+                if r.get("underline"):
+                    txt = f"<u>{txt}</u>"
+                font = r.get("font")
+                if font:
+                    txt = f"<font:{font}>{txt}</font>"
+                parts.append(txt)
+
+            texts.append("".join(parts))
+        return texts
 
     @staticmethod
     def _inline_ops(a: str, b: str):
