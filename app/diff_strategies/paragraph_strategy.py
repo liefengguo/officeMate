@@ -34,11 +34,15 @@ class ParagraphDiffStrategy(DiffStrategy):
                 texts.append(str(p))
                 continue
             runs = p.get("runs")
+            parts = []
+            ls = p.get("line_spacing")
+            if ls is not None:
+                parts.append(f"<ls:{ls}/>" )
             if not runs:
-                texts.append(p.get("text", ""))
+                parts.append(p.get("text", ""))
+                texts.append("".join(parts))
                 continue
 
-            parts = []
             for r in runs:
                 r_type = r.get("type", "text")
                 if r_type == "image":
@@ -60,6 +64,9 @@ class ParagraphDiffStrategy(DiffStrategy):
                 font = r.get("font")
                 if font:
                     txt = f"<font:{font}>{txt}</font>"
+                size = r.get("size")
+                if size is not None:
+                    txt = f"<size:{size}>{txt}</size>"
                 parts.append(txt)
 
             texts.append("".join(parts))

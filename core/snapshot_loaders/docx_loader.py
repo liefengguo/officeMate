@@ -54,6 +54,7 @@ class DocxLoader(SnapshotLoader):
                 "type": "text",         # or "image" placeholder
                 "text": "Hello",
                 "font": "Arial",
+                "size": 12.0,
                 "bold": True,
                 "italic": False,
                 "underline": False,
@@ -72,6 +73,17 @@ class DocxLoader(SnapshotLoader):
             if isinstance(element, CT_P):
                 para = Paragraph(element, doc)
                 runs = []
+                line_spacing = None
+                try:
+                    ls_val = para.paragraph_format.line_spacing
+                    if ls_val is not None:
+                        if hasattr(ls_val, 'pt'):
+                            line_spacing = float(ls_val.pt)
+                        else:
+                            line_spacing = float(ls_val)
+                except Exception:
+                    pass
+
                 for run in para.runs:
                     # detect drawing (images) within the run
                     has_img = False
@@ -84,11 +96,19 @@ class DocxLoader(SnapshotLoader):
                         runs.append({"type": "image"})
                         continue
 
+                    size_val = None
+                    try:
+                        if run.font.size is not None:
+                            size_val = float(run.font.size.pt)
+                    except Exception:
+                        pass
+
                     runs.append(
                         {
                             "type": "text",
                             "text": run.text,
                             "font": getattr(run.font, "name", None),
+                            "size": size_val,
                             "bold": bool(run.bold),
                             "italic": bool(run.italic),
                             "underline": bool(run.underline),
@@ -101,6 +121,7 @@ class DocxLoader(SnapshotLoader):
                         "text": para.text,
                         "style": para.style.name if para.style else None,
                         "runs": runs,
+                        "line_spacing": line_spacing,
                     }
                 )
                 idx += 1

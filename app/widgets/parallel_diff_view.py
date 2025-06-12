@@ -26,7 +26,9 @@ _IS_DARK = is_dark_mode()
 MONO_STYLE = "font-family:Menlo, Courier New, monospace; white-space:pre-wrap"
 
 
-_TOKEN_RE = re.compile(r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<image/>|<table>|</table>|<table/>)')
+_TOKEN_RE = re.compile(
+    r'(</?b>|</?i>|</?u>|<font:[^>]+>|</font>|<size:[^>]+>|</size>|<ls:[^>]+/>|<image/>|<table>|</table>|<table/>)'
+)
 
 
 def _tokens_to_html(text: str) -> str:
@@ -40,6 +42,14 @@ def _tokens_to_html(text: str) -> str:
             if part.startswith('<font:'):
                 font = part[6:-1]
                 html_parts.append(f'<span style="font-family:{escape(font)}">')
+            elif part.startswith('<size:'):
+                size = part[6:-1]
+                html_parts.append(f'<span style="font-size:{escape(size)}pt">')
+            elif part == '</size>':
+                html_parts.append('</span>')
+            elif part.startswith('<ls:'):
+                ls = part[4:-2]
+                html_parts.append(f'<span class="docx-ls">[ls:{escape(ls)}]</span>')
             elif part == '</font>':
                 html_parts.append('</span>')
             elif part == '<image/>':
