@@ -136,7 +136,7 @@ class HistoryPage(QWidget):
 
         # 解除预览 & 从列表移除
         self.display_panel.set_widget(QLabel("✂️ 已删除快照"))
-        self.list_widget.takeItem(row)               # 直接按行删除，避免引用 item
+        # self.list_widget.takeItem(row)               # 直接按行删除，避免引用 item
 
         # 如需刷新按钮状态
         self._toggle_undo_button()
@@ -146,19 +146,39 @@ class HistoryPage(QWidget):
         try:
             if path.endswith(".txt"):
                 with open(path, "r", encoding="utf-8") as f:
-                    txt = f.read()
-                vw = DiffViewerWidget()
-                vw.set_diff_content(txt)
-                return vw
-            elif path.endswith(".docx"):
-                doc = docx.Document(path)
-                paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+                    lines = f.readlines()
+
+                width = len(str(len(lines)))
+                numbered = [
+                    f'<span class="ln">{str(i).rjust(width)}</span>  {line.rstrip()}'
+                    for i, line in enumerate(lines, 1)
+                ]
+                html = "<pre style='margin:0'>" + "\n".join(numbered) + "</pre>"
+
                 from PyQt5.QtWidgets import QTextBrowser
                 browser = QTextBrowser()
                 browser.setProperty("class", "diff-pane")
                 browser.setOpenExternalLinks(False)
                 browser.setReadOnly(True)
-                browser.setText("\n".join(paragraphs) or "(空文档)")
+                browser.setHtml(html)
+                return browser
+
+            elif path.endswith(".docx"):
+                doc = docx.Document(path)
+                paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+                width = len(str(len(paragraphs)))
+                numbered = [
+                    f'<span class="ln">{str(i).rjust(width)}</span>  {p}'
+                    for i, p in enumerate(paragraphs, 1)
+                ]
+                html = "<pre style='margin:0'>" + "\n".join(numbered) + "</pre>"
+
+                from PyQt5.QtWidgets import QTextBrowser
+                browser = QTextBrowser()
+                browser.setProperty("class", "diff-pane")
+                browser.setOpenExternalLinks(False)
+                browser.setReadOnly(True)
+                browser.setHtml(html)
                 return browser
             else:
                 label = QLabel("(不支持的文件格式)")
@@ -187,7 +207,7 @@ class HistoryPage(QWidget):
         remark = meta.get("remark") or os.path.basename(meta.get("snapshot_path", ""))
         ts     = meta.get("timestamp", "")
         header_lbl = QLabel(f"{remark}  –  {ts}")
-        header_lbl.setStyleSheet("font-weight: bold; padding: 2px 0;")
+        header_lbl.setProperty("class", "h3")
 
         vbox.addWidget(header_lbl, 0)
         vbox.addWidget(content_widget, 1)

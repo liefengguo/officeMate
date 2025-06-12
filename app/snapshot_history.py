@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QAbstractItemView
+    QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QAbstractItemView, QListWidgetItem
 )
+from PyQt5.QtCore import Qt
 from ui.components import FlatButton, PrimaryButton
 from core.snapshot_manager import SnapshotManager
 from app.diff_viewer import DiffViewer
@@ -51,16 +52,22 @@ class SnapshotHistoryWindow(QWidget):
     def load_snapshots(self):
         """刷新快照列表"""
         self.list_widget.clear()
+
         versions = self.manager.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
             self.list_widget.setDisabled(True)
             return
+
         self.list_widget.setDisabled(False)
         for v in versions:
             time_str = v.get("timestamp", "未知时间")
-            path_str = v.get("snapshot_path", "未知路径")
-            self.list_widget.addItem(f"{time_str}  |  {path_str}")
+            remark   = v.get("remark", "")
+            display  = f"{time_str}  {remark}".strip()
+            item = QListWidgetItem(display)
+            # 将快照实际路径存入 UserRole，避免再 split text。
+            item.setData(Qt.UserRole, v.get("snapshot_path", ""))
+            self.list_widget.addItem(item)
 
     def preview_snapshots(self):
         items = self.list_widget.selectedItems()
@@ -69,26 +76,19 @@ class SnapshotHistoryWindow(QWidget):
             return
 
         for item in items:
-            parts = item.text().split("  |  ")
-            if len(parts) == 2:
-                file_path = parts[1].strip()
+            file_path = item.data(Qt.UserRole)
+            if file_path:
                 preview = PreviewWindow(file_path)
                 self.preview_windows.append(preview)  # Prevent GC
                 preview.show()
 
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
-        if len(items) != 2:
+        paths = [it.data(Qt.UserRole) for it in items if it.data(Qt.UserRole)]
+        if len(paths) != 2:
             QMessageBox.warning(self, "选择错误", "请选择两个快照进行对比")
             return
 
-        paths = []
-        for item in items:
-            parts = item.text().split("  |  ")
-            if len(parts) == 2:
-                paths.append(parts[1].strip())
-
-        if len(paths) == 2:
-            diff = self.manager.compare_snapshots(paths[0], paths[1])
-            viewer = DiffViewer(diff_text=diff)
-            viewer.show()
+        diff = self.manager.compare_snapshots(paths[0], paths[1])
+        viewer = DiffViewer(diff_text=diff)
+        viewer.show()
