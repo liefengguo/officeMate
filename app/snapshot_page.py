@@ -1,6 +1,7 @@
 # app/snapshot_page.py
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
 from PyQt5.QtCore import Qt
+import sip
 from core.i18n import _, i18n
 
 import os
@@ -53,6 +54,7 @@ class SnapshotPage(QWidget):
             lbl = QLabel(_("✅ 快照已创建！"))
             lbl.setAlignment(Qt.AlignCenter)
             self.display_panel.set_widget(lbl)
+            self.hint_lbl = lbl
         except Exception as e:
             QMessageBox.critical(self, _("错误"), _("创建快照失败：{e}").format(e=e))
 
@@ -65,6 +67,7 @@ class SnapshotPage(QWidget):
                 warn_lbl = QLabel(_("⚠️ 没有可用快照进行对比"))
                 warn_lbl.setAlignment(Qt.AlignCenter)
                 self.display_panel.set_widget(warn_lbl)
+                self.hint_lbl = warn_lbl
                 return
 
             latest_version = max(versions, key=lambda v: v.get("timestamp", ""))
@@ -86,13 +89,16 @@ class SnapshotPage(QWidget):
                 viewer.set_diff_content(diff_result.raw or _("当前文档与最新快照没有任何差异。"))
 
             self.display_panel.set_widget(viewer)
+            self.hint_lbl = None
 
         except Exception as e:
             err_view = DiffViewerWidget(self)
             err_view.set_diff_content(_("对比失败：{e}").format(e=e))
             self.display_panel.set_widget(err_view)
+            self.hint_lbl = None
 
     # ------------------------------------------------------- i18n
     def retranslate_ui(self):
-        self.hint_lbl.setText(_("👉 在左侧填写备注并点击“创建快照”"))
+        if self.hint_lbl is not None and not sip.isdeleted(self.hint_lbl):
+            self.hint_lbl.setText(_("👉 在左侧填写备注并点击“创建快照”"))
         self.middle_panel.retranslate_ui()

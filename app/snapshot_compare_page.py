@@ -3,6 +3,7 @@ import os
 from functools import partial
 from PyQt5.QtCore import Qt, QSettings
 from core.i18n import _, i18n
+import sip
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QListWidgetItem, QMessageBox
@@ -83,6 +84,7 @@ class SnapshotComparePage(QWidget):
             empty_lbl = QLabel(_("📭 没有快照可用"))
             empty_lbl.setAlignment(Qt.AlignCenter)
             self.display_panel.set_widget(empty_lbl)
+            self.hint_lbl = empty_lbl
             return
 
         for v in sorted(versions, key=lambda x: x.get("timestamp", ""), reverse=True):
@@ -98,6 +100,7 @@ class SnapshotComparePage(QWidget):
         reset_lbl = QLabel(_("👉 请选择两个快照后点击“对比”"))
         reset_lbl.setAlignment(Qt.AlignCenter)
         self.display_panel.set_widget(reset_lbl)
+        self.hint_lbl = reset_lbl
 
     # ---------------------------------------------------------------- compare
     def compare_snapshots(self):
@@ -147,11 +150,13 @@ class SnapshotComparePage(QWidget):
                 viewer.set_diff_content(diff_result.raw or _("两个快照无差异。"))
 
             self.display_panel.set_widget(viewer)
+            self.hint_lbl = None
 
         except Exception as e:
             err = DiffViewerWidget(self)
             err.set_diff_content(_("对比失败：{e}").format(e=e))
             self.display_panel.set_widget(err)
+            self.hint_lbl = None
 
     # ---------------------------------------------------------------- utils
     def check_selection_limit(self):
@@ -177,5 +182,6 @@ class SnapshotComparePage(QWidget):
     def retranslate_ui(self):
         self.label.setText(_("🔍 {name} 快照对比").format(name=self.doc_name))
         self.compare_button.setText(_("对比选中的两个快照"))
-        self.hint_lbl.setText(_("👉 请选择两个快照后点击“对比”"))
+        if self.hint_lbl is not None and not sip.isdeleted(self.hint_lbl):
+            self.hint_lbl.setText(_("👉 请选择两个快照后点击“对比”"))
         self.load_snapshots()
