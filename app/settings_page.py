@@ -52,6 +52,11 @@ class SettingsPage(QWidget):
         chk_exp.toggled.connect(lambda v: self.settings.setValue("options/experimental", v))
         layout.addWidget(chk_exp)
 
+        chk_auto_compare = QCheckBox("快照便捷对比")
+        chk_auto_compare.setChecked(self.settings.value("options/auto_snapshot_compare", False, type=bool))
+        chk_auto_compare.toggled.connect(lambda v: self.settings.setValue("options/auto_snapshot_compare", v))
+        layout.addWidget(chk_auto_compare)
+
         # -------------------- Diff detection options --------------------
         chk_bold = QCheckBox("检测粗体变化")
         chk_bold.setChecked(self.settings.value("diff/detect_bold", True, type=bool))

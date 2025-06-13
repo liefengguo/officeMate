@@ -1,7 +1,7 @@
 # app/snapshot_compare_page.py
 import os
 from functools import partial
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSettings
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QListWidgetItem, QMessageBox
@@ -63,7 +63,10 @@ class SnapshotComparePage(QWidget):
         self.manager.snapshot_created.connect(self.load_snapshots)
         self.manager.snapshot_deleted.connect(self.load_snapshots)
         self.compare_button.clicked.connect(self.compare_snapshots)
-        self.list_widget.itemSelectionChanged.connect(self.check_selection_limit)
+        self.list_widget.itemSelectionChanged.connect(self.on_selection_changed)
+
+        # 初始化按钮可见性
+        self.update_button_visibility()
 
         self.load_snapshots()
 
@@ -154,3 +157,15 @@ class SnapshotComparePage(QWidget):
         while len(items) > 2:
             items[0].setSelected(False)
             items = self.list_widget.selectedItems()
+
+    def update_button_visibility(self) -> bool:
+        """根据设置显示或隐藏对比按钮，返回开关状态"""
+        auto = QSettings().value("options/auto_snapshot_compare", False, type=bool)
+        self.compare_button.setVisible(not auto)
+        return auto
+
+    def on_selection_changed(self):
+        auto = self.update_button_visibility()
+        self.check_selection_limit()
+        if auto and len(self.list_widget.selectedItems()) == 2:
+            self.compare_snapshots()
