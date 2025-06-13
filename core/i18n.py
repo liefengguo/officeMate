@@ -63,7 +63,27 @@ _TRANSLATIONS = {
     "跟随系统": {"en": "System"},
     "浅色": {"en": "Light"},
     "深色": {"en": "Dark"},
-    "对比选中的两个快照": {"en": "Compare Selected Snapshots"}
+    "对比选中的两个快照": {"en": "Compare Selected Snapshots"},
+    "⚙ 软件设置": {"en": "⚙ Settings"},
+    "启动时自动检查更新": {"en": "Check for updates on startup"},
+    "启用实验功能": {"en": "Enable experimental features"},
+    "界面语言：": {"en": "Language:"},
+    "常规": {"en": "General"},
+    "外观": {"en": "Appearance"},
+    "快照便捷对比": {"en": "Quick snapshot compare"},
+    "快照": {"en": "Snapshots"},
+    "差异检测": {"en": "Diff Options"},
+    "检测粗体变化": {"en": "Detect bold changes"},
+    "检测斜体变化": {"en": "Detect italic changes"},
+    "检测下划线变化": {"en": "Detect underline changes"},
+    "检测字体名称差异": {"en": "Detect font name changes"},
+    "检测字体颜色差异": {"en": "Detect font color changes"},
+    "检测字体大小差异": {"en": "Detect font size changes"},
+    "检测行间距差异": {"en": "Detect line spacing changes"},
+    "检测段落对齐方式": {"en": "Detect paragraph alignment"},
+    "检测段落编号变化": {"en": "Detect numbering changes"},
+    "检测图片变动": {"en": "Detect image changes"},
+    "检测表格变动": {"en": "Detect table changes"}
 }
 
 _current_lang = None
