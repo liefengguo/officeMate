@@ -105,3 +105,28 @@ QWidget[class="preview-pane"] {
     border-radius: 6px;
     padding: 6px;
 }
+
+/* 8️⃣ Tab 选项卡 -------------------------------------------------- */
+QTabWidget::pane {
+    border: 1px solid #3D3D3D;
+    top: -1px;               /* 与选中项衔接 */
+}
+
+QTabBar::tab {
+    background: #2B2B2B;
+    color: #E2E2E2;
+    padding: 4px 8px;
+    border: 1px solid #3D3D3D;
+    border-bottom: none;     /* 与面板合并 */
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background: #1F1F1F;
+}
+
+QTabBar::tab:hover {
+    background: #373737;
+}

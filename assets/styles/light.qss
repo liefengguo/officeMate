@@ -88,3 +88,28 @@ QMessageBox QPushButton:pressed { background-color: #E0E0E0; }
 /* 7️⃣ 折叠块 ---------------------------------------------------- */
 .skip { color: #999999; }
 
+/* 8️⃣ Tab 选项卡 -------------------------------------------------- */
+QTabWidget::pane {
+    border: 1px solid #C3C3C3;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background: #FFFFFF;
+    color: #000000;
+    padding: 4px 8px;
+    border: 1px solid #C3C3C3;
+    border-bottom: none;
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background: #F7F7F7;
+}
+
+QTabBar::tab:hover {
+    background: #F2F2F2;
+}
+
