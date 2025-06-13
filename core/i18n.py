@@ -83,7 +83,8 @@ _TRANSLATIONS = {
     "检测段落对齐方式": {"en": "Detect paragraph alignment"},
     "检测段落编号变化": {"en": "Detect numbering changes"},
     "检测图片变动": {"en": "Detect image changes"},
-    "检测表格变动": {"en": "Detect table changes"}
+    "检测表格变动": {"en": "Detect table changes"},
+    "全选": {"en": "Select All"}
 }
 
 class _I18N(QObject):

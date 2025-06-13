@@ -124,6 +124,11 @@ class SettingsPage(QWidget):
         widget = QWidget()
         box = QVBoxLayout(widget)
 
+        self._diff_checks = []
+
+        chk_all = QCheckBox(_("全选"))
+        box.addWidget(chk_all)
+
         options = [
             ("diff/detect_bold", _("检测粗体变化")),
             ("diff/detect_italic", _("检测斜体变化")),
@@ -143,6 +148,22 @@ class SettingsPage(QWidget):
             chk.setChecked(self.settings.value(key, True, type=bool))
             chk.toggled.connect(lambda v, k=key: self.settings.setValue(k, v))
             box.addWidget(chk)
+            self._diff_checks.append(chk)
+
+        def _update_all_state():
+            all_checked = all(c.isChecked() for c in self._diff_checks)
+            chk_all.blockSignals(True)
+            chk_all.setChecked(all_checked)
+            chk_all.blockSignals(False)
+
+        def _set_all(checked: bool):
+            for chk in self._diff_checks:
+                chk.setChecked(checked)
+
+        chk_all.toggled.connect(_set_all)
+        for chk in self._diff_checks:
+            chk.toggled.connect(_update_all_state)
+        _update_all_state()
 
         box.addStretch(1)
         self.tabs.addTab(widget, _("差异检测"))
