@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QSettings, pyqtSignal, QObject
 
 # Mapping of original Chinese texts to translations
 _TRANSLATIONS = {
@@ -86,6 +86,12 @@ _TRANSLATIONS = {
     "检测表格变动": {"en": "Detect table changes"}
 }
 
+class _I18N(QObject):
+    language_changed = pyqtSignal()
+
+
+i18n = _I18N()
+
 _current_lang = None
 
 
@@ -98,8 +104,11 @@ def get_language() -> str:
 
 def set_language(lang: str) -> None:
     global _current_lang
+    if lang == _current_lang:
+        return
     _current_lang = lang
     QSettings().setValue("ui/language", lang)
+    i18n.language_changed.emit()
 
 
 def _(text: str) -> str:

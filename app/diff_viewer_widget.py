@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QPlainTextEdit
-from core.i18n import _
+from core.i18n import _, i18n
 
 class DiffViewerWidget(QPlainTextEdit):
     def __init__(self, parent=None):
@@ -7,6 +7,7 @@ class DiffViewerWidget(QPlainTextEdit):
         self.setReadOnly(True)
         self.setPlaceholderText(_("差异结果将在这里显示..."))
         # 可以在这里统一设置字体、背景、滚动条策略等
+        i18n.language_changed.connect(self.retranslate_ui)
 
     def set_diff_content(self, content: str):
         if not content.strip():
@@ -16,3 +17,6 @@ class DiffViewerWidget(QPlainTextEdit):
 
     def clear(self):
         self.setPlainText("")
+
+    def retranslate_ui(self):
+        self.setPlaceholderText(_("差异结果将在这里显示..."))

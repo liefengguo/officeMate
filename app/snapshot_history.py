@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QAbstractItemView, QListWidgetItem
 )
 from PyQt5.QtCore import Qt
-from core.i18n import _
+from core.i18n import _, i18n
 from ui.components import FlatButton, PrimaryButton
 from core.snapshot_manager import SnapshotManager
 from app.diff_viewer import DiffViewer
@@ -45,6 +45,8 @@ class SnapshotHistoryWindow(QWidget):
 
         self.preview_windows = []
         self.load_snapshots()
+
+        i18n.language_changed.connect(self.retranslate_ui)
 
     def go_back(self):
         if self.parent_window:
@@ -93,3 +95,12 @@ class SnapshotHistoryWindow(QWidget):
         diff = self.manager.compare_snapshots(paths[0], paths[1])
         viewer = DiffViewer(diff_text=diff)
         viewer.show()
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.setWindowTitle(_("快照历史"))
+        self.back_button.setText(_("← 返回主页"))
+        self.label.setText(_("文档：{name}").format(name=self.doc_name))
+        self.compare_button.setText(_("对比选中快照"))
+        self.preview_button.setText(_("查看快照内容"))
+        self.load_snapshots()

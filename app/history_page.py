@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QMessageBox
 )
-from core.i18n import _
+from core.i18n import _, i18n
 from ui.components import PrimaryButton, FlatButton
 
 from core.snapshot_manager import SnapshotManager
@@ -66,9 +66,11 @@ class HistoryPage(QWidget):
 
         # 初始加载
         self.load_snapshots()
-        hint = QLabel(_("👉 选择快照查看内容或恢复"))
-        hint.setAlignment(Qt.AlignCenter)
-        self.display_panel.set_widget(hint)
+        self.hint = QLabel(_("👉 选择快照查看内容或恢复"))
+        self.hint.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(self.hint)
+
+        i18n.language_changed.connect(self.retranslate_ui)
 
     # ---------------------------------------------------------------- list
     def load_snapshots(self):
@@ -207,3 +209,11 @@ class HistoryPage(QWidget):
         vbox.addWidget(content_widget, 1)
 
         self.display_panel.set_widget(wrapper)
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.label.setText(_("📜 {name} 的快照历史").format(name=self.doc_name))
+        self.btn_restore.setText(_("恢复所选快照"))
+        self.btn_delete.setText(_("删除所选快照"))
+        self.hint.setText(_("👉 选择快照查看内容或恢复"))
+        self.load_snapshots()

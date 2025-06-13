@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 import os
 from core.snapshot import SnapshotManager
-from core.i18n import _
+from core.i18n import _, i18n
 
 class SnapshotListWidget(QListWidget):
     def __init__(self, file_path, single_selection=True, parent=None):
@@ -16,6 +16,8 @@ class SnapshotListWidget(QListWidget):
             self.setSelectionMode(QListWidget.MultiSelection)
 
         self.load_snapshots()
+
+        i18n.language_changed.connect(self.load_snapshots)
 
     def load_snapshots(self):
         """加载快照数据到列表"""

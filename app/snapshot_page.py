@@ -1,7 +1,7 @@
 # app/snapshot_page.py
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
 from PyQt5.QtCore import Qt
-from core.i18n import _
+from core.i18n import _, i18n
 
 import os
 
@@ -36,9 +36,11 @@ class SnapshotPage(QWidget):
         self.middle_panel.compareRequested.connect(self.compare_with_latest)
 
         # 初始右侧提示
-        hint_lbl = QLabel(_("👉 在左侧填写备注并点击“创建快照”"))
-        hint_lbl.setAlignment(Qt.AlignCenter)
-        self.display_panel.set_widget(hint_lbl)
+        self.hint_lbl = QLabel(_("👉 在左侧填写备注并点击“创建快照”"))
+        self.hint_lbl.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(self.hint_lbl)
+
+        i18n.language_changed.connect(self.retranslate_ui)
 
     # ----------------------------------------------------------------- 槽函数
     def on_create_snapshot(self, remark: str):
@@ -89,3 +91,8 @@ class SnapshotPage(QWidget):
             err_view = DiffViewerWidget(self)
             err_view.set_diff_content(_("对比失败：{e}").format(e=e))
             self.display_panel.set_widget(err_view)
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.hint_lbl.setText(_("👉 在左侧填写备注并点击“创建快照”"))
+        self.middle_panel.retranslate_ui()

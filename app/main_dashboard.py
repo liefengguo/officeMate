@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 )
 from ui.components import PrimaryButton
 from PyQt5.QtCore import Qt, QSize, QEvent
-from core.i18n import _
+from core.i18n import _, i18n
 import os
 from app.snapshot_history import SnapshotHistoryWindow
 from core.recent_db import RecentDocDB
@@ -20,8 +20,8 @@ class MainDashboard(QWidget):
         self.setMinimumSize(500, 400)
 
         self.db = RecentDocDB()
-        title_label = QLabel(_("📂 已添加文档列表"))
-        title_label.setProperty("class", "h2")
+        self.title_label = QLabel(_("📂 已添加文档列表"))
+        self.title_label.setProperty("class", "h2")
         
         self.layout = QVBoxLayout()
         self.doc_list = QListWidget()
@@ -37,7 +37,7 @@ class MainDashboard(QWidget):
 
         self.layout.addWidget(self.add_button)
         self.layout.addSpacing(10)
-        self.layout.addWidget(title_label)
+        self.layout.addWidget(self.title_label)
         self.layout.addWidget(self.doc_list)
         self.setLayout(self.layout)
 
@@ -47,6 +47,15 @@ class MainDashboard(QWidget):
         self.add_button.clicked.connect(self.add_document)
         # self.doc_list.itemClicked.connect(self.open_snapshot_window)
         self.doc_list.itemClicked.connect(self.open_project_page)
+        self.refresh_list()
+
+        i18n.language_changed.connect(self.retranslate_ui)
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.setWindowTitle(_("DocSnap 文档管理主页"))
+        self.title_label.setText(_("📂 已添加文档列表"))
+        self.add_button.setText(_("➕ 添加项目"))
         self.refresh_list()
 
     def refresh_list(self):

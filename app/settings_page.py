@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QTabWidget,
 )
 from PyQt5.QtCore import QSettings
-from core.i18n import _, get_language, set_language
+from core.i18n import _, get_language, set_language, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
 class SettingsPage(QWidget):
@@ -17,9 +17,9 @@ class SettingsPage(QWidget):
 
         layout = QVBoxLayout(self)
 
-        title = QLabel(_("⚙ 软件设置"))
-        title.setProperty("class", "h2")
-        layout.addWidget(title)
+        self.title = QLabel(_("⚙ 软件设置"))
+        self.title.setProperty("class", "h2")
+        layout.addWidget(self.title)
 
         self.settings = QSettings()
 
@@ -33,6 +33,17 @@ class SettingsPage(QWidget):
 
         layout.addStretch(1)
         self.setLayout(layout)
+
+        i18n.language_changed.connect(self.retranslate_ui)
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.title.setText(_("⚙ 软件设置"))
+        self.tabs.clear()
+        self._init_general_tab()
+        self._init_appearance_tab()
+        self._init_snapshot_tab()
+        self._init_diff_tab()
 
     # ------------------------------------------------------- tab builders
     def _init_general_tab(self):

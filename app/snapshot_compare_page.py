@@ -2,7 +2,7 @@
 import os
 from functools import partial
 from PyQt5.QtCore import Qt, QSettings
-from core.i18n import _
+from core.i18n import _, i18n
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QListWidgetItem, QMessageBox
@@ -50,9 +50,9 @@ class SnapshotComparePage(QWidget):
 
         # ------------------------ 右侧显示区 ------------------------ #
         self.display_panel = SnapshotDisplayPanel()
-        hint_lbl = QLabel(_("👉 请选择两个快照后点击“对比”"))
-        hint_lbl.setAlignment(Qt.AlignCenter)
-        self.display_panel.set_widget(hint_lbl)
+        self.hint_lbl = QLabel(_("👉 请选择两个快照后点击“对比”"))
+        self.hint_lbl.setAlignment(Qt.AlignCenter)
+        self.display_panel.set_widget(self.hint_lbl)
 
         # ------------------------ 主水平布局 ------------------------ #
         hbox = QHBoxLayout(self)
@@ -70,6 +70,8 @@ class SnapshotComparePage(QWidget):
         self.update_button_visibility()
 
         self.load_snapshots()
+
+        i18n.language_changed.connect(self.retranslate_ui)
 
     # ---------------------------------------------------------------- list
     def load_snapshots(self):
@@ -170,3 +172,10 @@ class SnapshotComparePage(QWidget):
         self.check_selection_limit()
         if auto and len(self.list_widget.selectedItems()) == 2:
             self.compare_snapshots()
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.label.setText(_("🔍 {name} 快照对比").format(name=self.doc_name))
+        self.compare_button.setText(_("对比选中的两个快照"))
+        self.hint_lbl.setText(_("👉 请选择两个快照后点击“对比”"))
+        self.load_snapshots()
