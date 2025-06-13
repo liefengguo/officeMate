@@ -37,17 +37,11 @@ class HistoryPage(QWidget):
 
         self.btn_restore = FlatButton("恢复所选快照")
         self.btn_restore.setFixedHeight(28)
-        self.btn_undo = FlatButton("撤销上次恢复")
-        self.btn_undo.setFixedHeight(28)
-        # print("self.btn_undo:",self.btn_undo.property("type"))
         self.btn_restore.clicked.connect(self.restore_selected)
-        self.btn_undo.clicked.connect(self.sm.undo_restore)
-        self.btn_undo.setEnabled(False)
 
         mid_layout.addWidget(self.label)
         mid_layout.addWidget(self.list_widget)
         mid_layout.addWidget(self.btn_restore)
-        mid_layout.addWidget(self.btn_undo)
         self.btn_delete = PrimaryButton("删除所选快照")
         self.btn_delete.setFixedHeight(28)
         self.btn_delete.clicked.connect(self.delete_selected)
@@ -68,8 +62,6 @@ class HistoryPage(QWidget):
         self.list_widget.itemClicked.connect(self.preview_selected)
         self.sm.snapshot_created.connect(self.load_snapshots)
         self.sm.snapshot_deleted.connect(self.load_snapshots)
-        self.sm.snapshot_created.connect(self._toggle_undo_button)
-        self.sm.snapshot_deleted.connect(self._toggle_undo_button)
 
         # 初始加载
         self.load_snapshots()
@@ -83,7 +75,6 @@ class HistoryPage(QWidget):
         versions = self.sm.list_snapshots(self.doc_name)
         if not versions:
             self.list_widget.addItem("暂无快照记录")
-            self._toggle_undo_button()
             return
 
         versions.sort(key=lambda v: v.get("timestamp", ""), reverse=True)
@@ -94,15 +85,12 @@ class HistoryPage(QWidget):
             list_item = QListWidgetItem(text)
             list_item.setData(Qt.UserRole, v)
             self.list_widget.addItem(list_item)
-        self._toggle_undo_button()
 
     def handle_selection_changed(self):
         # no custom widget highlighting needed
         pass
 
-    # ---------------------------------------------------------------- restore / undo
-    def _toggle_undo_button(self, *_):
-        self.btn_undo.setEnabled(self.sm.can_undo())
+
 
     def restore_selected(self):
         items = self.list_widget.selectedItems()
@@ -141,9 +129,6 @@ class HistoryPage(QWidget):
         del_lbl.setAlignment(Qt.AlignCenter)
         self.display_panel.set_widget(del_lbl)
         # self.list_widget.takeItem(row)               # 直接按行删除，避免引用 item
-
-        # 如需刷新按钮状态
-        self._toggle_undo_button()
     # ---------------------------------------------------------------- view / delete
     def _build_preview_widget(self, path: str):
         """根据文件类型构建预览控件"""
