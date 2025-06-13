@@ -8,6 +8,7 @@ snapshot_panels.py
 
 from typing import Optional
 from PyQt5.QtCore import pyqtSignal
+from core.i18n import _
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QTextEdit, QListWidget, QListWidgetItem
@@ -44,22 +45,22 @@ class SnapshotMiddlePanel(QWidget):
         elif self.mode == "compare":
             self._init_compare(layout)
         else:
-            layout.addWidget(QLabel("未实现的面板模式"))
+            layout.addWidget(QLabel(_("未实现的面板模式")))
         layout.addStretch(1)
         self.setLayout(layout)
 
     # -------------------- note 模式：备注 + 按钮
     def _init_note(self, layout: QVBoxLayout):
-        layout.addWidget(QLabel("快照备注："))
+        layout.addWidget(QLabel(_("快照备注：")))
         self.remark_edit = QTextEdit()
         self.remark_edit.setProperty("class", "textinput")
-        self.remark_edit.setPlaceholderText("输入此版本的备注信息…")
+        self.remark_edit.setPlaceholderText(_("输入此版本的备注信息…"))
         self.remark_edit.setFixedHeight(80)
         layout.addWidget(self.remark_edit)
 
         btn_box = QHBoxLayout()
-        self.create_btn = PrimaryButton("创建快照")
-        self.compare_btn = FlatButton("对比当前与最新")
+        self.create_btn = PrimaryButton(_("创建快照"))
+        self.compare_btn = FlatButton(_("对比当前与最新"))
         print("self.compare_btn----:",self.compare_btn.property("type"))
         btn_box.addWidget(self.create_btn)
         btn_box.addWidget(self.compare_btn)
@@ -74,7 +75,7 @@ class SnapshotMiddlePanel(QWidget):
 
     # -------------------- list 模式：快照历史
     def _init_list(self, layout: QVBoxLayout):
-        layout.addWidget(QLabel("快照历史："))
+        layout.addWidget(QLabel(_("快照历史：")))
         self.list_widget = QListWidget()
         self.list_widget.setProperty("class", "snapshot-list")
         self.list_widget.itemClicked.connect(
@@ -94,7 +95,7 @@ class SnapshotMiddlePanel(QWidget):
 
     # -------------------- compare 模式：双选 + 对比
     def _init_compare(self, layout: QVBoxLayout):
-        layout.addWidget(QLabel("选择需要对比的两个快照："))
+        layout.addWidget(QLabel(_("选择需要对比的两个快照：")))
         self.first_list = QListWidget()
         self.first_list.setProperty("class", "snapshot-list")
         self.second_list = QListWidget()
@@ -104,7 +105,7 @@ class SnapshotMiddlePanel(QWidget):
         lists_box.addWidget(self.second_list)
         layout.addLayout(lists_box)
 
-        self.compare_btn = PrimaryButton("开始对比")
+        self.compare_btn = PrimaryButton(_("开始对比"))
         layout.addWidget(self.compare_btn)
         self.compare_btn.clicked.connect(self._emit_pair_compare)
 

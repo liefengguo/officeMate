@@ -5,15 +5,21 @@ Loads shared `_base.qss` plus the current theme via ``core.themes.apply_theme``.
 """
 
 import sys
+import os
 from PyQt5.QtWidgets import QApplication
 
 from core.themes import apply_theme
+from core.i18n import set_language
 from core.snapshot_manager import SnapshotManager
 from app.main_window import MainWindow
 
 
 def main() -> None:
     app = QApplication(sys.argv)
+
+    lang = os.getenv("DOCSNAP_LANG")
+    if lang:
+        set_language(lang)
 
     # Apply user‑preferred (or auto) theme at startup
     apply_theme(app)

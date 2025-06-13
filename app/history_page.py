@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QMessageBox
 )
+from core.i18n import _
 from ui.components import PrimaryButton, FlatButton
 
 from core.snapshot_manager import SnapshotManager
@@ -30,19 +31,19 @@ class HistoryPage(QWidget):
         # ---------- 中间列：快照列表 + 操作按钮 ----------
         mid_widget = QWidget()
         mid_layout = QVBoxLayout(mid_widget)
-        self.label = QLabel(f"📜 {self.doc_name} 的快照历史")
+        self.label = QLabel(_("📜 {name} 的快照历史").format(name=self.doc_name))
         self.list_widget = QListWidget()
         self.list_widget.setProperty("class", "snapshot-list")
         self.list_widget.setSelectionMode(QListWidget.SingleSelection)
 
-        self.btn_restore = FlatButton("恢复所选快照")
+        self.btn_restore = FlatButton(_("恢复所选快照"))
         self.btn_restore.setFixedHeight(28)
         self.btn_restore.clicked.connect(self.restore_selected)
 
         mid_layout.addWidget(self.label)
         mid_layout.addWidget(self.list_widget)
         mid_layout.addWidget(self.btn_restore)
-        self.btn_delete = PrimaryButton("删除所选快照")
+        self.btn_delete = PrimaryButton(_("删除所选快照"))
         self.btn_delete.setFixedHeight(28)
         self.btn_delete.clicked.connect(self.delete_selected)
         mid_layout.addWidget(self.btn_delete)
@@ -65,7 +66,7 @@ class HistoryPage(QWidget):
 
         # 初始加载
         self.load_snapshots()
-        hint = QLabel("👉 选择快照查看内容或恢复")
+        hint = QLabel(_("👉 选择快照查看内容或恢复"))
         hint.setAlignment(Qt.AlignCenter)
         self.display_panel.set_widget(hint)
 
@@ -74,7 +75,7 @@ class HistoryPage(QWidget):
         self.list_widget.clear()
         versions = self.sm.list_snapshots(self.doc_name)
         if not versions:
-            self.list_widget.addItem("暂无快照记录")
+            self.list_widget.addItem(_("暂无快照记录"))
             return
 
         versions.sort(key=lambda v: v.get("timestamp", ""), reverse=True)
@@ -95,29 +96,29 @@ class HistoryPage(QWidget):
     def restore_selected(self):
         items = self.list_widget.selectedItems()
         if not items:
-            QMessageBox.information(self, "提示", "请先选择要恢复的快照")
+            QMessageBox.information(self, _("提示"), _("请先选择要恢复的快照"))
             return
         meta = items[0].data(Qt.UserRole)
         if not isinstance(meta, dict):
-            QMessageBox.warning(self, "提示", "无法获取快照信息")
+            QMessageBox.warning(self, _("提示"), _("无法获取快照信息"))
             return
         self.sm.restore_snapshot(meta)
 
     def delete_selected(self):
         row = self.list_widget.currentRow()          # 先拿行号
         if row < 0:
-            QMessageBox.information(self, "提示", "请先选择要删除的快照")
+            QMessageBox.information(self, _("提示"), _("请先选择要删除的快照"))
             return
 
         meta_item = self.list_widget.item(row)
         meta = meta_item.data(Qt.UserRole)
         if not isinstance(meta, dict):
-            QMessageBox.warning(self, "提示", "无法获取快照信息")
+            QMessageBox.warning(self, _("提示"), _("无法获取快照信息"))
             return
 
         # 二次确认
-        if QMessageBox.question(self, "删除快照",
-                                "确定删除该快照？",
+        if QMessageBox.question(self, _("删除快照"),
+                                _("确定删除该快照？"),
                                 QMessageBox.Yes | QMessageBox.No) != QMessageBox.Yes:
             return
 
@@ -125,7 +126,7 @@ class HistoryPage(QWidget):
         self.sm.delete_snapshot(self.doc_name, meta)
 
         # 解除预览 & 从列表移除
-        del_lbl = QLabel("✂️ 已删除快照")
+        del_lbl = QLabel(_("✂️ 已删除快照"))
         del_lbl.setAlignment(Qt.AlignCenter)
         self.display_panel.set_widget(del_lbl)
         # self.list_widget.takeItem(row)               # 直接按行删除，避免引用 item
@@ -178,7 +179,7 @@ class HistoryPage(QWidget):
                 return browser
 
         except Exception as e:
-            err = QLabel(f"无法读取快照内容：{e}")
+            err = QLabel(_("无法读取快照内容：{e}").format(e=e))
             err.setAlignment(Qt.AlignCenter)
             return err
 

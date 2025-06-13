@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
 )
 from PyQt5.QtCore import QSettings
+from core.i18n import _
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
 from app.main_dashboard import MainDashboard
@@ -14,7 +15,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         apply_theme()
         self.manager = snapshot_manager
-        self.setWindowTitle("DocSnap 文档助手")
+        self.setWindowTitle(_("DocSnap 文档助手"))
         self.setMinimumSize(300, 200)
 
         # Restore previous window size if available
@@ -64,10 +65,10 @@ class MainWindow(QMainWindow):
     def _create_theme_menu(self):
         menubar = self.menuBar()
 
-        theme_menu = QMenu("主题(&T)", self)
-        act_auto  = QAction("跟随系统", self, checkable=True)
-        act_light = QAction("浅色", self, checkable=True)
-        act_dark  = QAction("深色", self, checkable=True)
+        theme_menu = QMenu(_("主题(&T)"), self)
+        act_auto  = QAction(_("跟随系统"), self, checkable=True)
+        act_light = QAction(_("浅色"), self, checkable=True)
+        act_dark  = QAction(_("深色"), self, checkable=True)
 
         group = QActionGroup(self)
         for a in (act_auto, act_light, act_dark):

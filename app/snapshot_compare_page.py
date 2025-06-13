@@ -2,6 +2,7 @@
 import os
 from functools import partial
 from PyQt5.QtCore import Qt, QSettings
+from core.i18n import _
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QListWidgetItem, QMessageBox
@@ -37,10 +38,10 @@ class SnapshotComparePage(QWidget):
         # ------------------------ 左侧交互区 ------------------------ #
         mid_widget = QWidget()
         mid_layout = QVBoxLayout(mid_widget)
-        self.label = QLabel(f"🔍 {self.doc_name} 快照对比")
+        self.label = QLabel(_("🔍 {name} 快照对比").format(name=self.doc_name))
         self.list_widget = SnapshotListWidget(file_path, single_selection=False)
         self.list_widget.setProperty("class", "snapshot-list")
-        self.compare_button = PrimaryButton("对比选中的两个快照")
+        self.compare_button = PrimaryButton(_("对比选中的两个快照"))
         self.compare_button.setFixedHeight(28)
         mid_layout.addWidget(self.label)
         mid_layout.addWidget(self.list_widget, 1)
@@ -49,7 +50,7 @@ class SnapshotComparePage(QWidget):
 
         # ------------------------ 右侧显示区 ------------------------ #
         self.display_panel = SnapshotDisplayPanel()
-        hint_lbl = QLabel("👉 请选择两个快照后点击“对比”")
+        hint_lbl = QLabel(_("👉 请选择两个快照后点击“对比”"))
         hint_lbl.setAlignment(Qt.AlignCenter)
         self.display_panel.set_widget(hint_lbl)
 
@@ -76,8 +77,8 @@ class SnapshotComparePage(QWidget):
         self.list_widget.clear()
         versions = self.manager.list_snapshots(self.doc_name)
         if not versions:
-            self.list_widget.addItem("暂无快照记录")
-            empty_lbl = QLabel("📭 没有快照可用")
+            self.list_widget.addItem(_("暂无快照记录"))
+            empty_lbl = QLabel(_("📭 没有快照可用"))
             empty_lbl.setAlignment(Qt.AlignCenter)
             self.display_panel.set_widget(empty_lbl)
             return
@@ -92,7 +93,7 @@ class SnapshotComparePage(QWidget):
             self.list_widget.addItem(item)
 
         # 清空右侧旧内容
-        reset_lbl = QLabel("👉 请选择两个快照后点击“对比”")
+        reset_lbl = QLabel(_("👉 请选择两个快照后点击“对比”"))
         reset_lbl.setAlignment(Qt.AlignCenter)
         self.display_panel.set_widget(reset_lbl)
 
@@ -100,7 +101,7 @@ class SnapshotComparePage(QWidget):
     def compare_snapshots(self):
         items = self.list_widget.selectedItems()
         if len(items) != 2:
-            QMessageBox.warning(self, "提示", "请选择两个快照进行对比")
+            QMessageBox.warning(self, _("提示"), _("请选择两个快照进行对比"))
             return
 
         paths = [it.data(Qt.UserRole) for it in items]
@@ -110,7 +111,7 @@ class SnapshotComparePage(QWidget):
         try:
             v1, v2 = (meta_map[p] for p in paths)
         except KeyError:
-            QMessageBox.warning(self, "错误", "读取快照信息失败")
+            QMessageBox.warning(self, _("错误"), _("读取快照信息失败"))
             return
 
         # 按时间排序：旧 -> 新
@@ -141,13 +142,13 @@ class SnapshotComparePage(QWidget):
                 viewer.right.setProperty("class", "diff-pane")
             else:
                 viewer = DiffViewerWidget(self)
-                viewer.set_diff_content(diff_result.raw or "两个快照无差异。")
+                viewer.set_diff_content(diff_result.raw or _("两个快照无差异。"))
 
             self.display_panel.set_widget(viewer)
 
         except Exception as e:
             err = DiffViewerWidget(self)
-            err.set_diff_content(f"对比失败：{e}")
+            err.set_diff_content(_("对比失败：{e}").format(e=e))
             self.display_panel.set_widget(err)
 
     # ---------------------------------------------------------------- utils

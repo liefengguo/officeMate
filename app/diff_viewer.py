@@ -3,11 +3,12 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor, QFont
 from core.diff_engine import DiffEngine
+from core.i18n import _
 
 class DiffViewer(QWidget):
     def __init__(self, file1_path, file2_path):
         super().__init__()
-        self.setWindowTitle("快照差异对比")
+        self.setWindowTitle(_("快照差异对比"))
         self.setMinimumSize(800, 600)
 
         layout = QVBoxLayout()
