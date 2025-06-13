@@ -63,7 +63,7 @@ class ProjectPage(QWidget):
 
         self.add_snapshot_btn.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         self.history_btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        self.compare_btn.clicked.connect(lambda: self.stack.setCurrentIndex(2))
+        self.compare_btn.clicked.connect(self.open_compare_page)
         self.settings_btn.clicked.connect(lambda: self.stack.setCurrentIndex(3))
 
         self.back_button.clicked.connect(self.back_to_home)
@@ -75,6 +75,12 @@ class ProjectPage(QWidget):
         # Ensure snapshot_created and snapshot_deleted signals are connected
         self.manager.snapshot_created.connect(self.handle_snapshot_created)
         self.manager.snapshot_deleted.connect(self.handle_snapshot_created)
+
+    def open_compare_page(self):
+        """显示快照对比页并刷新按钮状态"""
+        self.stack.setCurrentIndex(2)
+        if self.page_compare:
+            self.page_compare.update_button_visibility()
 
     def handle_snapshot_created(self, *_):
         """当快照创建完成后，刷新所有需要的页面"""
