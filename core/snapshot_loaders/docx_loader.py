@@ -76,6 +76,8 @@ class DocxLoader(SnapshotLoader):
                 line_spacing = None
                 align_type = None
                 numbered = False
+                left_indent = None
+                first_indent = None
                 try:
                     ls_val = para.paragraph_format.line_spacing
                     if ls_val is not None:
@@ -94,6 +96,18 @@ class DocxLoader(SnapshotLoader):
                 try:
                     if para._p.pPr is not None and para._p.pPr.numPr is not None:
                         numbered = True
+                except Exception:
+                    pass
+                try:
+                    li = para.paragraph_format.left_indent
+                    if li is not None:
+                        left_indent = float(li.pt) if hasattr(li, 'pt') else float(li)
+                except Exception:
+                    pass
+                try:
+                    fi = para.paragraph_format.first_line_indent
+                    if fi is not None:
+                        first_indent = float(fi.pt) if hasattr(fi, 'pt') else float(fi)
                 except Exception:
                     pass
 
@@ -141,6 +155,8 @@ class DocxLoader(SnapshotLoader):
                         "line_spacing": line_spacing,
                         "alignment": align_type,
                         "numbering": numbered,
+                        "indent_left": left_indent,
+                        "indent_first": first_indent,
                     }
                 )
                 idx += 1

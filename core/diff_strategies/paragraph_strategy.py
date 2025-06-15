@@ -46,6 +46,8 @@ class ParagraphDiffStrategy(DiffStrategy):
         detect_num = settings.value("diff/detect_numbering", True, type=bool)
         detect_img = settings.value("diff/detect_images", True, type=bool)
         detect_table = settings.value("diff/detect_tables", True, type=bool)
+        detect_style = settings.value("diff/detect_style", True, type=bool)
+        detect_indent = settings.value("diff/detect_indent", True, type=bool)
 
         texts: List[str] = []
         for p in struct:
@@ -60,6 +62,14 @@ class ParagraphDiffStrategy(DiffStrategy):
             align = p.get("alignment")
             if align and detect_align:
                 parts.append(f"<align:{align}/>")
+            if detect_indent:
+                left = p.get("indent_left")
+                first = p.get("indent_first")
+                if left is not None or first is not None:
+                    parts.append(f"<indent:{left},{first}/>")
+            style = p.get("style")
+            if style and detect_style:
+                parts.append(f"<style:{style}/>")
             if p.get("numbering") and detect_num:
                 parts.append("<num/>")
             if not runs:
@@ -167,14 +177,55 @@ class ParagraphDiffStrategy(DiffStrategy):
                     raw.append(f"+ {text}")
 
             elif tag == "replace":
-                a_text = "\n".join(para_a[i1:i2])
-                b_text = "\n".join(para_b[j1:j2])
-                inline = self._inline_ops(a_text, b_text)
-                chunks.append({"tag": "replace",
-                               "a_idx": i1, "b_idx": j1,
-                               "a_text": a_text, "b_text": b_text,
-                               "inline": inline})
-                raw.append(f"- {a_text}")
-                raw.append(f"+ {b_text}")
+                # When the two sections differ greatly, treating them as a
+                # single inline "replace" block makes the output hard to
+                # understand.  Instead mimic ``git diff`` behaviour: emit the
+                # old lines as deletions followed by the new lines as
+                # insertions.  This provides a clearer picture for large
+                # modifications while still allowing the UI to highlight
+                # smaller replacements inline when lengths match.
+
+                len_a = i2 - i1
+                len_b = j2 - j1
+
+                if len_a == len_b:
+                    for off in range(len_a):
+                        a_text = para_a[i1 + off]
+                        b_text = para_b[j1 + off]
+                        if a_text == b_text:
+                            add_equal(i1 + off, j1 + off)
+                        else:
+                            inline = self._inline_ops(a_text, b_text)
+                            chunks.append({
+                                "tag": "replace",
+                                "a_idx": i1 + off,
+                                "b_idx": j1 + off,
+                                "a_text": a_text,
+                                "b_text": b_text,
+                                "inline": inline,
+                            })
+                            raw.append(f"- {a_text}")
+                            raw.append(f"+ {b_text}")
+                else:
+                    for idx in range(i1, i2):
+                        text = para_a[idx]
+                        chunks.append({
+                            "tag": "delete",
+                            "a_idx": idx,
+                            "b_idx": -1,
+                            "a_text": text,
+                            "b_text": "",
+                        })
+                        raw.append(f"- {text}")
+                    for idx in range(j1, j2):
+                        text = para_b[idx]
+                        chunks.append({
+                            "tag": "insert",
+                            "a_idx": -1,
+                            "b_idx": idx,
+                            "a_text": "",
+                            "b_text": text,
+                        })
+                        raw.append(f"+ {text}")
 
         return DiffResult("\n".join(raw), structured=chunks)
