@@ -46,6 +46,8 @@ _TRANSLATIONS = {
         "ru": "\u2795 \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442",
         "ko": "\u2795 \ud504\ub85c\uc81d\ud2b8 \ucd94\uac00",
     },
+    "移除项目": {"en": "Remove Project"},
+    "确定从列表移除该项目？": {"en": "Remove this project from the list?"},
     "暂无文档，点击上方按钮添加": {
         "en": "No documents yet, click the button above to add",
         "es": "A\u00fan no hay documentos, haz clic en el bot\u00f3n de arriba para agregar",

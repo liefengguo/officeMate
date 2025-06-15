@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
-    QListWidgetItem
+    QListWidgetItem, QMenu
 )
 from ui.components import PrimaryButton
 from PyQt5.QtCore import Qt, QSize, QEvent
@@ -29,6 +29,8 @@ class MainDashboard(QWidget):
         self.doc_list.setFrameShape(QListWidget.NoFrame)
         self.doc_list.setMouseTracking(True)
         self.doc_list.setItemDelegate(ProjectItemDelegate())
+        self.doc_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.doc_list.customContextMenuRequested.connect(self.show_context_menu)
         
         self.add_button = PrimaryButton(_("➕ 添加项目"))
         # print(self.add_button.property("type"))
@@ -98,6 +100,25 @@ class MainDashboard(QWidget):
                     self.doc_list.viewport().setCursor(Qt.ArrowCursor)
                 self.doc_list.viewport().update()
         return super().eventFilter(source, event)
+
+    def show_context_menu(self, pos):
+        item = self.doc_list.itemAt(pos)
+        if not item or not item.data(1000):
+            return
+        menu = QMenu(self)
+        remove_act = menu.addAction(_("移除项目"))
+        action = menu.exec_(self.doc_list.viewport().mapToGlobal(pos))
+        if action == remove_act:
+            file_path = item.data(1000)
+            reply = QMessageBox.question(
+                self,
+                _("移除项目"),
+                _("确定从列表移除该项目？"),
+                QMessageBox.Yes | QMessageBox.No,
+            )
+            if reply == QMessageBox.Yes:
+                self.db.remove(file_path)
+                self.refresh_list()
 
     def open_project_page(self, item):
         file_path = item.data(1000)
