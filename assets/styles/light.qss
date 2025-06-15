@@ -67,12 +67,19 @@ QMessageBox QPushButton {
     background-color: #FFFFFF;
     border: 1px solid #C3C3C3;
     color: #000000;
-    min-width: 60px;
-    padding: 4px 10px;
+    min-width: 72px;
+    padding: 4px 12px;
     border-radius: 6px;
+}
+QMessageBox QPushButton:default {
+    background-color: #0A84FF;
+    border: none;
+    color: white;
 }
 QMessageBox QPushButton:hover   { background-color: #F2F2F2; }
 QMessageBox QPushButton:pressed { background-color: #E0E0E0; }
+QMessageBox QPushButton:default:hover   { background-color: #3B9CFF; }
+QMessageBox QPushButton:default:pressed { background-color: #0067D9; }
 
 /* 6️⃣ Diff 专用 ------------------------------------------------- */
 .ln    { color: #666666; }      /* line numbers */
