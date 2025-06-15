@@ -193,8 +193,10 @@ class ParallelDiffView(QSplitter):
         old_idx, new_idx = 1, 1        # 行号计数
         compact = QSettings().value("diff/compact_style", False, type=bool)
 
-        def ln_html(n):    # 行号灰色
-            return f'<span class="ln">{n:>4}</span> '
+        def ln_html(n):    # 行号灰色，右对齐
+            return (
+                f'<span class="ln" style="display:inline-block;width:4ch;text-align:right;">{n}</span> '
+            )
 
         def sym_html(sym):
             color = {"-":"#ff3b30", "+":"#34c759", "~":"#ff9500"}.get(sym, "#888")

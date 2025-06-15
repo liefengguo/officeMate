@@ -147,8 +147,10 @@ class HistoryPage(QWidget):
                 paragraphs = ParagraphDiffStrategy._paragraph_texts(loader, path)
                 width = len(str(len(paragraphs)))
                 numbered = [
-                    f'<span class="ln">{str(i).rjust(width)}</span> ' +
-                    (_tokens_to_html(p, show_tokens=not compact) or "&nbsp;")
+                    (
+                        f'<span class="ln" style="display:inline-block;width:{width}ch;text-align:right;">{i}</span> '
+                        + (_tokens_to_html(p, show_tokens=not compact) or "&nbsp;")
+                    )
                     for i, p in enumerate(paragraphs, 1)
                 ]
                 html = f"<div style='{MONO_STYLE}'>" + "<br>".join(numbered) + "</div>"
@@ -170,7 +172,10 @@ class HistoryPage(QWidget):
                 lines = text.splitlines()
                 width = len(str(len(lines)))
                 numbered = [
-                    f'<span class="ln">{str(i).rjust(width)}</span> {escape(line)}'
+                    (
+                        f'<span class="ln" style="display:inline-block;width:{width}ch;text-align:right;">{i}</span> '
+                        f"{escape(line)}"
+                    )
                     for i, line in enumerate(lines, 1)
                 ]
                 html = f"<div style='{MONO_STYLE}'>" + "<br>".join(numbered) + "</div>"
