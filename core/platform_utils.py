@@ -30,8 +30,8 @@ except ModuleNotFoundError:  # pragma: no cover
 def is_dark_mode() -> bool:  # noqa: D401 – simple function
     """Return **True** if the operating system is set to *dark* appearance.
 
-    Currently supports macOS (10.14+) and Windows 10/11.  
-    Other platforms default to *False* (light).
+    Currently supports macOS (10.14+), Windows 10/11 and Linux desktops
+    (GNOME/KDE). Other platforms default to *False* (light).
     """
     if sys.platform == "darwin":
         # macOS checks the global AppleInterfaceStyle. When set to "Dark", the
@@ -63,7 +63,54 @@ def is_dark_mode() -> bool:  # noqa: D401 – simple function
         except (FileNotFoundError, OSError):
             return False
 
-    # Linux / other – could inspect GTK/KDE settings, but keep simple for now.
+    if sys.platform.startswith("linux"):
+        # Try GNOME 42+ setting first
+        try:
+            result = subprocess.run(
+                [
+                    "gsettings",
+                    "get",
+                    "org.gnome.desktop.interface",
+                    "color-scheme",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=0.5,
+            )
+            if result.returncode == 0 and "dark" in result.stdout.lower():
+                return True
+        except Exception:
+            pass
+
+        # Fallback to older gtk-theme check
+        try:
+            result = subprocess.run(
+                [
+                    "gsettings",
+                    "get",
+                    "org.gnome.desktop.interface",
+                    "gtk-theme",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=0.5,
+            )
+            if result.returncode == 0 and "dark" in result.stdout.lower():
+                return True
+        except Exception:
+            pass
+
+        # Environment hints
+        gtk_theme = os.getenv("GTK_THEME", "").lower()
+        if "dark" in gtk_theme:
+            return True
+        kde_scheme = os.getenv("KDE_COLOR_SCHEME", "").lower()
+        if "dark" in kde_scheme:
+            return True
+
+        return False
+
+    # Other platforms
     return False
 
 

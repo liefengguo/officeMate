@@ -7,8 +7,8 @@
 QPushButton { border: none; background: transparent; }
 /* ----------------------- 1. Font & Metrics ----------------------- */
 QWidget {
-    /* System font on macOS / Segoe UI fallback on Windows */
-    font-family: -apple-system, "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    /* System font on macOS/Windows, Noto Sans fallback on Linux */
+    font-family: -apple-system, "Segoe UI", "Noto Sans", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     font-size: 13px;       /* default body size */
 }
 

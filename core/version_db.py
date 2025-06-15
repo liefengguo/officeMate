@@ -15,6 +15,7 @@ class SnapshotRepository:
 
           • macOS : ~/Library/Application Support/DocSnap/versions.json
           • Windows: %APPDATA%\DocSnap\versions.json
+          • Linux : ~/.local/share/DocSnap/versions.json
         """
         if db_path is None:
             db_path = Path(get_app_data_dir()) / "versions.json"
