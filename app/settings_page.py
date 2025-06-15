@@ -149,6 +149,8 @@ class SettingsPage(QWidget):
             ("diff/detect_size", _("检测字体大小差异")),
             ("diff/detect_line_spacing", _("检测行间距差异")),
             ("diff/detect_alignment", _("检测段落对齐方式")),
+            ("diff/detect_style", _("检测段落样式变化")),
+            ("diff/detect_indent", _("检测段落缩进变化")),
             ("diff/detect_numbering", _("检测段落编号变化")),
             ("diff/detect_images", _("检测图片变动")),
             ("diff/detect_tables", _("检测表格变动")),
