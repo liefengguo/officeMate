@@ -84,7 +84,9 @@ _TRANSLATIONS = {
     "检测段落编号变化": {"en": "Detect numbering changes"},
     "检测图片变动": {"en": "Detect image changes"},
     "检测表格变动": {"en": "Detect table changes"},
-    "全选": {"en": "Select All"}
+    "全选": {"en": "Select All"},
+    "🔍 {name} 快照对比": {"en": "🔍 Snapshot compare for {name}"},
+    "… {count} 段未变 …": {"en": "… {count} unchanged paragraphs …"}
 }
 
 class _I18N(QObject):

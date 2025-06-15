@@ -230,8 +230,8 @@ class ParallelDiffView(QSplitter):
                 new_idx += 1
 
             elif tag == "skip":
-                skip_html = (f'<span class="skip">… {ch["count"]} unchanged '
-                                f'paragraphs …</span>')
+                skip_text = _("… {count} 段未变 …").format(count=ch["count"])
+                skip_html = f'<span class="skip">{skip_text}</span>'
                 left_lines.append(skip_html)
                 right_lines.append(skip_html)
 
