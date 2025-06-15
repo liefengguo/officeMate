@@ -7,6 +7,7 @@ OfficeMate is a cross-platform document snapshot and diff tool built with **PyQt
 - Manage projects containing `.txt` and `.docx` files
 - Take snapshots and store version history automatically
 - Compare any two snapshots with rich text highlighting
+- Formatting-only changes in Word documents are ignored for cleaner diffs
 - Preview snapshot contents in a separate window
 - Dashboard with recent documents
 - Light, dark and auto themes with OS detection

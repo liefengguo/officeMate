@@ -9,6 +9,7 @@ ParagraphDiffStrategy 2.0
 
 from pathlib import Path
 from typing import List, Dict
+import re
 from PyQt5.QtCore import QSettings
 from core.i18n import _
 import difflib
@@ -23,6 +24,12 @@ CONTEXT_LINES = 3           # 折叠时保留上下文行数
 class ParagraphDiffStrategy(DiffStrategy):
 
     # ------------------------- helpers
+    _TAG_RE = re.compile(r"<[^>]+>")
+
+    @classmethod
+    def _plain(cls, text: str) -> str:
+        """Remove markup tags used for styling comparison."""
+        return cls._TAG_RE.sub("", text)
     @staticmethod
     def _paragraph_texts(loader, path: str) -> List[str]:
         struct = loader.load_structured(path)
@@ -121,7 +128,10 @@ class ParagraphDiffStrategy(DiffStrategy):
         para_a = self._paragraph_texts(loader_a, path_a)
         para_b = self._paragraph_texts(loader_b, path_b)
 
-        sm = difflib.SequenceMatcher(None, para_a, para_b, autojunk=False)
+        plain_a = [self._plain(t) for t in para_a]
+        plain_b = [self._plain(t) for t in para_b]
+
+        sm = difflib.SequenceMatcher(None, plain_a, plain_b, autojunk=False)
         if (len(para_a) + len(para_b) > 200) and sm.quick_ratio() < 0.3:
             a_text = "\n".join(para_a)
             b_text = "\n".join(para_b)

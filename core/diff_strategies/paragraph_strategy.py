@@ -8,6 +8,7 @@ ParagraphDiffStrategy 2.0
 
 from pathlib import Path
 from typing import List, Dict
+import re
 from PyQt5.QtCore import QSettings
 import difflib
 
@@ -22,6 +23,12 @@ class ParagraphDiffStrategy(DiffStrategy):
     """Docx / 富文本 段落级 diff（支持行内变化和折叠）"""
 
     # ------------------------------------------------ helper
+    _TAG_RE = re.compile(r"<[^>]+>")
+
+    @classmethod
+    def _plain(cls, text: str) -> str:
+        """Remove markup tags for comparison."""
+        return cls._TAG_RE.sub("", text)
     @staticmethod
     def _paragraph_texts(loader, path: str) -> List[str]:
         """调用 loader.load_structured → 返回带样式 token 的段落文本列表"""
@@ -123,7 +130,10 @@ class ParagraphDiffStrategy(DiffStrategy):
         para_a = self._paragraph_texts(loader_a, path_a)
         para_b = self._paragraph_texts(loader_b, path_b)
 
-        sm = difflib.SequenceMatcher(None, para_a, para_b, autojunk=False)
+        plain_a = [self._plain(t) for t in para_a]
+        plain_b = [self._plain(t) for t in para_b]
+
+        sm = difflib.SequenceMatcher(None, plain_a, plain_b, autojunk=False)
         # 当差异过大且相似度极低时，直接视为整体替换，避免生成大量杂乱块
         if (len(para_a) + len(para_b) > 200) and sm.quick_ratio() < 0.3:
             a_text = "\n".join(para_a)
