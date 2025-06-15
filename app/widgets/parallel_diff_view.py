@@ -15,6 +15,8 @@ from typing import List, Dict
 from html import escape
 import re
 
+from core.i18n import _
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel

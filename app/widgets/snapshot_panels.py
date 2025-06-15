@@ -63,7 +63,6 @@ class SnapshotMiddlePanel(QWidget):
         btn_box = QHBoxLayout()
         self.create_btn = PrimaryButton(_("创建快照"))
         self.compare_btn = FlatButton(_("对比当前与最新"))
-        print("self.compare_btn----:",self.compare_btn.property("type"))
         btn_box.addWidget(self.create_btn)
         btn_box.addWidget(self.compare_btn)
         layout.addLayout(btn_box)

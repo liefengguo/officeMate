@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QMessageBox
 )
+import sip
 from core.i18n import _, i18n
 from ui.components import PrimaryButton, FlatButton
 
@@ -215,5 +216,6 @@ class HistoryPage(QWidget):
         self.label.setText(_("📜 {name} 的快照历史").format(name=self.doc_name))
         self.btn_restore.setText(_("恢复所选快照"))
         self.btn_delete.setText(_("删除所选快照"))
-        self.hint.setText(_("👉 选择快照查看内容或恢复"))
+        if self.hint is not None and not sip.isdeleted(self.hint):
+            self.hint.setText(_("👉 选择快照查看内容或恢复"))
         self.load_snapshots()

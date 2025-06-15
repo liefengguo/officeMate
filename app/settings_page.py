@@ -62,19 +62,30 @@ class SettingsPage(QWidget):
 
         lang_label = QLabel(_("界面语言："))
         box.addWidget(lang_label)
-        lang_zh = QRadioButton("中文")
-        lang_en = QRadioButton("English")
+        lang_buttons = {
+            "zh": QRadioButton("中文"),
+            "en": QRadioButton("English"),
+            "es": QRadioButton("Español"),
+            "pt": QRadioButton("Português"),
+            "ja": QRadioButton("日本語"),
+            "de": QRadioButton("Deutsch"),
+            "fr": QRadioButton("Français"),
+            "ru": QRadioButton("Русский"),
+            "ko": QRadioButton("한국어"),
+        }
         lang_group = QButtonGroup(self)
-        for btn in (lang_zh, lang_en):
+        for btn in lang_buttons.values():
             lang_group.addButton(btn)
             box.addWidget(btn)
 
         current = get_language()
-        (lang_en if current == "en" else lang_zh).setChecked(True)
+        lang_buttons.get(current, lang_buttons["zh"]).setChecked(True)
 
         def _apply_lang(button):
-            mapping = {lang_zh: "zh", lang_en: "en"}
-            set_language(mapping[button])
+            for code, btn in lang_buttons.items():
+                if btn is button:
+                    set_language(code)
+                    break
 
         lang_group.buttonClicked.connect(_apply_lang)
 
