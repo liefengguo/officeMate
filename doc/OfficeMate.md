@@ -1,6 +1,7 @@
 # OfficeMate
 
-
+Supports a multilingual user interface including Chinese, English, Spanish,
+Portuguese, Japanese, German, French, Russian and Korean.
 
 ------
 

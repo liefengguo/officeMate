@@ -1,6 +1,19 @@
 from PyQt5.QtCore import QSettings, pyqtSignal, QObject
 
 # Mapping of original Chinese texts to translations
+SUPPORTED_LANGUAGES = {
+    "zh": "中文",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "fr": "Français",
+    "ru": "Русский",
+    "ko": "한국어",
+}
+
+# Mapping of original Chinese texts to translations
 _TRANSLATIONS = {
     "DocSnap 文档助手": {"en": "DocSnap Assistant"},
     "DocSnap 文档管理主页": {"en": "DocSnap Dashboard"},
@@ -89,6 +102,14 @@ _TRANSLATIONS = {
     "… {count} 段未变 …": {"en": "… {count} unchanged paragraphs …"}
 }
 
+# Populate other languages with English text if missing
+for mapping in _TRANSLATIONS.values():
+    en = mapping.get("en")
+    if en:
+        for code in SUPPORTED_LANGUAGES:
+            if code not in ("zh", "en") and code not in mapping:
+                mapping[code] = en
+
 class _I18N(QObject):
     language_changed = pyqtSignal()
 
@@ -117,4 +138,8 @@ def set_language(lang: str) -> None:
 def _(text: str) -> str:
     lang = get_language()
     trans = _TRANSLATIONS.get(text, {})
-    return trans.get(lang, text)
+    if lang in trans:
+        return trans[lang]
+    if lang != "zh" and "en" in trans:
+        return trans["en"]
+    return text
