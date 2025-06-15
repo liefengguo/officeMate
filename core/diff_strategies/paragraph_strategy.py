@@ -46,6 +46,8 @@ class ParagraphDiffStrategy(DiffStrategy):
         detect_num = settings.value("diff/detect_numbering", True, type=bool)
         detect_img = settings.value("diff/detect_images", True, type=bool)
         detect_table = settings.value("diff/detect_tables", True, type=bool)
+        detect_style = settings.value("diff/detect_style", True, type=bool)
+        detect_indent = settings.value("diff/detect_indent", True, type=bool)
 
         texts: List[str] = []
         for p in struct:
@@ -60,6 +62,14 @@ class ParagraphDiffStrategy(DiffStrategy):
             align = p.get("alignment")
             if align and detect_align:
                 parts.append(f"<align:{align}/>")
+            if detect_indent:
+                left = p.get("indent_left")
+                first = p.get("indent_first")
+                if left is not None or first is not None:
+                    parts.append(f"<indent:{left},{first}/>")
+            style = p.get("style")
+            if style and detect_style:
+                parts.append(f"<style:{style}/>")
             if p.get("numbering") and detect_num:
                 parts.append("<num/>")
             if not runs:
