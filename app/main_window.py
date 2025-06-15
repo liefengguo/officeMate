@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
 )
 from PyQt5.QtCore import QSettings
+from core.i18n import _, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
 from app.main_dashboard import MainDashboard
@@ -14,7 +15,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         apply_theme()
         self.manager = snapshot_manager
-        self.setWindowTitle("DocSnap 文档助手")
+        self.setWindowTitle(_("DocSnap 文档助手"))
         self.setMinimumSize(300, 200)
 
         # Restore previous window size if available
@@ -35,9 +36,21 @@ class MainWindow(QMainWindow):
         # ---------------- 主题菜单 ----------------
         self._create_theme_menu()
 
+        i18n.language_changed.connect(self.retranslate_ui)
+
         # 初始化页面
         self.dashboard = MainDashboard(parent=self, snapshot_manager=self.manager)
         self.stack.addWidget(self.dashboard)  # index 0
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.setWindowTitle(_("DocSnap 文档助手"))
+        self.theme_menu.setTitle(_("主题(&T)"))
+        self.act_auto.setText(_("跟随系统"))
+        self.act_light.setText(_("浅色"))
+        self.act_dark.setText(_("深色"))
+        if hasattr(self, 'dashboard'):
+            self.dashboard.retranslate_ui()
 
     def open_snapshot_history(self, file_path):
         self.snapshot_page = SnapshotHistoryWindow(file_path, parent=self, snapshot_manager=self.manager)
@@ -64,27 +77,27 @@ class MainWindow(QMainWindow):
     def _create_theme_menu(self):
         menubar = self.menuBar()
 
-        theme_menu = QMenu("主题(&T)", self)
-        act_auto  = QAction("跟随系统", self, checkable=True)
-        act_light = QAction("浅色", self, checkable=True)
-        act_dark  = QAction("深色", self, checkable=True)
+        self.theme_menu = QMenu(_("主题(&T)"), self)
+        self.act_auto  = QAction(_("跟随系统"), self, checkable=True)
+        self.act_light = QAction(_("浅色"), self, checkable=True)
+        self.act_dark  = QAction(_("深色"), self, checkable=True)
 
         group = QActionGroup(self)
-        for a in (act_auto, act_light, act_dark):
+        for a in (self.act_auto, self.act_light, self.act_dark):
             a.setActionGroup(group)
-            theme_menu.addAction(a)
+            self.theme_menu.addAction(a)
 
         # 读取用户偏好（若无则 auto）
         pref = load_theme_pref()
-        {"auto": act_auto,
-         "light": act_light,
-         "dark": act_dark}.get(pref, act_auto).setChecked(True)
+        {"auto": self.act_auto,
+         "light": self.act_light,
+         "dark": self.act_dark}.get(pref, self.act_auto).setChecked(True)
 
-        menubar.addMenu(theme_menu)
+        menubar.addMenu(self.theme_menu)
 
         # 切换主题
         def _on_triggered(action: QAction):
-            mapping = {act_auto: "auto", act_light: "light", act_dark: "dark"}
+            mapping = {self.act_auto: "auto", self.act_light: "light", self.act_dark: "dark"}
             pref = mapping[action]
             save_theme_pref(pref)
             apply_theme(pref=pref)

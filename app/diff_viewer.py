@@ -3,11 +3,12 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor, QFont
 from core.diff_engine import DiffEngine
+from core.i18n import _, i18n
 
 class DiffViewer(QWidget):
     def __init__(self, file1_path, file2_path):
         super().__init__()
-        self.setWindowTitle("快照差异对比")
+        self.setWindowTitle(_("快照差异对比"))
         self.setMinimumSize(800, 600)
 
         layout = QVBoxLayout()
@@ -17,6 +18,8 @@ class DiffViewer(QWidget):
         self.setLayout(layout)
 
         self.show_diff(file1_path, file2_path)
+
+        i18n.language_changed.connect(self.retranslate_ui)
 
     def show_diff(self, file1, file2):
         engine = DiffEngine()
@@ -41,3 +44,6 @@ class DiffViewer(QWidget):
         cursor.setCharFormat(fmt)
         cursor.insertText(text)
         cursor.insertText("\n")
+
+    def retranslate_ui(self):
+        self.setWindowTitle(_("快照差异对比"))

@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
 )
 from ui.components import PrimaryButton
 from PyQt5.QtCore import Qt, QSize, QEvent
+from core.i18n import _, i18n
 import os
 from app.snapshot_history import SnapshotHistoryWindow
 from core.recent_db import RecentDocDB
@@ -15,12 +16,12 @@ class MainDashboard(QWidget):
         super().__init__(parent)
         self.manager = snapshot_manager
         self.parent_window = parent
-        self.setWindowTitle("DocSnap 文档管理主页")
+        self.setWindowTitle(_("DocSnap 文档管理主页"))
         self.setMinimumSize(500, 400)
 
         self.db = RecentDocDB()
-        title_label = QLabel("📂 已添加文档列表")
-        title_label.setProperty("class", "h2")
+        self.title_label = QLabel(_("📂 已添加文档列表"))
+        self.title_label.setProperty("class", "h2")
         
         self.layout = QVBoxLayout()
         self.doc_list = QListWidget()
@@ -29,14 +30,14 @@ class MainDashboard(QWidget):
         self.doc_list.setMouseTracking(True)
         self.doc_list.setItemDelegate(ProjectItemDelegate())
         
-        self.add_button = PrimaryButton("➕ 添加项目")
+        self.add_button = PrimaryButton(_("➕ 添加项目"))
         # print(self.add_button.property("type"))
 
         self.doc_list.setSpacing(4)
 
         self.layout.addWidget(self.add_button)
         self.layout.addSpacing(10)
-        self.layout.addWidget(title_label)
+        self.layout.addWidget(self.title_label)
         self.layout.addWidget(self.doc_list)
         self.setLayout(self.layout)
 
@@ -48,11 +49,20 @@ class MainDashboard(QWidget):
         self.doc_list.itemClicked.connect(self.open_project_page)
         self.refresh_list()
 
+        i18n.language_changed.connect(self.retranslate_ui)
+
+    # ------------------------------------------------------- i18n
+    def retranslate_ui(self):
+        self.setWindowTitle(_("DocSnap 文档管理主页"))
+        self.title_label.setText(_("📂 已添加文档列表"))
+        self.add_button.setText(_("➕ 添加项目"))
+        self.refresh_list()
+
     def refresh_list(self):
         self.doc_list.clear()
         docs = self.db.get_all()
         if not docs:
-            self.doc_list.addItem("暂无文档，点击上方按钮添加")
+            self.doc_list.addItem(_("暂无文档，点击上方按钮添加"))
             self.doc_list.setDisabled(True)
         else:
             self.doc_list.setDisabled(False)
@@ -64,7 +74,7 @@ class MainDashboard(QWidget):
                 self.doc_list.addItem(item)
     def add_document(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "选择文档", "", "文档 (*.txt *.docx);;所有文件 (*)"
+            self, _("选择文档"), "", _("文档 (*.txt *.docx);;所有文件 (*)")
         )
         if file_path:
             self.db.add(file_path)
@@ -76,7 +86,7 @@ class MainDashboard(QWidget):
             if self.parent_window:
                 self.parent_window.open_snapshot_history(file_path)
         else:
-            QMessageBox.warning(self, "文件不存在", f"该文件无法访问：\n{file_path}")
+            QMessageBox.warning(self, _("文件不存在"), _("该文件无法访问：\n{path}").format(path=file_path))
 
     def eventFilter(self, source, event):
         if source is self.doc_list.viewport():
@@ -95,4 +105,4 @@ class MainDashboard(QWidget):
             # 通过 parent_window 触发页面切换
             self.parent_window.open_project_page(file_path)
         else:
-            QMessageBox.warning(self, "文件不存在", f"无法访问：{file_path}")
+            QMessageBox.warning(self, _("文件不存在"), _("无法访问：{path}").format(path=file_path))

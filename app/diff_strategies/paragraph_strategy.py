@@ -10,6 +10,7 @@ ParagraphDiffStrategy 2.0
 from pathlib import Path
 from typing import List, Dict
 from PyQt5.QtCore import QSettings
+from core.i18n import _
 import difflib
 
 from .base_strategy import DiffStrategy, DiffResult
@@ -126,7 +127,7 @@ class ParagraphDiffStrategy(DiffStrategy):
 
         def add_skip(count: int):
             chunks.append({"tag": "skip", "count": count})
-            raw_lines.append(f"... {count} unchanged paragraphs ...")
+            raw_lines.append(_("... {count} 段未变 ...").format(count=count))
 
         for tag, i1, i2, j1, j2 in sm.get_opcodes():
             if tag == "equal":

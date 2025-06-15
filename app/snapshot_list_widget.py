@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 import os
 from core.snapshot import SnapshotManager
+from core.i18n import _, i18n
 
 class SnapshotListWidget(QListWidget):
     def __init__(self, file_path, single_selection=True, parent=None):
@@ -16,6 +17,8 @@ class SnapshotListWidget(QListWidget):
 
         self.load_snapshots()
 
+        i18n.language_changed.connect(self.load_snapshots)
+
     def load_snapshots(self):
         """加载快照数据到列表"""
         self.clear()
@@ -23,14 +26,14 @@ class SnapshotListWidget(QListWidget):
         versions = self.sm.version_db.get_versions(doc_name)
 
         if not versions:
-            self.addItem("暂无快照记录")
+            self.addItem(_("暂无快照记录"))
             return
 
         versions.sort(key=lambda v: v.get("timestamp", ""), reverse=True)
 
         for v in versions:
-            timestamp = v.get("timestamp", "未知时间")
-            path = v.get("snapshot_path", "未知路径")
+            timestamp = v.get("timestamp", _("未知时间"))
+            path = v.get("snapshot_path", _("未知路径"))
             remark = v.get("remark", "")
 
             title = remark.strip() if remark.strip() else os.path.basename(path)

@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PyQt5.QtGui import QFont
+from core.i18n import _, i18n
 import os
 from core.snapshot_loaders.loader_registry import LoaderRegistry
 from core.diff_strategies.paragraph_strategy import ParagraphDiffStrategy
@@ -8,7 +9,7 @@ from app.widgets.parallel_diff_view import _tokens_to_html, MONO_STYLE
 class PreviewWindow(QWidget):
     def __init__(self, file_path):
         super().__init__()
-        self.setWindowTitle("快照内容预览")
+        self.setWindowTitle(_("快照内容预览"))
         self.setMinimumSize(400, 300)
 
         layout = QVBoxLayout()
@@ -18,6 +19,8 @@ class PreviewWindow(QWidget):
         layout.addWidget(self.text_edit)
         self.setLayout(layout)
         self.load_content(file_path)
+
+        i18n.language_changed.connect(self.retranslate_ui)
 
     def load_content(self, path: str):
         """Load snapshot content using LoaderRegistry."""
@@ -40,4 +43,7 @@ class PreviewWindow(QWidget):
                 self.text_edit.setStyleSheet(MONO_STYLE)
                 self.text_edit.setPlainText(text)
         except Exception as e:
-            self.text_edit.setPlainText(f"加载内容失败：{e}")
+            self.text_edit.setPlainText(_("加载内容失败：{e}").format(e=e))
+
+    def retranslate_ui(self):
+        self.setWindowTitle(_("快照内容预览"))
