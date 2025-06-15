@@ -42,13 +42,13 @@ class HistoryPage(QWidget):
         self.btn_restore.clicked.connect(self.restore_selected)
 
         mid_layout.addWidget(self.label)
-        mid_layout.addWidget(self.list_widget)
+        mid_layout.addWidget(self.list_widget, 1)
         mid_layout.addWidget(self.btn_restore)
         self.btn_delete = PrimaryButton(_("删除所选快照"))
         self.btn_delete.setFixedHeight(28)
         self.btn_delete.clicked.connect(self.delete_selected)
         mid_layout.addWidget(self.btn_delete)
-        mid_layout.addStretch(1)
+        mid_layout.addStretch()
 
         # ---------- 右侧显示面板 ----------
         self.display_panel = SnapshotDisplayPanel()
