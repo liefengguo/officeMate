@@ -17,7 +17,7 @@ import re
 
 from core.i18n import _
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSettings
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
 
@@ -33,7 +33,7 @@ _TOKEN_RE = re.compile(
 )
 
 
-def _tokens_to_html(text: str) -> str:
+def _tokens_to_html(text: str, show_tokens: bool = True) -> str:
     """Convert style tokens produced by ParagraphDiffStrategy to HTML."""
     parts = _TOKEN_RE.split(text)
     html_parts: List[str] = []
@@ -41,6 +41,8 @@ def _tokens_to_html(text: str) -> str:
         if not part:
             continue
         if _TOKEN_RE.fullmatch(part):
+            if not show_tokens:
+                continue
             if part.startswith('<font:'):
                 font = part[6:-1]
                 html_parts.append(f'<span style="font-family:{escape(font)}">')
@@ -146,7 +148,7 @@ class ParallelDiffView(QSplitter):
         self._lock = False
 
     @staticmethod
-    def _render_inline(inline_ops: List[List[str]], side: str) -> str:
+    def _render_inline(inline_ops: List[List[str]], side: str, compact: bool = False) -> str:
         """
         inline_ops: [["equal","foo","foo"],["delete","bar",""],["insert","","baz"]]
         side: "a" (old) or "b" (new)
@@ -154,7 +156,7 @@ class ParallelDiffView(QSplitter):
         html_parts = []
         for tag, a_chunk, b_chunk in inline_ops:
             if tag == "equal":
-                html_parts.append(_tokens_to_html(a_chunk))
+                html_parts.append(_tokens_to_html(a_chunk if side == "a" else b_chunk, show_tokens=not compact))
             elif tag == "delete":
                 if side == "a":
                     style = (
@@ -181,6 +183,7 @@ class ParallelDiffView(QSplitter):
         """渲染左右 HTML，带行号和符号"""
         left_lines, right_lines = [], []
         old_idx, new_idx = 1, 1        # 行号计数
+        compact = QSettings().value("diff/compact_style", False, type=bool)
 
         def ln_html(n):    # 行号灰色
             return f'<span class="ln">{n:>4}</span> '
@@ -193,7 +196,7 @@ class ParallelDiffView(QSplitter):
             tag = ch["tag"]
 
             if tag == "equal":
-                text = _tokens_to_html(ch["a_text"] or "")
+                text = _tokens_to_html(ch["a_text"] or "", show_tokens=not compact)
                 left_lines.append(ln_html(old_idx) + "&nbsp;" + text)
                 right_lines.append(ln_html(new_idx) + "&nbsp;" + text)
                 old_idx += 1
@@ -224,8 +227,8 @@ class ParallelDiffView(QSplitter):
             elif tag == "replace":
                 # 行内高亮
                 inline = ch.get("inline", [])
-                left_html = self._render_inline(inline, "a")
-                right_html = self._render_inline(inline, "b")
+                left_html = self._render_inline(inline, "a", compact)
+                right_html = self._render_inline(inline, "b", compact)
                 left_lines.append(ln_html(old_idx) + sym_html("~") + left_html)
                 right_lines.append(ln_html(new_idx) + sym_html("~") + right_html)
                 old_idx += 1
