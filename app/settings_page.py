@@ -128,6 +128,11 @@ class SettingsPage(QWidget):
         chk_auto_compare.toggled.connect(lambda v: self.settings.setValue("options/auto_snapshot_compare", v))
         box.addWidget(chk_auto_compare)
 
+        chk_compact = QCheckBox(_("简洁显示"))
+        chk_compact.setChecked(self.settings.value("diff/compact_style", False, type=bool))
+        chk_compact.toggled.connect(lambda v: self.settings.setValue("diff/compact_style", v))
+        box.addWidget(chk_compact)
+
         box.addStretch(1)
         self.tabs.addTab(widget, _("快照"))
 

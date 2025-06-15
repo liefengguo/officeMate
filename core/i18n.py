@@ -648,6 +648,16 @@ _TRANSLATIONS = {
         "ru": "\u041e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u0442\u044c \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0442\u0430\u0431\u043b\u0438\u0446",
         "ko": "\ud45c \ubcc0\uacbd \uac10\uc9c0",
     },
+    "简洁显示": {
+        "en": "Compact display",
+        "es": "Visualización compacta",
+        "pt": "Exibição compacta",
+        "ja": "簡潔表示",
+        "de": "Kompakte Anzeige",
+        "fr": "Affichage compact",
+        "ru": "Компактное отображение",
+        "ko": "간결 표시",
+    },
     "检测段落样式变化": {
         "en": "Detect paragraph style changes",
         "es": "Detectar cambios de estilo de párrafo",
