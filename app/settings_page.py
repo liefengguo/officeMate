@@ -128,6 +128,11 @@ class SettingsPage(QWidget):
         chk_auto_compare.toggled.connect(lambda v: self.settings.setValue("options/auto_snapshot_compare", v))
         box.addWidget(chk_auto_compare)
 
+        chk_compact = QCheckBox(_("简洁显示"))
+        chk_compact.setChecked(self.settings.value("diff/compact_style", False, type=bool))
+        chk_compact.toggled.connect(lambda v: self.settings.setValue("diff/compact_style", v))
+        box.addWidget(chk_compact)
+
         box.addStretch(1)
         self.tabs.addTab(widget, _("快照"))
 
@@ -154,7 +159,6 @@ class SettingsPage(QWidget):
             ("diff/detect_numbering", _("检测段落编号变化")),
             ("diff/detect_images", _("检测图片变动")),
             ("diff/detect_tables", _("检测表格变动")),
-            ("diff/compact_style", _("仅在变化处显示样式标记")),
         ]
 
         for key, label in options:
