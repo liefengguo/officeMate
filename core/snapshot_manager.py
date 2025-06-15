@@ -40,12 +40,20 @@ class SnapshotManager(QObject):
 
     # ------------------------------------------------------------------ public API
 
-    def create_snapshot(self, file_path: str, remark: str = "") -> Dict:
+    def create_snapshot(
+        self,
+        file_path: str,
+        remark: str = "",
+        *,
+        kind: str | None = None,
+    ) -> Dict:
         """
         Create a new snapshot from `file_path`.
 
         :param file_path: Absolute path of the source document.
         :param remark:    Optional commit message / remark string.
+        :param kind:      Optional marker describing the snapshot type
+                           ("normal", "backup", "restore", ...).
         :return:          Metadata dict describing the new snapshot.
         """
         if not os.path.isfile(file_path):
@@ -71,7 +79,8 @@ class SnapshotManager(QObject):
             "file_path": file_path,          # absolute path of original doc
             "timestamp": timestamp,
             "remark": remark,
-            "snapshot_path": str(snapshot_file)
+            "snapshot_path": str(snapshot_file),
+            "kind": kind or "normal",
         }
         self.repo.save_version(doc_name, meta)
         # register a fallback plain‑text loader for legacy '.bak' if not yet registered
@@ -101,12 +110,19 @@ class SnapshotManager(QObject):
         # emit signal for UI refresh
         self.snapshot_deleted.emit(version_meta)
 
-    def list_snapshots(self, doc_name: str) -> List[Dict]:
+    def list_snapshots(self, doc_name: str, *, include_restore: bool = True) -> List[Dict]:
         """
         Return list of snapshot metadata for given document, newest first.
+
+        Parameters
+        ----------
+        include_restore : bool
+            If ``False`` restore markers are excluded from the result.
         """
         self.repo.reload()
         versions = self.repo.get_versions(doc_name)
+        if not include_restore:
+            versions = [v for v in versions if v.get("kind") != "restore"]
         versions.sort(key=lambda v: v.get("timestamp", ""), reverse=True)
         return versions
 
@@ -148,7 +164,7 @@ class SnapshotManager(QObject):
         Safely restore working document to the state of target_meta.
         1) create auto-backup of current doc (undo point)
         2) overwrite current doc with snapshot content
-        3) create new snapshot entry 'Restore to <id>'
+        3) create marker snapshot 'Restore to <id>' for history/undo
         """
         snap_id = target_meta.get("snapshot_id") or os.path.splitext(os.path.basename(target_meta.get("snapshot_path", "")))[0]
         work_file = self._get_work_file(target_meta)
@@ -156,7 +172,8 @@ class SnapshotManager(QObject):
         # 1. backup current state
         backup_meta = self.create_snapshot(
             work_file,
-            remark=f"Auto backup before restore -> {snap_id}"
+            remark=f"Auto backup before restore -> {snap_id}",
+            kind="backup",
         )
 
         # 2. overwrite
@@ -165,7 +182,8 @@ class SnapshotManager(QObject):
         # 3. add new snapshot indicating restore
         restore_meta = self.create_snapshot(
             work_file,
-            remark=f"Restore to {snap_id}"
+            remark=f"Restore to {snap_id}",
+            kind="restore",
         )
 
         # push undo stack
@@ -182,7 +200,11 @@ class SnapshotManager(QObject):
         # restore to backup_meta (this will push another entry, but we don't push recursively)
         work_file = self._get_work_file(backup_meta)
         shutil.copyfile(backup_meta["snapshot_path"], work_file)
-        self.create_snapshot(work_file, remark="Undo Restore")
+        self.create_snapshot(
+            work_file,
+            remark="Undo Restore",
+            kind="undo",
+        )
 
 
     # ----------------- internal helpers -----------------

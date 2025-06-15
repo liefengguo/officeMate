@@ -62,7 +62,7 @@ class SnapshotPage(QWidget):
         try:
             # 找到最新快照文件
             doc_name = os.path.basename(self.file_path)
-            versions = self.manager.list_snapshots(doc_name)
+            versions = self.manager.list_snapshots(doc_name, include_restore=False)
             if not versions:
                 warn_lbl = QLabel(_("⚠️ 没有可用快照进行对比"))
                 warn_lbl.setAlignment(Qt.AlignCenter)
