@@ -124,6 +124,22 @@ class ParagraphDiffStrategy(DiffStrategy):
         para_b = self._paragraph_texts(loader_b, path_b)
 
         sm = difflib.SequenceMatcher(None, para_a, para_b, autojunk=False)
+        # 当差异过大且相似度极低时，直接视为整体替换，避免生成大量杂乱块
+        if (len(para_a) + len(para_b) > 200) and sm.quick_ratio() < 0.3:
+            a_text = "\n".join(para_a)
+            b_text = "\n".join(para_b)
+            inline = self._inline_ops(a_text, b_text)
+            chunks = [{
+                "tag": "replace",
+                "a_idx": 0,
+                "b_idx": 0,
+                "a_text": a_text,
+                "b_text": b_text,
+                "inline": inline,
+            }]
+            raw = [f"- {a_text}", f"+ {b_text}"]
+            return DiffResult("\n".join(raw), structured=chunks)
+
         chunks: List[Dict] = []
         raw: List[str] = []
 

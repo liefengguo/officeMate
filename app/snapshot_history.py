@@ -92,8 +92,8 @@ class SnapshotHistoryWindow(QWidget):
             QMessageBox.warning(self, _("选择错误"), _("请选择两个快照进行对比"))
             return
 
-        diff = self.manager.compare_snapshots(paths[0], paths[1])
-        viewer = DiffViewer(diff_text=diff)
+        # 直接通过 DiffViewer 比较两个文件路径，避免中间结果类型不匹配
+        viewer = DiffViewer(paths[0], paths[1])
         viewer.show()
 
     # ------------------------------------------------------- i18n
