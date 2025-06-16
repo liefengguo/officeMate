@@ -86,7 +86,7 @@ class ImportMergePage(QWidget):
             return None
         versions = self.manager.list_snapshots(self.doc_name)
         for v in versions:
-            if v.get("snapshot_path") == item.data(Qt.UserRole):
+            if v.get("snapshot_path") == item.data(1000):
                 return v
         return None
 
@@ -95,7 +95,7 @@ class ImportMergePage(QWidget):
         if not base_item or not self._imported_path:
             QMessageBox.information(self, _("提示"), _("请先选择基准快照并导入文档"))
             return
-        self._base_path = base_item.data(Qt.UserRole)
+        self._base_path = base_item.data(1000)
         diff_result = self.manager.diff_engine.compare_files(self._base_path, self._imported_path)
         if diff_result.structured:
             viewer = ParallelDiffView(os.path.basename(self._base_path), os.path.basename(self._imported_path), self)
