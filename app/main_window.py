@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
 )
-from PyQt5.QtCore import QSettings, QSize
+from PyQt5.QtCore import QSettings, QSize, QTimer
 from core.i18n import _, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
@@ -9,6 +9,7 @@ from app.main_dashboard import MainDashboard
 from app.snapshot_history import SnapshotHistoryWindow
 from app.project_page import ProjectPage
 from core.snapshot_manager import SnapshotManager
+from app.onboarding import OnboardingDialog
 
 class MainWindow(QMainWindow):
     def __init__(self, snapshot_manager: SnapshotManager):
@@ -41,6 +42,9 @@ class MainWindow(QMainWindow):
         # 初始化页面
         self.dashboard = MainDashboard(parent=self, snapshot_manager=self.manager)
         self.stack.addWidget(self.dashboard)  # index 0
+
+        # 展示新手引导（首次启动）
+        QTimer.singleShot(100, self._maybe_show_onboarding)
 
     # ------------------------------------------------------- i18n
     def retranslate_ui(self):
@@ -111,6 +115,13 @@ class MainWindow(QMainWindow):
             save_theme_pref(pref)
             apply_theme(pref=pref)
         group.triggered.connect(_on_triggered)
+
+    def _maybe_show_onboarding(self):
+        settings = QSettings()
+        if not settings.value("ui/onboarding_done", False, type=bool):
+            dlg = OnboardingDialog(self)
+            if dlg.exec_():
+                settings.setValue("ui/onboarding_done", True)
 
     def _store_current_size(self):
         """Save current window size depending on active page."""

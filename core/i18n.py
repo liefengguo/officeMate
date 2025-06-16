@@ -737,7 +737,17 @@ _TRANSLATIONS = {
         "fr": "… {count} paragraphes inchang\u00e9s …",
         "ru": "… {count} \u0431\u0435\u0437 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439 \u0430\u0431\u0437\u0430\u0446\u0435\u0432 …",
         "ko": "… {count}\uac1c \ub2e8\ub77d \ubcc0\ud654 \uc5c6\uc74c …",
-    }
+    },
+    "欢迎使用 DocSnap": {"en": "Welcome to DocSnap"},
+    "管理文档快照": {"en": "Manage snapshots"},
+    "自动保存文档历史版本，随时回溯。": {"en": "Automatically save document history for easy rollback."},
+    "快速对比差异": {"en": "Compare differences"},
+    "选取任意两个版本，智能展示改动。": {"en": "Select any two versions to see changes."},
+    "多语言与主题": {"en": "Languages and themes"},
+    "提供多种语言和亮/暗主题，个性化体验。": {"en": "Multiple languages and light/dark themes for a personalized experience."},
+    "下一步": {"en": "Next"},
+    "跳过": {"en": "Skip"},
+    "开始使用": {"en": "Get Started"},
 }
 
 # Populate other languages with English text if missing
