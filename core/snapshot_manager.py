@@ -141,12 +141,33 @@ class SnapshotManager(QObject):
         """
         return self.diff_engine.compare_files(path1, path2)
 
-    def merge_into_work_file(self, base_path: str, other_path: str, work_file: str) -> str:
+    def merge_into_work_file(
+        self,
+        base_path: str,
+        other_path: str,
+        work_file: str,
+        preview: bool = False,
+    ) -> Tuple[str, Optional[str]]:
         """Apply changes from *other_path* relative to *base_path* onto *work_file*.
 
-        Currently only plain text files are supported.  The method returns the
-        unified diff that was applied.  A new snapshot of the resulting file is
-        created automatically.
+        Parameters
+        ----------
+        base_path : str
+            Snapshot path of the original base document ``A``.
+        other_path : str
+            Path to the modified document ``C`` to merge.
+        work_file : str
+            Target working file ``B`` that should receive the changes.
+        preview : bool, optional
+            If ``True`` the patch is applied to a temporary copy of
+            ``work_file`` and the path of that copy is returned. The
+            original file remains untouched and no snapshot is created.
+
+        Returns
+        -------
+        Tuple[str, Optional[str]]
+            The unified diff text and, if ``preview`` is ``True``, the path of
+            the patched temporary file.  Otherwise the second element is ``None``.
         """
         import difflib
         import subprocess
@@ -176,25 +197,34 @@ class SnapshotManager(QObject):
         )
         patch_text = "\n".join(diff_lines)
 
-        with tempfile.NamedTemporaryFile("w", delete=False) as tmp:
-            tmp.write(patch_text)
-            tmp_path = tmp.name
+        with tempfile.NamedTemporaryFile("w", delete=False) as tmp_patch:
+            tmp_patch.write(patch_text)
+            patch_path = tmp_patch.name
+
+        if preview:
+            tmp_out = tempfile.NamedTemporaryFile("w", delete=False, suffix=ext)
+            tmp_out.close()
+            shutil.copyfile(work_file, tmp_out.name)
+            target = tmp_out.name
+        else:
+            target = work_file
 
         try:
             proc = subprocess.run(
-                ["patch", "--batch", work_file, tmp_path],
+                ["patch", "--batch", target, patch_path],
                 capture_output=True,
                 text=True,
             )
             if proc.returncode != 0:
                 raise RuntimeError(proc.stderr.strip() or proc.stdout.strip())
 
-            # snapshot after successful merge
-            self.create_snapshot(work_file, remark=f"Merge {os.path.basename(other_path)}")
+            if not preview:
+                # snapshot after successful merge
+                self.create_snapshot(work_file, remark=f"Merge {os.path.basename(other_path)}")
         finally:
-            os.unlink(tmp_path)
+            os.unlink(patch_path)
 
-        return patch_text
+        return patch_text, (target if preview else None)
 
 
     # ----------------- restore / undo -----------------

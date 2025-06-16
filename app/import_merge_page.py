@@ -27,22 +27,23 @@ class ImportMergePage(QWidget):
         # ---------- Left panel ----------
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
-        self.base_label = QLabel(_("选择基准快照(A)："))
-        self.base_list = SnapshotListWidget(file_path, single_selection=True)
-        self.target_label = QLabel(_("选择合并目标(C)："))
-        self.target_list = SnapshotListWidget(file_path, single_selection=True)
+        self.list_label = QLabel(_("快照列表："))
+        self.list_widget = SnapshotListWidget(file_path, single_selection=True)
+
         self.import_btn = PrimaryButton(_("导入外部文档…"))
         self.import_btn.setFixedHeight(28)
         self.diff_btn = PrimaryButton(_("查看差异"))
         self.diff_btn.setFixedHeight(28)
-        self.merge_btn = PrimaryButton(_("合并到目标"))
+        self.preview_btn = PrimaryButton(_("预览合并"))
+        self.preview_btn.setFixedHeight(28)
+        self.merge_btn = PrimaryButton(_("应用合并"))
         self.merge_btn.setFixedHeight(28)
-        left_layout.addWidget(self.base_label)
-        left_layout.addWidget(self.base_list)
-        left_layout.addWidget(self.target_label)
-        left_layout.addWidget(self.target_list)
+
+        left_layout.addWidget(self.list_label)
+        left_layout.addWidget(self.list_widget)
         left_layout.addWidget(self.import_btn)
         left_layout.addWidget(self.diff_btn)
+        left_layout.addWidget(self.preview_btn)
         left_layout.addWidget(self.merge_btn)
         left_layout.addStretch(1)
 
@@ -61,20 +62,22 @@ class ImportMergePage(QWidget):
         self._imported_path: Optional[str] = None
         self._base_path: Optional[str] = None
         self._target_meta: Optional[dict] = None
+        self._preview_path: Optional[str] = None
+        self._diff_ready = False
 
         # ---------- Signals ----------
         self.import_btn.clicked.connect(self.import_file)
         self.diff_btn.clicked.connect(self.compare_with_base)
+        self.preview_btn.clicked.connect(self.preview_merge)
         self.merge_btn.clicked.connect(self.merge_into_target)
         i18n.language_changed.connect(self.retranslate_ui)
 
     # ---------------------------------------------------------------- utils
     def load_snapshots(self):
-        self.base_list.load_snapshots()
-        self.target_list.load_snapshots()
+        self.list_widget.load_snapshots()
 
     def import_file(self):
-        path, _ = QFileDialog.getOpenFileName(self, _("选择对比文档"), "", "*")
+        path, _selected = QFileDialog.getOpenFileName(self, _("选择对比文档"), "", "*")
         if path:
             self._imported_path = path
 
@@ -88,7 +91,7 @@ class ImportMergePage(QWidget):
         return None
 
     def compare_with_base(self):
-        base_item = self.base_list.currentItem()
+        base_item = self.list_widget.currentItem()
         if not base_item or not self._imported_path:
             QMessageBox.information(self, _("提示"), _("请先选择基准快照并导入文档"))
             return
@@ -104,12 +107,13 @@ class ImportMergePage(QWidget):
             viewer.set_diff_content(diff_result.raw or _("两个文档无差异。"))
         self.display_panel.set_widget(viewer)
         self.hint_lbl = None
+        self._diff_ready = True
 
-    def merge_into_target(self):
-        if not self._base_path or not self._imported_path:
-            QMessageBox.information(self, _("提示"), _("请先完成差异查看"))
+    def preview_merge(self):
+        if not self._diff_ready:
+            QMessageBox.information(self, _("提示"), _("请先完成基准差异查看"))
             return
-        target_item = self.target_list.currentItem()
+        target_item = self.list_widget.currentItem()
         if not target_item:
             QMessageBox.information(self, _("提示"), _("请选择合并目标快照"))
             return
@@ -119,18 +123,59 @@ class ImportMergePage(QWidget):
             return
         work_file = meta.get("file_path") or self.file_path
         try:
-            self.manager.merge_into_work_file(self._base_path, self._imported_path, work_file)
+            patch_text, preview_path = self.manager.merge_into_work_file(
+                self._base_path,
+                self._imported_path,
+                work_file,
+                preview=True,
+            )
+            diff_result = self.manager.diff_engine.compare_files(work_file, preview_path)
+            if diff_result.structured:
+                viewer = ParallelDiffView(os.path.basename(work_file), os.path.basename(preview_path), self)
+                viewer.load_chunks(diff_result.structured)
+                viewer.left.setProperty("class", "diff-pane")
+                viewer.right.setProperty("class", "diff-pane")
+            else:
+                viewer = DiffViewerWidget(self)
+                viewer.set_diff_content(diff_result.raw or _("两个文档无差异。"))
+            self.display_panel.set_widget(viewer)
+            self._target_meta = meta
+            self._preview_path = preview_path
+            self.hint_lbl = None
+        except Exception as e:
+            QMessageBox.critical(self, _("预览失败"), str(e))
+
+    def merge_into_target(self):
+        if not self._base_path or not self._imported_path or not self._diff_ready:
+            QMessageBox.information(self, _("提示"), _("请先完成差异查看"))
+            return
+        if self._target_meta is None:
+            QMessageBox.information(self, _("提示"), _("请先预览合并效果"))
+            return
+        meta = self._target_meta
+        work_file = meta.get("file_path") or self.file_path
+        try:
+            self.manager.merge_into_work_file(
+                self._base_path,
+                self._imported_path,
+                work_file,
+                preview=False,
+            )
             QMessageBox.information(self, _("合并完成"), _("差异已应用到目标文档"))
+            if self._preview_path and os.path.exists(self._preview_path):
+                os.unlink(self._preview_path)
+            self._preview_path = None
+            self._target_meta = None
         except Exception as e:
             QMessageBox.critical(self, _("合并失败"), str(e))
 
     # ------------------------------------------------------- i18n
     def retranslate_ui(self):
-        self.base_label.setText(_("选择基准快照(A)："))
-        self.target_label.setText(_("选择合并目标(C)："))
+        self.list_label.setText(_("快照列表："))
         self.import_btn.setText(_("导入外部文档…"))
         self.diff_btn.setText(_("查看差异"))
-        self.merge_btn.setText(_("合并到目标"))
+        self.preview_btn.setText(_("预览合并"))
+        self.merge_btn.setText(_("应用合并"))
         if self.hint_lbl is not None:
             self.hint_lbl.setText(_("👉 请选择基准快照并导入文档"))
         self.load_snapshots()
