@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
 )
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QSettings, QSize
 from core.i18n import _, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
@@ -18,17 +18,17 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(_("DocSnap 文档助手"))
         self.setMinimumSize(300, 200)
 
-        # Restore previous window size if available
+        # Restore separate sizes for dashboard and content pages
         self._settings = QSettings()
-        width = self._settings.value("ui/window_width")
-        height = self._settings.value("ui/window_height")
-        try:
-            width = int(width)
-            height = int(height)
-        except (TypeError, ValueError):
-            width = height = None
-        if width and height:
-            self.resize(width, height)
+        home_w = self._settings.value("ui/home_width", 500, type=int)
+        home_h = self._settings.value("ui/home_height", 400, type=int)
+        page_w = self._settings.value("ui/page_width", 800, type=int)
+        page_h = self._settings.value("ui/page_height", 600, type=int)
+        self.home_size = QSize(home_w, home_h)
+        self.page_size = QSize(page_w, page_h)
+
+        # Start with dashboard size
+        self.resize(self.home_size)
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -53,14 +53,20 @@ class MainWindow(QMainWindow):
             self.dashboard.retranslate_ui()
 
     def open_snapshot_history(self, file_path):
+        # Store dashboard size before switching
+        self._store_current_size()
         self.snapshot_page = SnapshotHistoryWindow(file_path, parent=self, snapshot_manager=self.manager)
         if self.stack.count() == 2:
             self.stack.removeWidget(self.stack.widget(1))
         self.stack.addWidget(self.snapshot_page)  # index 1
         self.stack.setCurrentIndex(1)
+        self.resize(self.page_size)
 
     def go_back_to_dashboard(self):
+        # Persist page size and restore dashboard size
+        self._store_current_size()
         self.stack.setCurrentIndex(0)
+        self.resize(self.home_size)
 
     def open_project_page(self, file_path):
         """从主页打开项目页面"""
@@ -69,9 +75,12 @@ class MainWindow(QMainWindow):
             self.stack.removeWidget(self.project_page)
 
         # 创建新的项目页面并压入堆栈
+        # Store dashboard size before switching
+        self._store_current_size()
         self.project_page = ProjectPage(file_path, snapshot_manager=self.manager, parent=self)
         self.stack.addWidget(self.project_page)  # index 1
         self.stack.setCurrentWidget(self.project_page)
+        self.resize(self.page_size)
 
     # ---------------------------------------------------------------- theme
     def _create_theme_menu(self):
@@ -103,8 +112,18 @@ class MainWindow(QMainWindow):
             apply_theme(pref=pref)
         group.triggered.connect(_on_triggered)
 
+    def _store_current_size(self):
+        """Save current window size depending on active page."""
+        if self.stack.currentIndex() == 0:
+            self.home_size = self.size()
+            self._settings.setValue("ui/home_width", self.home_size.width())
+            self._settings.setValue("ui/home_height", self.home_size.height())
+        else:
+            self.page_size = self.size()
+            self._settings.setValue("ui/page_width", self.page_size.width())
+            self._settings.setValue("ui/page_height", self.page_size.height())
+
     def closeEvent(self, event):
         """Persist window size on close."""
-        self._settings.setValue("ui/window_width", self.width())
-        self._settings.setValue("ui/window_height", self.height())
+        self._store_current_size()
         super().closeEvent(event)
