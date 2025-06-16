@@ -141,6 +141,61 @@ class SnapshotManager(QObject):
         """
         return self.diff_engine.compare_files(path1, path2)
 
+    def merge_into_work_file(self, base_path: str, other_path: str, work_file: str) -> str:
+        """Apply changes from *other_path* relative to *base_path* onto *work_file*.
+
+        Currently only plain text files are supported.  The method returns the
+        unified diff that was applied.  A new snapshot of the resulting file is
+        created automatically.
+        """
+        import difflib
+        import subprocess
+        import tempfile
+        from pathlib import Path
+
+        # ensure all three files share the same extension and loader
+        ext = Path(work_file).suffix
+        if ext not in (".txt", ".TXT"):
+            raise ValueError("Only text files are currently supported")
+
+        loader = LoaderRegistry.get_loader(ext)
+        if loader is None:
+            raise ValueError(f"No loader for extension: {ext}")
+
+        base_text = loader.get_text(base_path).splitlines()
+        other_text = loader.get_text(other_path).splitlines()
+
+        diff_lines = list(
+            difflib.unified_diff(
+                base_text,
+                other_text,
+                fromfile=os.path.basename(base_path),
+                tofile=os.path.basename(other_path),
+                lineterm="",
+            )
+        )
+        patch_text = "\n".join(diff_lines)
+
+        with tempfile.NamedTemporaryFile("w", delete=False) as tmp:
+            tmp.write(patch_text)
+            tmp_path = tmp.name
+
+        try:
+            proc = subprocess.run(
+                ["patch", "--batch", work_file, tmp_path],
+                capture_output=True,
+                text=True,
+            )
+            if proc.returncode != 0:
+                raise RuntimeError(proc.stderr.strip() or proc.stdout.strip())
+
+            # snapshot after successful merge
+            self.create_snapshot(work_file, remark=f"Merge {os.path.basename(other_path)}")
+        finally:
+            os.unlink(tmp_path)
+
+        return patch_text
+
 
     # ----------------- restore / undo -----------------
     def restore_snapshot(self, target_meta: Dict):
