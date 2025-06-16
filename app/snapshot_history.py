@@ -38,9 +38,10 @@ class SnapshotHistoryWindow(QWidget):
         self.preview_button.clicked.connect(self.preview_snapshots)
         self.list_widget.setSelectionMode(QAbstractItemView.MultiSelection)
         self.layout.addWidget(self.label)
-        self.layout.addWidget(self.list_widget)
+        self.layout.addWidget(self.list_widget, 1)
         self.layout.addWidget(self.compare_button)
         self.layout.addWidget(self.preview_button)
+        self.layout.addStretch()
         self.setLayout(self.layout)
 
         self.preview_windows = []

@@ -191,10 +191,14 @@ class ParallelDiffView(QSplitter):
         """渲染左右 HTML，带行号和符号"""
         left_lines, right_lines = [], []
         old_idx, new_idx = 1, 1        # 行号计数
+        max_old = max((c.get("a_idx", -1) for c in chunks), default=-1) + 1
+        max_new = max((c.get("b_idx", -1) for c in chunks), default=-1) + 1
+        width = len(str(max(max_old, max_new)))
         compact = QSettings().value("diff/compact_style", False, type=bool)
 
         def ln_html(n):    # 行号灰色
-            return f'<span class="ln">{n:>4}</span> '
+            num = str(n) if n != "" else ""
+            return f'<span class="ln">{num.rjust(width)}</span> '
 
         def sym_html(sym):
             color = {"-":"#ff3b30", "+":"#34c759", "~":"#ff9500"}.get(sym, "#888")

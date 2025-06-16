@@ -42,13 +42,13 @@ class HistoryPage(QWidget):
         self.btn_restore.clicked.connect(self.restore_selected)
 
         mid_layout.addWidget(self.label)
-        mid_layout.addWidget(self.list_widget)
+        mid_layout.addWidget(self.list_widget, 1)
         mid_layout.addWidget(self.btn_restore)
         self.btn_delete = PrimaryButton(_("删除所选快照"))
         self.btn_delete.setFixedHeight(28)
         self.btn_delete.clicked.connect(self.delete_selected)
         mid_layout.addWidget(self.btn_delete)
-        mid_layout.addStretch(1)
+        mid_layout.addStretch()
 
         # ---------- 右侧显示面板 ----------
         self.display_panel = SnapshotDisplayPanel()
@@ -147,8 +147,8 @@ class HistoryPage(QWidget):
                 paragraphs = ParagraphDiffStrategy._paragraph_texts(loader, path)
                 width = len(str(len(paragraphs)))
                 numbered = [
-                    f'<span class="ln">{str(i).rjust(width)}</span> ' +
-                    (_tokens_to_html(p, show_tokens=not compact) or "&nbsp;")
+                    f'<span class="ln">{str(i).rjust(width)}</span> '
+                    + (_tokens_to_html(p, show_tokens=not compact) or "&nbsp;")
                     for i, p in enumerate(paragraphs, 1)
                 ]
                 html = f"<div style='{MONO_STYLE}'>" + "<br>".join(numbered) + "</div>"
