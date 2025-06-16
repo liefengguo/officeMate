@@ -28,6 +28,7 @@ class ProjectPage(QWidget):
         self.add_snapshot_btn = FlatButton("📸")
         self.history_btn = FlatButton("📜")
         self.compare_btn = FlatButton("🔍")
+        self.merge_btn = FlatButton("📥")
         # Gear emoji with text presentation avoids font issues on some systems
         self.settings_btn = FlatButton("⚙")
 
@@ -39,6 +40,10 @@ class ProjectPage(QWidget):
         self.compare_btn.setFixedSize(40, 40)
         self.compare_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.toolbar_layout.addWidget(self.compare_btn)
+
+        self.merge_btn.setFixedSize(40, 40)
+        self.merge_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.toolbar_layout.addWidget(self.merge_btn)
 
         self.toolbar_layout.addStretch(1)
         self.settings_btn.setFixedSize(40, 40)
@@ -54,17 +59,21 @@ class ProjectPage(QWidget):
         self.page_add_snapshot = SnapshotPage(self.file_path, self.manager)
         self.page_history = HistoryPage(self.file_path, self.manager)
         self.page_compare = SnapshotComparePage(self.file_path, self.manager)
+        from app.import_merge_page import ImportMergePage
+        self.page_merge = ImportMergePage(self.file_path, self.manager)
         self.page_settings = SettingsPage()
 
         self.stack.addWidget(self.page_add_snapshot)  # index 0
         self.stack.addWidget(self.page_history)       # index 1
         self.stack.addWidget(self.page_compare)       # index 2
-        self.stack.addWidget(self.page_settings)      # index 3
+        self.stack.addWidget(self.page_merge)         # index 3
+        self.stack.addWidget(self.page_settings)      # index 4
 
         self.add_snapshot_btn.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         self.history_btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))
         self.compare_btn.clicked.connect(self.open_compare_page)
-        self.settings_btn.clicked.connect(lambda: self.stack.setCurrentIndex(3))
+        self.merge_btn.clicked.connect(self.open_merge_page)
+        self.settings_btn.clicked.connect(lambda: self.stack.setCurrentIndex(4))
 
         self.back_button.clicked.connect(self.back_to_home)
 
@@ -82,12 +91,20 @@ class ProjectPage(QWidget):
         if self.page_compare:
             self.page_compare.update_button_visibility()
 
+    def open_merge_page(self):
+        """显示导入合并页并刷新列表"""
+        self.stack.setCurrentIndex(3)
+        if self.page_merge:
+            self.page_merge.load_snapshots()
+
     def handle_snapshot_created(self, *_):
         """当快照创建完成后，刷新所有需要的页面"""
         if self.page_history:
             self.page_history.load_snapshots()
         if self.page_compare:
             self.page_compare.load_snapshots()
+        if self.page_merge:
+            self.page_merge.load_snapshots()
 
     def back_to_home(self):
         """返回软件首页"""

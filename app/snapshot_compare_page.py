@@ -54,19 +54,11 @@ class SnapshotComparePage(QWidget):
         self.hint_lbl = QLabel(_("👉 请选择两个快照后点击“对比”"))
         self.hint_lbl.setAlignment(Qt.AlignCenter)
         self.display_panel.set_widget(self.hint_lbl)
-        self.merge_button = PrimaryButton(_("同步差异到当前文档"))
-        self.merge_button.setFixedHeight(28)
-        self.merge_button.setVisible(False)
-
-        right_container = QWidget()
-        right_layout = QVBoxLayout(right_container)
-        right_layout.addWidget(self.display_panel, 1)
-        right_layout.addWidget(self.merge_button)
 
         # ------------------------ 主水平布局 ------------------------ #
         hbox = QHBoxLayout(self)
         hbox.addWidget(mid_widget, 1)
-        hbox.addWidget(right_container, 2)
+        hbox.addWidget(self.display_panel, 2)
         self.setLayout(hbox)
 
         # ------------------------ 信号连接 ------------------------ #
@@ -74,7 +66,6 @@ class SnapshotComparePage(QWidget):
         self.manager.snapshot_deleted.connect(self.load_snapshots)
         self.compare_button.clicked.connect(self.compare_snapshots)
         self.list_widget.itemSelectionChanged.connect(self.on_selection_changed)
-        self.merge_button.clicked.connect(self.merge_selected)
 
         # 初始化按钮可见性
         self.update_button_visibility()
@@ -82,9 +73,6 @@ class SnapshotComparePage(QWidget):
         self.load_snapshots()
 
         i18n.language_changed.connect(self.retranslate_ui)
-
-        self._base_path = None
-        self._other_path = None
 
     # ---------------------------------------------------------------- list
     def load_snapshots(self):
@@ -161,17 +149,8 @@ class SnapshotComparePage(QWidget):
                 viewer = DiffViewerWidget(self)
                 viewer.set_diff_content(diff_result.raw or _("两个快照无差异。"))
 
-            container = QWidget()
-            vbox = QVBoxLayout(container)
-            vbox.setContentsMargins(0, 0, 0, 0)
-            vbox.addWidget(viewer, 1)
-            vbox.addWidget(self.merge_button)
-
-            self.display_panel.set_widget(container)
+            self.display_panel.set_widget(viewer)
             self.hint_lbl = None
-            self.merge_button.setVisible(True)
-            self._base_path = base_path
-            self._other_path = latest_path
 
         except Exception as e:
             err = DiffViewerWidget(self)
@@ -206,14 +185,3 @@ class SnapshotComparePage(QWidget):
         if self.hint_lbl is not None and not sip.isdeleted(self.hint_lbl):
             self.hint_lbl.setText(_("👉 请选择两个快照后点击“对比”"))
         self.load_snapshots()
-
-    def merge_selected(self):
-        if not self._base_path or not self._other_path:
-            return
-        try:
-            self.manager.merge_into_work_file(
-                self._base_path, self._other_path, self.file_path
-            )
-            QMessageBox.information(self, _("同步完成"), _("差异已合并到当前文档"))
-        except Exception as e:
-            QMessageBox.critical(self, _("同步失败"), str(e))
