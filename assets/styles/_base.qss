@@ -40,13 +40,7 @@ QPushButton[type="flat"]    { border: none; }
 /* ----------------------- 3. Util Classes ------------------------ */
 
 /* Line numbers & diff symbols take color from theme */
-.ln    {
-    padding-right: 8px;
-    user-select: none;
-    display: inline-block;
-    width: 4ch;           /* keep numbers right aligned */
-    text-align: right;
-}
+.ln    { padding-right: 8px; user-select: none; }
 .sym   { font-weight: bold; }
 
 /* diff .skip always italic gray; color overridden by theme if needed */
