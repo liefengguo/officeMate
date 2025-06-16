@@ -197,7 +197,7 @@ class ParallelDiffView(QSplitter):
         compact = QSettings().value("diff/compact_style", False, type=bool)
 
         def ln_html(n):    # 行号灰色
-            style = f'display:inline-block;width:{width}ch;text-align:right;'
+            style = f'display:inline-block;width:{width}em;text-align:right;'
             num = str(n) if n != "" else ""
             return f'<span class="ln" style="{style}">{num}</span> '
 

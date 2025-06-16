@@ -146,7 +146,7 @@ class HistoryPage(QWidget):
                 compact = QSettings().value("diff/compact_style", False, type=bool)
                 paragraphs = ParagraphDiffStrategy._paragraph_texts(loader, path)
                 width = len(str(len(paragraphs)))
-                style = f"display:inline-block;width:{width}ch;text-align:right;"
+                style = f"display:inline-block;width:{width}em;text-align:right;"
                 numbered = [
                     f'<span class="ln" style="{style}">{i}</span> '
                     + (_tokens_to_html(p, show_tokens=not compact) or "&nbsp;")
@@ -170,7 +170,7 @@ class HistoryPage(QWidget):
 
                 lines = text.splitlines()
                 width = len(str(len(lines)))
-                style = f"display:inline-block;width:{width}ch;text-align:right;"
+                style = f"display:inline-block;width:{width}em;text-align:right;"
                 numbered = [
                     f'<span class="ln" style="{style}">{i}</span> {escape(line)}'
                     for i, line in enumerate(lines, 1)
