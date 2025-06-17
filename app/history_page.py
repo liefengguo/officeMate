@@ -3,12 +3,12 @@ import os
 from functools import partial
 from html import escape
 
-from PyQt5.QtCore import Qt, QSettings
-from PyQt5.QtWidgets import (
+from PySide6.QtCore import Qt, QSettings
+from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QMessageBox
 )
-import sip
+import shiboken6
 from core.i18n import _, i18n
 from ui.components import PrimaryButton, FlatButton
 
@@ -140,7 +140,7 @@ class HistoryPage(QWidget):
             ext = os.path.splitext(path)[1]
             loader = LoaderRegistry.get_loader(ext)
 
-            from PyQt5.QtWidgets import QTextBrowser
+            from PySide6.QtWidgets import QTextBrowser
 
             if loader and hasattr(loader, "load_structured"):
                 compact = QSettings().value("diff/compact_style", False, type=bool)
@@ -217,6 +217,6 @@ class HistoryPage(QWidget):
         self.label.setText(_("📜 {name} 的快照历史").format(name=self.doc_name))
         self.btn_restore.setText(_("恢复所选快照"))
         self.btn_delete.setText(_("删除所选快照"))
-        if self.hint is not None and not sip.isdeleted(self.hint):
+        if self.hint is not None and shiboken6.isValid(self.hint):
             self.hint.setText(_("👉 选择快照查看内容或恢复"))
         self.load_snapshots()

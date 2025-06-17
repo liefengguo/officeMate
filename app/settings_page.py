@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QLabel,
@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QButtonGroup,
     QTabWidget,
 )
-from PyQt5.QtCore import QSettings
+from PySide6.QtCore import QSettings
 from core.i18n import _, get_language, set_language, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 

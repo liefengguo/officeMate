@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
     QListWidgetItem, QMenu
 )
 from ui.components import PrimaryButton
-from PyQt5.QtCore import Qt, QSize, QEvent
+from PySide6.QtCore import Qt, QSize, QEvent
 from core.i18n import _, i18n
 import os
 from app.snapshot_history import SnapshotHistoryWindow
@@ -107,7 +107,7 @@ class MainDashboard(QWidget):
             return
         menu = QMenu(self)
         remove_act = menu.addAction(_("移除项目"))
-        action = menu.exec_(self.doc_list.viewport().mapToGlobal(pos))
+        action = menu.exec(self.doc_list.viewport().mapToGlobal(pos))
         if action == remove_act:
             file_path = item.data(1000)
             reply = QMessageBox.question(

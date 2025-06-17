@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTextBrowser, QWidget, QHBoxLayout
+from PySide6.QtWidgets import QTextBrowser, QWidget, QHBoxLayout
 
 class ParallelDiffView(QWidget):
     def __init__(self, parent=None):

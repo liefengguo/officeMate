@@ -6,7 +6,7 @@ Loads shared `_base.qss` plus the current theme via ``core.themes.apply_theme``.
 
 import sys
 import os
-from PyQt5.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 
 from core.themes import apply_theme
 from core.i18n import set_language
@@ -29,7 +29,7 @@ def main() -> None:
     window = MainWindow(snapshot_mgr)
     window.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import QStandardPaths
+from PySide6.QtCore import QStandardPaths
 
 try:  # Windows registry is only available on Windows
     import winreg

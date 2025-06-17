@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QStackedWidget, QLabel, QSizePolicy
 )
 from ui.components import FlatButton
-from PyQt5.QtCore import Qt
+from PySide6.QtCore import Qt
 from app.snapshot_page import SnapshotPage
 from app.history_page import HistoryPage
 from app.snapshot_compare_page import SnapshotComparePage

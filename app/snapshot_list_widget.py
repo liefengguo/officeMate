@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QListWidget, QListWidgetItem
+from PySide6.QtWidgets import QListWidget, QListWidgetItem
 import os
 from core.snapshot import SnapshotManager
 from core.i18n import _, i18n

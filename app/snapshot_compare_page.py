@@ -1,10 +1,10 @@
 # app/snapshot_compare_page.py
 import os
 from functools import partial
-from PyQt5.QtCore import Qt, QSettings
+from PySide6.QtCore import Qt, QSettings
 from core.i18n import _, i18n
-import sip
-from PyQt5.QtWidgets import (
+import shiboken6
+from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QListWidgetItem, QMessageBox
 )
@@ -182,6 +182,6 @@ class SnapshotComparePage(QWidget):
     def retranslate_ui(self):
         self.label.setText(_("🔍 {name} 快照对比").format(name=self.doc_name))
         self.compare_button.setText(_("对比选中的两个快照"))
-        if self.hint_lbl is not None and not sip.isdeleted(self.hint_lbl):
+        if self.hint_lbl is not None and shiboken6.isValid(self.hint_lbl):
             self.hint_lbl.setText(_("👉 请选择两个快照后点击“对比”"))
         self.load_snapshots()

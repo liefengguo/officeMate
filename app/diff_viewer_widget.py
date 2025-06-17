@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QPlainTextEdit
+from PySide6.QtWidgets import QPlainTextEdit
 from core.i18n import _, i18n
 
 class DiffViewerWidget(QPlainTextEdit):

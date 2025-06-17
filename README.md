@@ -1,6 +1,6 @@
 # OfficeMate
 
-OfficeMate 是一款基于 Python 和 PyQt5 的桌面文档助手，用于创建快照、比较差异并管理历史版本。
+OfficeMate 是一款基于 Python 和 PySide6 的桌面文档助手，用于创建快照、比较差异并管理历史版本。
 
 ## 主要特性
 
@@ -17,7 +17,7 @@ OfficeMate 是一款基于 Python 和 PyQt5 的桌面文档助手，用于创建
 
 1. 安装 Python 3.10+ 及依赖：
    ```bash
-   pip install PyQt5 python-docx
+   pip install PySide6 python-docx
    ```
 2. 运行应用：
    ```bash

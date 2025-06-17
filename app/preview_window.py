@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QSettings
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
+from PySide6.QtGui import QFont
+from PySide6.QtCore import QSettings
 from core.i18n import _, i18n
 import os
 from core.snapshot_loaders.loader_registry import LoaderRegistry

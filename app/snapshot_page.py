@@ -1,7 +1,7 @@
 # app/snapshot_page.py
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
-from PyQt5.QtCore import Qt
-import sip
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
+from PySide6.QtCore import Qt
+import shiboken6
 from core.i18n import _, i18n
 
 import os
@@ -99,6 +99,6 @@ class SnapshotPage(QWidget):
 
     # ------------------------------------------------------- i18n
     def retranslate_ui(self):
-        if self.hint_lbl is not None and not sip.isdeleted(self.hint_lbl):
+        if self.hint_lbl is not None and shiboken6.isValid(self.hint_lbl):
             self.hint_lbl.setText(_("👉 在左侧填写备注并点击“创建快照”"))
         self.middle_panel.retranslate_ui()

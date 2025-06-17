@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QLabel, QMessageBox, QAbstractItemView, QListWidgetItem
 )
-from PyQt5.QtCore import Qt
+from PySide6.QtCore import Qt
 from core.i18n import _, i18n
 from ui.components import FlatButton, PrimaryButton
 from core.snapshot_manager import SnapshotManager

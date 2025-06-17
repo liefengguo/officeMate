@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QStyledItemDelegate, QStyle
-from PyQt5.QtGui import QFont, QColor, QPainter
-from PyQt5.QtCore import QRectF, QSize, Qt
-from PyQt5.QtGui import QPalette
+from PySide6.QtWidgets import QStyledItemDelegate, QStyle
+from PySide6.QtGui import QFont, QColor, QPainter
+from PySide6.QtCore import QRectF, QSize, Qt
+from PySide6.QtGui import QPalette
 
 class ProjectItemDelegate(QStyledItemDelegate):
     RADIUS = 6

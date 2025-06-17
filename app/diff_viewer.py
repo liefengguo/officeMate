@@ -1,7 +1,7 @@
 
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit
-from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor, QFont
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
+from PySide6.QtGui import QTextCharFormat, QTextCursor, QColor, QFont
 from core.diff_engine import DiffEngine
 from core.i18n import _, i18n
 

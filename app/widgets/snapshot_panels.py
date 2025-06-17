@@ -7,9 +7,9 @@ snapshot_panels.py
 """
 
 from typing import Optional
-from PyQt5.QtCore import pyqtSignal
+from PySide6.QtCore import Signal
 from core.i18n import _, i18n
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QTextEdit, QListWidget, QListWidgetItem
 )
@@ -25,10 +25,10 @@ class SnapshotMiddlePanel(QWidget):
     """
 
     # 对外信号
-    snapshotCreated = pyqtSignal(str)                 # 备注
-    compareRequested = pyqtSignal()                   # 请求对比（note 模式）
-    snapshotSelected = pyqtSignal(str)                # 列表模式：选中一个快照
-    pairCompareRequested = pyqtSignal(str, str)       # compare 模式：两个版本
+    snapshotCreated = Signal(str)                 # 备注
+    compareRequested = Signal()                   # 请求对比（note 模式）
+    snapshotSelected = Signal(str)                # 列表模式：选中一个快照
+    pairCompareRequested = Signal(str, str)       # compare 模式：两个版本
 
     def __init__(self, mode: str = "note", parent: Optional[QWidget] = None):
         super().__init__(parent)
