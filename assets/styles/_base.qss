@@ -89,5 +89,5 @@ QRadioButton::indicator {
     width: 14px;
     height: 14px;
 }
-QCheckBox::indicator { border-radius: 4px; }
+QCheckBox::indicator { border-radius: 6px; }
 QRadioButton::indicator { border-radius: 7px; }
