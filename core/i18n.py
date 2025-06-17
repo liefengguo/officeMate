@@ -749,6 +749,9 @@ _TRANSLATIONS = {
     "保存合并文档": {"en": "Save merged document"},
     "已导出合并文档": {"en": "Merged document exported"},
     "导出失败：{e}": {"en": "Export failed: {e}"},
+    "基准快照：": {"en": "Base:"},
+    "合并目标快照：": {"en": "Target:"},
+    "待合并文档：": {"en": "Remote:"},
 }
 
 # Populate other languages with English text if missing
