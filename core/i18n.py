@@ -737,6 +737,14 @@ _TRANSLATIONS = {
         "fr": "… {count} paragraphes inchang\u00e9s …",
         "ru": "… {count} \u0431\u0435\u0437 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439 \u0430\u0431\u0437\u0430\u0446\u0435\u0432 …",
         "ko": "… {count}\uac1c \ub2e8\ub77d \ubcc0\ud654 \uc5c6\uc74c …",
+    "🧩 {name} 快照合并": {"en": "🧩 Merge snapshots for {name}"},
+    "导出合并结果": {"en": "Export Merged"},
+    "👉 首先选择基准快照": {"en": "👉 Select base snapshot"},
+    "👉 选择用于对比的快照": {"en": "👉 Choose snapshot to compare"},
+    "👉 选择合并目标快照": {"en": "👉 Choose merge target"},
+    "保存合并文档": {"en": "Save merged document"},
+    "已导出合并文档": {"en": "Merged document exported"},
+    "导出失败：{e}": {"en": "Export failed: {e}"},
     }
 }
 
