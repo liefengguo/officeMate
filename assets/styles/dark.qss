@@ -139,3 +139,16 @@ QTabBar::tab:hover {
     background: #373737;
     color: #FFFFFF;
 }
+
+/* 9️⃣ Checkboxes & radio buttons --------------------------------- */
+QCheckBox::indicator,
+QRadioButton::indicator {
+    border: 1px solid #3D3D3D;
+    background: #2B2B2B;
+}
+QCheckBox::indicator:checked,
+QRadioButton::indicator:checked {
+    border: 1px solid #0A84FF;
+    background: #0A84FF;
+}
+
