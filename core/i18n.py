@@ -78,6 +78,12 @@ _TRANSLATIONS = {
         "ru": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b (*.txt *.docx);;\u0412\u0441\u0435 \u0444\u0430\u0439\u043b\u044b (*)",
         "ko": "\ubb38\uc11c (*.txt *.docx);;\ubaa8\ub4e0 \ud30c\uc77c (*)",
     },
+    "Word 文档 (*.docx);;所有文件 (*)": {
+        "en": "Word documents (*.docx);;All files (*)",
+    },
+    "文本文件 (*.txt);;所有文件 (*)": {
+        "en": "Text files (*.txt);;All files (*)",
+    },
     "文件不存在": {
         "en": "File not found",
         "es": "Archivo no encontrado",
