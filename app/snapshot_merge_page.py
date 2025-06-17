@@ -38,12 +38,12 @@ class SnapshotMergePage(QWidget):
         self.export_btn.setFixedHeight(28)
         self.export_btn.setEnabled(False)
         left_layout.addWidget(self.label)
+        left_layout.addWidget(self.list_widget, 1)
+        left_layout.addStretch()
         left_layout.addWidget(self.import_btn)
         left_layout.addWidget(self.diff_btn)
         left_layout.addWidget(self.preview_btn)
-        left_layout.addWidget(self.list_widget, 1)
         left_layout.addWidget(self.export_btn)
-        left_layout.addStretch()
 
         # right preview
         self.preview = QTextEdit()
@@ -77,7 +77,7 @@ class SnapshotMergePage(QWidget):
         self.list_widget.load_snapshots()
 
     def import_document(self):
-        file_path, _ = QFileDialog.getOpenFileName(
+        file_path, selected_filter = QFileDialog.getOpenFileName(
             self, _("选择文档"), "", _("文档 (*.txt *.docx);;所有文件 (*)")
         )
         if file_path:
