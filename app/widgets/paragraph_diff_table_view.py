@@ -20,14 +20,14 @@ The expected `diff_chunks` format comes from ParagraphDiffStrategy:
 """
 
 from typing import List, Tuple
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QTableView,
     QStyledItemDelegate,
     QHeaderView,
     QAbstractItemView,
 )
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant
-from PyQt5.QtGui import QColor, QFont, QPainter
+from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant
+from PySide6.QtGui import QColor, QFont, QPainter
 
 
 # ------------------------------------------------------------------ Delegate

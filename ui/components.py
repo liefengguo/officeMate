@@ -24,8 +24,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
     QPushButton,
     QSplitter,
     QSplitterHandle,

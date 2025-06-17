@@ -17,9 +17,9 @@ import re
 
 from core.i18n import _
 
-from PyQt5.QtCore import Qt, QSettings
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
+from PySide6.QtCore import Qt, QSettings
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
 
 
 from core.platform_utils import is_dark_mode

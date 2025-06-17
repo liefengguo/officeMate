@@ -6,7 +6,7 @@ Centralised theme handling for DocSnap.
 
 Usage
 ------
->>> from PyQt5.QtWidgets import QApplication
+>>> from PySide6.QtWidgets import QApplication
 >>> from core.themes import apply_theme, save_theme_pref
 >>> app = QApplication([])
 >>> apply_theme(app)               # load stored or auto theme
@@ -26,8 +26,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QApplication
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QApplication
 
 from core.platform_utils import is_dark_mode
 

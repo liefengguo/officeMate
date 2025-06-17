@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QSettings, pyqtSignal, QObject
+from PySide6.QtCore import QSettings, Signal, QObject
 
 # Mapping of original Chinese texts to translations
 SUPPORTED_LANGUAGES = {
@@ -749,7 +749,7 @@ for mapping in _TRANSLATIONS.values():
                 mapping[code] = en
 
 class _I18N(QObject):
-    language_changed = pyqtSignal()
+    language_changed = Signal()
 
 
 i18n = _I18N()

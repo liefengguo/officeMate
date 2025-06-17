@@ -1,6 +1,6 @@
 # app/snapshot_page.py
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
-from PyQt5.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMessageBox
+from PySide6.QtCore import Qt
 import sip
 from core.i18n import _, i18n
 

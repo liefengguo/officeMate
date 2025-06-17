@@ -11,7 +11,7 @@ from core.platform_utils import get_app_data_dir
 SNAP_ROOT = Path(get_app_data_dir()) / "snapshots"
 SNAP_ROOT.mkdir(parents=True, exist_ok=True)
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PySide6.QtCore import QObject, Signal
 
 from .version_db import SnapshotRepository
 from .diff_engine import DiffEngine
@@ -25,8 +25,8 @@ class SnapshotManager(QObject):
     class rather than talking directly to the repository or the file‑system.
     """
 
-    snapshot_created = pyqtSignal(dict)   # metadata dict emitted after creation
-    snapshot_deleted = pyqtSignal(dict)   # metadata dict emitted after deletion
+    snapshot_created = Signal(dict)   # metadata dict emitted after creation
+    snapshot_deleted = Signal(dict)   # metadata dict emitted after deletion
 
     def __init__(self,
                  repository: Optional[SnapshotRepository] = None,

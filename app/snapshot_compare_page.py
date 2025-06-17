@@ -1,10 +1,10 @@
 # app/snapshot_compare_page.py
 import os
 from functools import partial
-from PyQt5.QtCore import Qt, QSettings
+from PySide6.QtCore import Qt, QSettings
 from core.i18n import _, i18n
 import sip
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QListWidgetItem, QMessageBox
 )

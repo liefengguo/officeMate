@@ -9,7 +9,7 @@ ParagraphDiffStrategy 2.0
 
 from pathlib import Path
 from typing import List, Dict
-from PyQt5.QtCore import QSettings
+from PySide6.QtCore import QSettings
 from core.i18n import _
 import difflib
 

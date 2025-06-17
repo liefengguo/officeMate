@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QMainWindow, QStackedWidget, QMenu, QAction, QActionGroup
 )
-from PyQt5.QtCore import QSettings, QSize
+from PySide6.QtCore import QSettings, QSize
 from core.i18n import _, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 

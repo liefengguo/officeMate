@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout
-from PyQt5.QtCore import Qt, pyqtSignal
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout
+from PySide6.QtCore import Qt, Signal
 
 class SnapshotItemWidget(QWidget):
-    view_requested = pyqtSignal()
-    delete_requested = pyqtSignal()
+    view_requested = Signal()
+    delete_requested = Signal()
 
     def __init__(self, title, timestamp, parent=None):
         super().__init__(parent)

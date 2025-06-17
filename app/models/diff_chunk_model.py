@@ -16,13 +16,13 @@ A diff chunk dict must contain:
 """
 
 from typing import List, Tuple
-from PyQt5.QtCore import (
+from PySide6.QtCore import (
     Qt,
     QAbstractTableModel,
     QModelIndex,
     QVariant,
 )
-from PyQt5.QtGui import QColor
+from PySide6.QtGui import QColor
 
 
 class DiffChunkModel(QAbstractTableModel):
