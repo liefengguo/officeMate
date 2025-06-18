@@ -35,9 +35,13 @@ class MainDashboard(QWidget):
         self.doc_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.doc_list.customContextMenuRequested.connect(self.show_context_menu)
 
+        self.doc_list.setMinimumSize(QSize(300, 200))
         self.doc_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         self.add_button = PrimaryButton(_("➕ 添加项目"))
+        self.add_button.setMinimumSize(QSize(90, 30))
+        self.add_button.setMaximumWidth(150)
+        self.add_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         self.doc_list.setSpacing(4)
 
