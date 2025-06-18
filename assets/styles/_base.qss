@@ -82,3 +82,12 @@ QSplitter::handle {
 QListWidget[class="snapshot-list"]::item {
     font-weight: bold;
 }
+
+/* Rounded indicators for option controls */
+QCheckBox::indicator,
+QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+}
+QCheckBox::indicator { border-radius: 6px; }
+QRadioButton::indicator { border-radius: 7px; }
