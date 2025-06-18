@@ -7,6 +7,7 @@ from ui.components import PrimaryButton
 from core.i18n import _, i18n
 from core.snapshot_manager import SnapshotManager
 from app.snapshot_list_widget import SnapshotListWidget
+from app.widgets.snapshot_panels import SnapshotDisplayPanel
 from core.merge_utils import three_way_merge, merge_documents
 import os
 
@@ -61,15 +62,13 @@ class SnapshotMergePage(QWidget):
         self.info_lbl.setAlignment(Qt.AlignCenter)
         self.info_lbl.setStyleSheet("font-size:11px;color:gray;")
 
-        # display widget
-        self.display = QWidget()
-        display_layout = QVBoxLayout(self.display)
-        display_layout.addWidget(self.hint_lbl)
-        display_layout.setContentsMargins(0, 0, 0, 0)
+        # display widget using common panel
+        self.display_panel = SnapshotDisplayPanel()
+        self.display_panel.set_widget(self.hint_lbl)
 
         hbox = QHBoxLayout(self)
         hbox.addWidget(left_widget, 1)
-        hbox.addWidget(self.display, 2)
+        hbox.addWidget(self.display_panel, 2)
         self.setLayout(hbox)
 
         # signals
@@ -166,19 +165,16 @@ class SnapshotMergePage(QWidget):
             self.export_btn.setEnabled(False)
 
     def _set_display_widget(self, widget: QWidget, info: str | None = None):
-        layout = self.display.layout()  # type: QVBoxLayout
-        for i in reversed(range(layout.count())):
-            item = layout.itemAt(i)
-            w = item.widget()
-            if w is not None:
-                w.setParent(None)
+        wrapper = QWidget()
+        vbox = QVBoxLayout(wrapper)
+        vbox.setContentsMargins(0, 0, 0, 0)
         if info:
             self.info_lbl.setText(info)
+            vbox.addWidget(self.info_lbl)
         else:
             self.info_lbl.clear()
-        layout.addWidget(widget)
-        if info:
-            layout.addWidget(self.info_lbl)
+        vbox.addWidget(widget)
+        self.display_panel.set_widget(wrapper)
 
     def export_result(self):
         if not self.merged_text:
