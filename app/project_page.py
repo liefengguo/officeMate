@@ -21,12 +21,13 @@ class ProjectPage(QWidget):
 
         self.toolbar_layout = QVBoxLayout()
         self.toolbar_layout.setAlignment(Qt.AlignTop)
-        self.toolbar_layout.setSpacing(8)
+        self.toolbar_layout.setSpacing(16)
 
         self.back_button = FlatButton("⬅")
         self.back_button.setFixedSize(40, 40)
         self.back_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.toolbar_layout.addWidget(self.back_button)
+        self.toolbar_layout.addSpacing(16)
 
         # Left toolbar
         self.add_snapshot_btn = FlatButton("📸")
@@ -46,6 +47,7 @@ class ProjectPage(QWidget):
 
         self.toolbar_layout.addStretch(1)
         self.settings_btn.setFixedSize(40, 40)
+        self.toolbar_layout.addSpacing(16)
         self.toolbar_layout.addWidget(self.settings_btn)
 
         # wrap toolbar in a sidebar widget for QSS

@@ -41,13 +41,13 @@ class MainDashboard(QWidget):
 
         self.doc_list.setSpacing(4)
 
-        header_layout = QHBoxLayout()
-        header_layout.addWidget(self.title_label)
-        header_layout.addStretch(1)
-        header_layout.addWidget(self.add_button)
-
-        self.layout.addLayout(header_layout)
+        self.layout.addWidget(self.title_label)
         self.layout.addWidget(self.doc_list, 1)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch(1)
+        btn_row.addWidget(self.add_button)
+        self.layout.addLayout(btn_row)
 
         # Install event filter for hover/cursor on list items
         self.doc_list.viewport().installEventFilter(self)
