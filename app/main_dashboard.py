@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
-    QListWidgetItem, QMenu
+    QListWidgetItem, QMenu, QSizePolicy
 )
 from ui.components import PrimaryButton
 from PySide6.QtCore import Qt, QSize, QEvent
@@ -24,7 +24,11 @@ class MainDashboard(QWidget):
         self.title_label.setProperty("class", "h2")
         
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(10, 10, 10, 10)
+        self.layout.setSpacing(10)
+
         self.doc_list = QListWidget()
+        self.doc_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.doc_list.setProperty("class", "snapshot-list")
         self.doc_list.setFrameShape(QListWidget.NoFrame)
         self.doc_list.setMouseTracking(True)
@@ -72,7 +76,8 @@ class MainDashboard(QWidget):
                 item = QListWidgetItem()
                 item.setData(1000, doc_path)
                 item.setToolTip(doc_path)
-                item.setSizeHint(QSize(300, 50))
+                # Height hint only – width adapts to list widget
+                item.setSizeHint(QSize(0, 50))
                 self.doc_list.addItem(item)
     def add_document(self):
         file_path, _ = QFileDialog.getOpenFileName(
