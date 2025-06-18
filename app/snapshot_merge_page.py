@@ -7,7 +7,7 @@ from ui.components import PrimaryButton
 from core.i18n import _, i18n
 from core.snapshot_manager import SnapshotManager
 from app.snapshot_list_widget import SnapshotListWidget
-from core.merge_utils import three_way_merge
+from core.merge_utils import three_way_merge, merge_documents
 import os
 
 
@@ -185,19 +185,9 @@ class SnapshotMergePage(QWidget):
         )
         if save_path:
             try:
-                if self.remote_ext == ".docx":
-                    from docx import Document
-                    doc = Document()
-                    for line in self.merged_text.splitlines():
-                        doc.add_paragraph(line)
-                    if not save_path.lower().endswith(".docx"):
-                        save_path += ".docx"
-                    doc.save(save_path)
-                else:
-                    if not save_path.lower().endswith(self.remote_ext):
-                        save_path += self.remote_ext
-                    with open(save_path, "w", encoding="utf-8") as fp:
-                        fp.write(self.merged_text)
+                if not os.path.splitext(save_path)[1]:
+                    save_path += self.remote_ext or ".txt"
+                merge_documents(self.base_path, self.target_path, self.remote_file, save_path)
                 QMessageBox.information(self, _("成功"), _("已导出合并文档"))
             except Exception as e:
                 QMessageBox.critical(self, _("错误"), _("导出失败：{e}").format(e=e))
