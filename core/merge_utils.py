@@ -49,11 +49,27 @@ def _load_docx_elements(docx_path: str):
     return elems, texts, tree
 
 
+def _load_docx_rels(docx_path: str):
+    """Return (relations dict, tree)."""
+    with zipfile.ZipFile(docx_path) as zf:
+        xml_bytes = zf.read("word/_rels/document.xml.rels")
+    tree = ET.fromstring(xml_bytes)
+    rels = {el.get("Id"): el for el in tree}
+    return rels, tree
+
+
 def merge_docx(base_path: str, local_path: str, remote_path: str, output_path: str) -> None:
     """Merge docx files at paragraph level and write result to ``output_path``."""
     base_elems, base_texts, _ = _load_docx_elements(base_path)
     local_elems, _, local_tree = _load_docx_elements(local_path)
     remote_elems, remote_texts, _ = _load_docx_elements(remote_path)
+    local_rels, local_rels_tree = _load_docx_rels(local_path)
+    remote_rels, _ = _load_docx_rels(remote_path)
+
+    # merge relationships so remote images work correctly
+    for rid, rel in remote_rels.items():
+        if rid not in local_rels:
+            local_rels_tree.append(deepcopy(rel))
 
     sm = difflib.SequenceMatcher(None, base_texts, remote_texts)
     merged: list = []
@@ -78,14 +94,23 @@ def merge_docx(base_path: str, local_path: str, remote_path: str, output_path: s
         body.append(deepcopy(el))
 
     xml_bytes = ET.tostring(local_tree, encoding="utf-8", xml_declaration=True)
+    rels_bytes = ET.tostring(local_rels_tree, encoding="utf-8", xml_declaration=True)
 
-    with zipfile.ZipFile(local_path) as src:
+    with zipfile.ZipFile(local_path) as src_local, zipfile.ZipFile(remote_path) as src_remote:
+        remote_media = {item.filename for item in src_remote.infolist() if item.filename.startswith("word/media/")}
         with zipfile.ZipFile(output_path, "w") as dst:
-            for item in src.infolist():
-                data = src.read(item.filename)
+            for item in src_local.infolist():
+                if item.filename.startswith("word/media/") and item.filename in remote_media:
+                    continue
+                data = src_local.read(item.filename)
                 if item.filename == "word/document.xml":
                     data = xml_bytes
-                dst.writestr(item, data)
+                elif item.filename == "word/_rels/document.xml.rels":
+                    data = rels_bytes
+                dst.writestr(item.filename, data)
+            for item in src_remote.infolist():
+                if item.filename.startswith("word/media/"):
+                    dst.writestr(item.filename, src_remote.read(item.filename))
 
 
 def merge_documents(base_path: str, local_path: str, remote_path: str, output_path: str) -> None:

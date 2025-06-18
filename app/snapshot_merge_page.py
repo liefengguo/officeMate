@@ -32,6 +32,10 @@ class SnapshotMergePage(QWidget):
         self.label = QLabel(_("🧩 {name} 快照合并").format(name=self.doc_name))
         self.list_widget = SnapshotListWidget(file_path, single_selection=True)
         self.list_widget.setProperty("class", "snapshot-list")
+        self.base_lbl = QLabel()
+        self.base_lbl.setStyleSheet("font-size:11px;color:gray;")
+        self.target_lbl = QLabel()
+        self.target_lbl.setStyleSheet("font-size:11px;color:gray;")
         self.import_btn = PrimaryButton(_("导入待合并文档"))
         self.diff_btn = PrimaryButton(_("查看差异"))
         self.preview_btn = PrimaryButton(_("预览合并"))
@@ -39,6 +43,8 @@ class SnapshotMergePage(QWidget):
         self.export_btn.setFixedHeight(28)
         self.export_btn.setEnabled(False)
         left_layout.addWidget(self.label)
+        left_layout.addWidget(self.base_lbl)
+        left_layout.addWidget(self.target_lbl)
         left_layout.addWidget(self.list_widget, 1)
         left_layout.addStretch()
         left_layout.addWidget(self.import_btn)
@@ -91,6 +97,8 @@ class SnapshotMergePage(QWidget):
             self.target_path = ""
             self.merged_text = ""
             self.export_btn.setEnabled(False)
+            self.base_lbl.clear()
+            self.target_lbl.clear()
             self.hint_lbl.setText(_("👉 选择基准快照并点击“查看差异”"))
 
     def show_diff(self):
@@ -104,6 +112,7 @@ class SnapshotMergePage(QWidget):
         self.base_path = item.data(1000)
         base_title = self._snapshot_title(self.base_path)
         remote_title = os.path.basename(self.remote_file)
+        self.base_lbl.setText(f"{_('基准快照：')}{base_title}")
         try:
             diff_result = self.manager.compare_snapshots(self.base_path, self.remote_file)
             if diff_result.structured:
@@ -133,6 +142,8 @@ class SnapshotMergePage(QWidget):
             QMessageBox.warning(self, _("提示"), _("请选择合并目标"))
             return
         self.target_path = item.data(1000)
+        target_title = self._snapshot_title(self.target_path)
+        self.target_lbl.setText(f"{_('合并目标快照：')}{target_title}")
         try:
             base_text = self.manager.get_snapshot_content(self.base_path)
             local_text = self.manager.get_snapshot_content(self.target_path)
@@ -140,7 +151,6 @@ class SnapshotMergePage(QWidget):
             self.merged_text = three_way_merge(base_text, local_text, remote_text)
             self.preview.setPlainText(self.merged_text)
             base_title = self._snapshot_title(self.base_path)
-            target_title = self._snapshot_title(self.target_path)
             remote_title = os.path.basename(self.remote_file)
             info = (
                 f"{_('基准快照：')}{base_title}\n"
@@ -205,6 +215,14 @@ class SnapshotMergePage(QWidget):
             self.hint_lbl.setText(_("👉 选择基准快照并点击“查看差异”"))
         else:
             self.hint_lbl.setText(_("👉 选择合并目标快照并点击“预览合并”"))
+        if self.base_path:
+            self.base_lbl.setText(f"{_('基准快照：')}{self._snapshot_title(self.base_path)}")
+        else:
+            self.base_lbl.clear()
+        if self.target_path:
+            self.target_lbl.setText(f"{_('合并目标快照：')}{self._snapshot_title(self.target_path)}")
+        else:
+            self.target_lbl.clear()
 
     def _snapshot_title(self, path: str) -> str:
         versions = self.manager.list_snapshots(self.doc_name)
