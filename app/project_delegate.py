@@ -69,4 +69,6 @@ class ProjectItemDelegate(QStyledItemDelegate):
         painter.restore()
 
     def sizeHint(self, option, index):
-        return QSize(option.rect.width(), 60)
+        # Width adapts to view; height is fixed
+        width = option.widget.width() - 2 * self.MARGIN if option.widget else option.rect.width()
+        return QSize(width, 60)

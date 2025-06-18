@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
-    QListWidgetItem, QMenu
+    QListWidgetItem, QMenu, QSizePolicy
 )
 from ui.components import PrimaryButton
 from PySide6.QtCore import Qt, QSize, QEvent
@@ -17,14 +17,18 @@ class MainDashboard(QWidget):
         self.manager = snapshot_manager
         self.parent_window = parent
         self.setWindowTitle(_("DocSnap 文档管理主页"))
-        self.setMinimumSize(500, 400)
+        self.setMinimumSize(300, 200)
 
         self.db = RecentDocDB()
         self.title_label = QLabel(_("📂 已添加文档列表"))
         self.title_label.setProperty("class", "h2")
         
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(10, 10, 10, 10)
+        self.layout.setSpacing(10)
+
         self.doc_list = QListWidget()
+        self.doc_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.doc_list.setProperty("class", "snapshot-list")
         self.doc_list.setFrameShape(QListWidget.NoFrame)
         self.doc_list.setMouseTracking(True)
@@ -72,10 +76,13 @@ class MainDashboard(QWidget):
                 item = QListWidgetItem()
                 item.setData(1000, doc_path)
                 item.setToolTip(doc_path)
-                item.setSizeHint(QSize(300, 50))
+                # Height hint only – width adapts to list widget
+                item.setSizeHint(QSize(0, 50))
                 self.doc_list.addItem(item)
     def add_document(self):
-        file_path, _ = QFileDialog.getOpenFileName(
+        # use a named variable for the filter to avoid shadowing the
+        # translation helper `_`
+        file_path, selected_filter = QFileDialog.getOpenFileName(
             self, _("选择文档"), "", _("文档 (*.txt *.docx);;所有文件 (*)")
         )
         if file_path:
@@ -85,6 +92,8 @@ class MainDashboard(QWidget):
     def open_snapshot_window(self, item):
         file_path = item.data(1000)
         if os.path.exists(file_path):
+            # mark as recently used
+            self.db.touch(file_path)
             if self.parent_window:
                 self.parent_window.open_snapshot_history(file_path)
         else:
@@ -123,6 +132,8 @@ class MainDashboard(QWidget):
     def open_project_page(self, item):
         file_path = item.data(1000)
         if os.path.exists(file_path):
+            # move project to top as most recently used
+            self.db.touch(file_path)
             # 通过 parent_window 触发页面切换
             self.parent_window.open_project_page(file_path)
         else:
