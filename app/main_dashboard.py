@@ -80,7 +80,9 @@ class MainDashboard(QWidget):
                 item.setSizeHint(QSize(0, 50))
                 self.doc_list.addItem(item)
     def add_document(self):
-        file_path, _ = QFileDialog.getOpenFileName(
+        # use a named variable for the filter to avoid shadowing the
+        # translation helper `_`
+        file_path, selected_filter = QFileDialog.getOpenFileName(
             self, _("选择文档"), "", _("文档 (*.txt *.docx);;所有文件 (*)")
         )
         if file_path:
