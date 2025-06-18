@@ -92,6 +92,8 @@ class MainDashboard(QWidget):
     def open_snapshot_window(self, item):
         file_path = item.data(1000)
         if os.path.exists(file_path):
+            # mark as recently used
+            self.db.touch(file_path)
             if self.parent_window:
                 self.parent_window.open_snapshot_history(file_path)
         else:
@@ -130,6 +132,8 @@ class MainDashboard(QWidget):
     def open_project_page(self, item):
         file_path = item.data(1000)
         if os.path.exists(file_path):
+            # move project to top as most recently used
+            self.db.touch(file_path)
             # 通过 parent_window 触发页面切换
             self.parent_window.open_project_page(file_path)
         else:

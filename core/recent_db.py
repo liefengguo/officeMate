@@ -20,6 +20,15 @@ class RecentDocDB:
             with open(self.path, "w") as f:
                 json.dump(docs, f, indent=2)
 
+    def touch(self, file_path):
+        """Move file_path to the top as the most recently used."""
+        docs = self.get_all()
+        if file_path in docs:
+            docs.remove(file_path)
+        docs.insert(0, file_path)
+        with open(self.path, "w") as f:
+            json.dump(docs, f, indent=2)
+
     def remove(self, file_path):
         """Remove a document from the recent list."""
         docs = self.get_all()
