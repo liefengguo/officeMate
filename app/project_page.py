@@ -18,7 +18,7 @@ class ProjectPage(QWidget):
         self.main_layout = QHBoxLayout(self)
         self.toolbar_layout = QVBoxLayout()
         self.toolbar_layout.setAlignment(Qt.AlignTop)
-        self.toolbar_layout.setSpacing(8)
+        self.toolbar_layout.setSpacing(20)
 
         self.back_button = FlatButton("⬅")
         self.back_button.setFixedSize(40, 40)

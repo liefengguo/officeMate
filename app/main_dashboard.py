@@ -17,7 +17,7 @@ class MainDashboard(QWidget):
         self.manager = snapshot_manager
         self.parent_window = parent
         self.setWindowTitle(_("DocSnap 文档管理主页"))
-        self.setMinimumSize(500, 400)
+        self.setMinimumSize(300, 200)
 
         self.db = RecentDocDB()
         self.title_label = QLabel(_("📂 已添加文档列表"))
