@@ -46,8 +46,36 @@ _TRANSLATIONS = {
         "ru": "\u2795 \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442",
         "ko": "\u2795 \ud504\ub85c\uc81d\ud2b8 \ucd94\uac00",
     },
-    "移除项目": {"en": "Remove Project"},
-    "确定从列表移除该项目？": {"en": "Remove this project from the list?"},
+    "移除项目": {
+        "en": "Remove Project",
+        "es": "Eliminar proyecto",
+        "pt": "Remover projeto",
+        "ja": "\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u3092\u524a\u9664",
+        "de": "Projekt entfernen",
+        "fr": "Supprimer le projet",
+        "ru": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442",
+        "ko": "\ud504\ub85c\uc81d\ud2b8 \uc0ad\uc81c"
+    },
+    "确定从列表移除该项目？": {
+        "en": "Remove this project from the list?",
+        "es": "\u00bfEliminar este proyecto de la lista?",
+        "pt": "Remover este projeto da lista?",
+        "ja": "\u30ea\u30b9\u30c8\u304b\u3089\u3053\u306e\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u3092\u524a\u9664\u3057\u307e\u3059\u304b?",
+        "de": "Dieses Projekt aus der Liste entfernen?",
+        "fr": "Supprimer ce projet de la liste ?",
+        "ru": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u044d\u0442\u043e\u0442 \u043f\u0440\u043e\u0435\u043a\u0442 \u0438\u0437 \u0441\u043f\u0438\u0441\u043a\u0430?",
+        "ko": "\ubaa9\ub85d\uc5d0\uc11c \uc774 \ud504\ub85c\uc81d\ud2b8\ub97c \uc81c\uac70\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?"
+    },
+    "同时删除相关快照": {
+        "en": "Delete associated snapshots",
+        "es": "Eliminar instant\u00e1neas asociadas",
+        "pt": "Excluir snapshots associados",
+        "ja": "\u95a2\u9023\u30b9\u30ca\u30c3\u30d7\u3082\u524a\u9664",
+        "de": "Zugeh\u00f6rige Snapshots l\u00f6schen",
+        "fr": "Supprimer les snapshots associ\u00e9s",
+        "ru": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0435 \u0441\u043d\u0438\u043c\u043a\u0438",
+        "ko": "\uad00\ub828 \uc2a4\ub0a0\uc0f7\ub3c4 \uc0ad\uc81c"
+    },
     "暂无文档，点击上方按钮添加": {
         "en": "No documents yet, click the button above to add",
         "es": "A\u00fan no hay documentos, haz clic en el bot\u00f3n de arriba para agregar",
