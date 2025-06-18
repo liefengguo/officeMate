@@ -16,8 +16,12 @@ class ProjectPage(QWidget):
         self.parent_window = parent
 
         self.main_layout = QHBoxLayout(self)
+        self.main_layout.setContentsMargins(12, 12, 12, 12)
+        self.main_layout.setSpacing(10)
+
         self.toolbar_layout = QVBoxLayout()
         self.toolbar_layout.setAlignment(Qt.AlignTop)
+        self.toolbar_layout.setSpacing(8)
 
         self.back_button = FlatButton("⬅")
         self.back_button.setFixedSize(40, 40)
@@ -48,9 +52,11 @@ class ProjectPage(QWidget):
         self.sidebar = QWidget()
         self.sidebar.setProperty("role", "sidebar")
         self.sidebar.setLayout(self.toolbar_layout)
+        self.sidebar.setFixedWidth(60)
 
         # Right content area
         self.stack = QStackedWidget()
+        self.stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.page_add_snapshot = SnapshotPage(self.file_path, self.manager)
         self.page_history = HistoryPage(self.file_path, self.manager)
         self.page_compare = SnapshotComparePage(self.file_path, self.manager)
@@ -69,7 +75,7 @@ class ProjectPage(QWidget):
         self.back_button.clicked.connect(self.back_to_home)
 
         self.main_layout.addWidget(self.sidebar)
-        self.main_layout.addWidget(self.stack)
+        self.main_layout.addWidget(self.stack, 1)
 
         self.stack.setCurrentIndex(0)
         # Ensure snapshot_created and snapshot_deleted signals are connected

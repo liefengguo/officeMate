@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
-    QListWidgetItem, QMenu
+    QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
+    QListWidgetItem, QMenu, QSizePolicy
 )
 from ui.components import PrimaryButton
 from PySide6.QtCore import Qt, QSize, QEvent
@@ -23,7 +23,10 @@ class MainDashboard(QWidget):
         self.title_label = QLabel(_("📂 已添加文档列表"))
         self.title_label.setProperty("class", "h2")
         
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout(self)
+        self.layout.setSpacing(10)
+        self.layout.setContentsMargins(12, 12, 12, 12)
+
         self.doc_list = QListWidget()
         self.doc_list.setProperty("class", "snapshot-list")
         self.doc_list.setFrameShape(QListWidget.NoFrame)
@@ -31,17 +34,20 @@ class MainDashboard(QWidget):
         self.doc_list.setItemDelegate(ProjectItemDelegate())
         self.doc_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.doc_list.customContextMenuRequested.connect(self.show_context_menu)
+
+        self.doc_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         self.add_button = PrimaryButton(_("➕ 添加项目"))
-        # print(self.add_button.property("type"))
 
         self.doc_list.setSpacing(4)
 
-        self.layout.addWidget(self.add_button)
-        self.layout.addSpacing(10)
-        self.layout.addWidget(self.title_label)
-        self.layout.addWidget(self.doc_list)
-        self.setLayout(self.layout)
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(self.title_label)
+        header_layout.addStretch(1)
+        header_layout.addWidget(self.add_button)
+
+        self.layout.addLayout(header_layout)
+        self.layout.addWidget(self.doc_list, 1)
 
         # Install event filter for hover/cursor on list items
         self.doc_list.viewport().installEventFilter(self)
