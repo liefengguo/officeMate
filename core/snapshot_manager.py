@@ -38,6 +38,21 @@ class SnapshotManager(QObject):
         # stack of (doc_name, undo_meta, restore_meta) for undo feature
         self._undo_stack: List[Tuple[str, Dict, Dict]] = []
 
+    def delete_all_snapshots(self, doc_name: str) -> None:
+        """Delete all snapshots of a document and clear metadata."""
+        self.repo.reload()
+        versions = self.repo.get_versions(doc_name)
+        for meta in versions:
+            path = meta.get("snapshot_path")
+            if path and os.path.exists(path):
+                os.remove(path)
+        if doc_name in self.repo.data:
+            del self.repo.data[doc_name]
+            self.repo.save()
+        snap_dir = SNAP_ROOT / doc_name
+        if snap_dir.exists():
+            shutil.rmtree(snap_dir, ignore_errors=True)
+
     # ------------------------------------------------------------------ public API
 
     def create_snapshot(self, file_path: str, remark: str = "") -> Dict:

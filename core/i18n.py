@@ -48,6 +48,7 @@ _TRANSLATIONS = {
     },
     "移除项目": {"en": "Remove Project"},
     "确定从列表移除该项目？": {"en": "Remove this project from the list?"},
+    "同时删除相关快照": {"en": "Delete associated snapshots"},
     "暂无文档，点击上方按钮添加": {
         "en": "No documents yet, click the button above to add",
         "es": "A\u00fan no hay documentos, haz clic en el bot\u00f3n de arriba para agregar",

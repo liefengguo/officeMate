@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QFileDialog, QMessageBox, QLabel,
-    QListWidgetItem, QMenu, QSizePolicy
+    QListWidgetItem, QMenu, QSizePolicy, QCheckBox
 )
 from ui.components import PrimaryButton
 from PySide6.QtCore import Qt, QSize, QEvent
@@ -119,14 +119,20 @@ class MainDashboard(QWidget):
         action = menu.exec(self.doc_list.viewport().mapToGlobal(pos))
         if action == remove_act:
             file_path = item.data(1000)
-            reply = QMessageBox.question(
-                self,
-                _("移除项目"),
-                _("确定从列表移除该项目？"),
-                QMessageBox.Yes | QMessageBox.No,
-            )
+            box = QMessageBox(self)
+            box.setIcon(QMessageBox.Question)
+            box.setWindowTitle(_("移除项目"))
+            box.setText(_("确定从列表移除该项目？"))
+            chk = QCheckBox(_("同时删除相关快照"))
+            chk.setChecked(False)
+            box.setCheckBox(chk)
+            box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            reply = box.exec()
             if reply == QMessageBox.Yes:
                 self.db.remove(file_path)
+                if chk.isChecked():
+                    doc_name = os.path.basename(file_path)
+                    self.manager.delete_all_snapshots(doc_name)
                 self.refresh_list()
 
     def open_project_page(self, item):
