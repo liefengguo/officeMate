@@ -6,7 +6,9 @@ Loads shared `base.qss` plus the current theme via ``core.themes.apply_theme``.
 
 import sys
 import os
+from pathlib import Path
 from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QIcon
 
 from core.themes import apply_theme
 from core.i18n import set_language
@@ -16,6 +18,8 @@ from app.main_window import MainWindow
 
 def main() -> None:
     app = QApplication(sys.argv)
+    icon_path = Path(__file__).resolve().parent / "assets" / "img" / "icon.png"
+    app.setWindowIcon(QIcon(str(icon_path)))
 
     lang = os.getenv("DOCSNAP_LANG")
     if lang:
@@ -27,6 +31,7 @@ def main() -> None:
     # Create main window
     snapshot_mgr = SnapshotManager()
     window = MainWindow(snapshot_mgr)
+    window.setWindowIcon(QIcon(str(icon_path)))
     window.show()
 
     sys.exit(app.exec())
