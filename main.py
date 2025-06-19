@@ -1,7 +1,7 @@
 """
 DocSnap entry point
 ~~~~~~~~~~~~~~~~~~~
-Loads shared `_base.qss` plus the current theme via ``core.themes.apply_theme``.
+Loads shared `base.qss` plus the current theme via ``core.themes.apply_theme``.
 """
 
 import sys
