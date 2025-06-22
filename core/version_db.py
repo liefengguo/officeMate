@@ -47,5 +47,5 @@ class SnapshotRepository:
 
     def reload(self):
         """从磁盘重新加载版本数据"""
-        with open(self.db_path, "r") as f:
+        with open(self.db_path, "r", encoding="utf-8") as f:
             self.data = json.load(f)
