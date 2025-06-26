@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QButtonGroup,
     QTabWidget,
 )
-from PySide6.QtCore import QSettings
+from core.settings import get_settings
 from core.i18n import _, get_language, set_language, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
@@ -21,7 +21,7 @@ class SettingsPage(QWidget):
         self.title.setProperty("class", "h2")
         layout.addWidget(self.title)
 
-        self.settings = QSettings()
+        self.settings = get_settings()
 
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)

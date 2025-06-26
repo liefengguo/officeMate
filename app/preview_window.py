@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit
 from PySide6.QtGui import QFont
-from PySide6.QtCore import QSettings
+from core.settings import get_settings
 from core.i18n import _, i18n
 import os
 from core.snapshot_loaders.loader_registry import LoaderRegistry
@@ -30,7 +30,7 @@ class PreviewWindow(QWidget):
             loader = LoaderRegistry.get_loader(ext)
             html = ""
             if loader and hasattr(loader, "load_structured"):
-                compact = QSettings().value("diff/compact_style", False, type=bool)
+                compact = get_settings().value("diff/compact_style", False, type=bool)
                 paras = ParagraphDiffStrategy._paragraph_texts(loader, path)
                 html_parts = [_tokens_to_html(p, show_tokens=not compact) for p in paras]
                 html = "<br>".join(html_parts)

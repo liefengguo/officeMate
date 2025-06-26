@@ -3,7 +3,8 @@ import os
 from functools import partial
 from html import escape
 
-from PySide6.QtCore import Qt, QSettings
+from PySide6.QtCore import Qt
+from core.settings import get_settings
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QMessageBox
@@ -143,7 +144,7 @@ class HistoryPage(QWidget):
             from PySide6.QtWidgets import QTextBrowser
 
             if loader and hasattr(loader, "load_structured"):
-                compact = QSettings().value("diff/compact_style", False, type=bool)
+                compact = get_settings().value("diff/compact_style", False, type=bool)
                 paragraphs = ParagraphDiffStrategy._paragraph_texts(loader, path)
                 width = len(str(len(paragraphs)))
                 numbered = [

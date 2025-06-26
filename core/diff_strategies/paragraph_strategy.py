@@ -8,7 +8,7 @@ ParagraphDiffStrategy 2.0
 
 from pathlib import Path
 from typing import List, Dict
-from PySide6.QtCore import QSettings
+from core.settings import get_settings
 import difflib
 
 from .base_strategy import DiffStrategy, DiffResult
@@ -34,7 +34,7 @@ class ParagraphDiffStrategy(DiffStrategy):
         if isinstance(struct[0], str):
             return struct
 
-        settings = QSettings()
+        settings = get_settings()
         detect_bold = settings.value("diff/detect_bold", True, type=bool)
         detect_italic = settings.value("diff/detect_italic", True, type=bool)
         detect_underline = settings.value("diff/detect_underline", True, type=bool)

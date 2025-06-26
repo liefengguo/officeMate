@@ -17,7 +17,8 @@ import re
 
 from core.i18n import _
 
-from PySide6.QtCore import Qt, QSettings
+from PySide6.QtCore import Qt
+from core.settings import get_settings
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QSplitter, QTextBrowser, QWidget, QVBoxLayout, QLabel
 
@@ -194,7 +195,7 @@ class ParallelDiffView(QSplitter):
         max_old = max((c.get("a_idx", -1) for c in chunks), default=-1) + 1
         max_new = max((c.get("b_idx", -1) for c in chunks), default=-1) + 1
         width = len(str(max(max_old, max_new)))
-        compact = QSettings().value("diff/compact_style", False, type=bool)
+        compact = get_settings().value("diff/compact_style", False, type=bool)
 
         def ln_html(n):    # 行号灰色
             num = str(n) if n != "" else ""

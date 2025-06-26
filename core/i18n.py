@@ -1,4 +1,5 @@
-from PySide6.QtCore import QSettings, Signal, QObject
+from PySide6.QtCore import Signal, QObject
+from core.settings import get_settings
 
 # Mapping of original Chinese texts to translations
 SUPPORTED_LANGUAGES = {
@@ -788,7 +789,7 @@ _current_lang = None
 def get_language() -> str:
     global _current_lang
     if _current_lang is None:
-        _current_lang = QSettings().value("ui/language", "zh")
+        _current_lang = get_settings().value("ui/language", "zh")
     return _current_lang
 
 
@@ -797,7 +798,7 @@ def set_language(lang: str) -> None:
     if lang == _current_lang:
         return
     _current_lang = lang
-    QSettings().setValue("ui/language", lang)
+    get_settings().setValue("ui/language", lang)
     i18n.language_changed.emit()
 
 

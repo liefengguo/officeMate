@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from PySide6.QtCore import QSettings
+from core.settings import get_settings
 from PySide6.QtWidgets import QApplication
 
 from core.platform_utils import is_dark_mode
@@ -44,14 +44,14 @@ def _read_qss(filename: str) -> str:
 # ---------------------------------------------------------------------- public
 def load_theme_pref() -> str:
     """Return stored preference: 'auto' (default) | 'light' | 'dark'."""
-    return QSettings().value("ui/theme", "auto")
+    return get_settings().value("ui/theme", "auto")
 
 
 def save_theme_pref(pref: str) -> None:
     """Persist preference in QSettings."""
     if pref not in ("auto", "light", "dark"):
         raise ValueError("pref must be 'auto', 'light' or 'dark'")
-    QSettings().setValue("ui/theme", pref)
+    get_settings().setValue("ui/theme", pref)
 
 
 def _pick_theme_file(pref: str) -> str:

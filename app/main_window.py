@@ -2,7 +2,8 @@ from PySide6.QtWidgets import (
     QMainWindow, QStackedWidget, QMenu
 )
 from PySide6.QtGui import QAction, QActionGroup
-from PySide6.QtCore import QSettings, QSize
+from PySide6.QtCore import QSize
+from core.settings import get_settings
 from core.i18n import _, i18n
 from core.themes import apply_theme, load_theme_pref, save_theme_pref
 
@@ -20,7 +21,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(300, 200)
 
         # Restore separate sizes for dashboard and content pages
-        self._settings = QSettings()
+        self._settings = get_settings()
         home_w = self._settings.value("ui/home_width", 500, type=int)
         home_h = self._settings.value("ui/home_height", 400, type=int)
         page_w = self._settings.value("ui/page_width", 800, type=int)

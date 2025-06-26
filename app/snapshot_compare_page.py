@@ -1,7 +1,8 @@
 # app/snapshot_compare_page.py
 import os
 from functools import partial
-from PySide6.QtCore import Qt, QSettings
+from PySide6.QtCore import Qt
+from core.settings import get_settings
 from core.i18n import _, i18n
 import shiboken6
 from PySide6.QtWidgets import (
@@ -168,7 +169,7 @@ class SnapshotComparePage(QWidget):
 
     def update_button_visibility(self) -> bool:
         """根据设置显示或隐藏对比按钮，返回开关状态"""
-        auto = QSettings().value("options/auto_snapshot_compare", False, type=bool)
+        auto = get_settings().value("options/auto_snapshot_compare", False, type=bool)
         self.compare_button.setVisible(not auto)
         return auto
 
