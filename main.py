@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
+from PySide6.QtCore import QCoreApplication
 
 from core.themes import apply_theme
 from core.i18n import set_language
@@ -18,6 +19,9 @@ from app.main_window import MainWindow
 
 def main() -> None:
     app = QApplication(sys.argv)
+    # Explicitly set organization and application name for QSettings
+    QCoreApplication.setOrganizationName("OfficeMate")
+    QCoreApplication.setApplicationName("OfficeMate")
     icon_path = Path(__file__).resolve().parent / "assets" / "img" / "icon.png"
     app.setWindowIcon(QIcon(str(icon_path)))
 
