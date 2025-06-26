@@ -11,9 +11,9 @@ from PySide6.QtCore import Signal
 from core.i18n import _, i18n
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QListWidget, QListWidgetItem
+    QLabel, QTextEdit, QListWidget, QListWidgetItem
 )
-from ui.components import PrimaryButton, FlatButton, EnterSubmitTextEdit
+from ui.components import PrimaryButton, FlatButton
 
 class SnapshotMiddlePanel(QWidget):
     """
@@ -54,11 +54,10 @@ class SnapshotMiddlePanel(QWidget):
     def _init_note(self, layout: QVBoxLayout):
         self.remark_label = QLabel(_("快照备注："))
         layout.addWidget(self.remark_label)
-        self.remark_edit = EnterSubmitTextEdit()
+        self.remark_edit = QTextEdit()
         self.remark_edit.setProperty("class", "textinput")
         self.remark_edit.setPlaceholderText(_("输入此版本的备注信息…"))
         self.remark_edit.setFixedHeight(80)
-        self.remark_edit.textChanged.connect(self._update_create_state)
         layout.addWidget(self.remark_edit)
 
         btn_box = QHBoxLayout()
@@ -69,18 +68,11 @@ class SnapshotMiddlePanel(QWidget):
         layout.addLayout(btn_box)
         # 连接信号
         self.create_btn.clicked.connect(self._emit_create)
-        self.remark_edit.enterPressed.connect(self._emit_create)
         self.compare_btn.clicked.connect(self.compareRequested)
-        self._update_create_state()
 
     def _emit_create(self):
         remark = self.remark_edit.toPlainText().strip()
-        if remark:
-            self.snapshotCreated.emit(remark)
-
-    def _update_create_state(self):
-        has_text = bool(self.remark_edit.toPlainText().strip())
-        self.create_btn.setEnabled(has_text)
+        self.snapshotCreated.emit(remark)
 
     # -------------------- list 模式：快照历史
     def _init_list(self, layout: QVBoxLayout):

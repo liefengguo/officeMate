@@ -24,12 +24,11 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QPushButton,
     QSplitter,
     QSplitterHandle,
-    QTextEdit,
 )
 
 
@@ -96,16 +95,3 @@ class ThinSplitter(QSplitter):
     # --- override to return our custom handle -------------------
     def createHandle(self) -> QSplitterHandle:  # type: ignore[override]
         return _OnePixelHandle(self.orientation(), self)
-
-
-# --------------------------------------------------------------- Text Widgets
-class EnterSubmitTextEdit(QTextEdit):
-    """QTextEdit that emits ``enterPressed`` when Return is pressed."""
-
-    enterPressed = Signal()
-
-    def keyPressEvent(self, event):  # type: ignore[override]
-        if event.key() in (Qt.Key_Return, Qt.Key_Enter) and event.modifiers() == Qt.NoModifier:
-            self.enterPressed.emit()
-        else:
-            super().keyPressEvent(event)
