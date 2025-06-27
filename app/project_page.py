@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 from app.snapshot_page import SnapshotPage
 from app.history_page import HistoryPage
 from app.snapshot_compare_page import SnapshotComparePage
+from app.timeline_page import SnapshotTimelinePage
 from app.settings_page import SettingsPage
 
 class ProjectPage(QWidget):
@@ -28,11 +29,12 @@ class ProjectPage(QWidget):
         # Left toolbar
         self.add_snapshot_btn = FlatButton("📸")
         self.history_btn = FlatButton("📜")
+        self.timeline_btn = FlatButton("📈")
         self.compare_btn = FlatButton("🔍")
         # Gear emoji with text presentation avoids font issues on some systems
         self.settings_btn = FlatButton("⚙")
 
-        for btn in (self.add_snapshot_btn, self.history_btn):
+        for btn in (self.add_snapshot_btn, self.history_btn, self.timeline_btn):
             btn.setFixedSize(40, 40)
             btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             self.toolbar_layout.addWidget(btn)
@@ -54,18 +56,21 @@ class ProjectPage(QWidget):
         self.stack = QStackedWidget()
         self.page_add_snapshot = SnapshotPage(self.file_path, self.manager)
         self.page_history = HistoryPage(self.file_path, self.manager)
+        self.page_timeline = SnapshotTimelinePage(self.file_path, self.manager)
         self.page_compare = SnapshotComparePage(self.file_path, self.manager)
         self.page_settings = SettingsPage()
 
         self.stack.addWidget(self.page_add_snapshot)  # index 0
         self.stack.addWidget(self.page_history)       # index 1
-        self.stack.addWidget(self.page_compare)       # index 2
-        self.stack.addWidget(self.page_settings)      # index 3
+        self.stack.addWidget(self.page_timeline)      # index 2
+        self.stack.addWidget(self.page_compare)       # index 3
+        self.stack.addWidget(self.page_settings)      # index 4
 
         self.add_snapshot_btn.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         self.history_btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        self.timeline_btn.clicked.connect(lambda: self.stack.setCurrentIndex(2))
         self.compare_btn.clicked.connect(self.open_compare_page)
-        self.settings_btn.clicked.connect(lambda: self.stack.setCurrentIndex(3))
+        self.settings_btn.clicked.connect(lambda: self.stack.setCurrentIndex(4))
 
         self.back_button.clicked.connect(self.back_to_home)
 
@@ -79,7 +84,7 @@ class ProjectPage(QWidget):
 
     def open_compare_page(self):
         """显示快照对比页并刷新按钮状态"""
-        self.stack.setCurrentIndex(2)
+        self.stack.setCurrentIndex(3)
         if self.page_compare:
             self.page_compare.update_button_visibility()
 
@@ -87,6 +92,8 @@ class ProjectPage(QWidget):
         """当快照创建完成后，刷新所有需要的页面"""
         if self.page_history:
             self.page_history.load_snapshots()
+        if self.page_timeline:
+            self.page_timeline.load_snapshots()
         if self.page_compare:
             self.page_compare.load_snapshots()
 

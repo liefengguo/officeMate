@@ -194,6 +194,12 @@ _TRANSLATIONS = {
         "ru": "\uD83D\uDC49 \u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0437\u0430\u043c\u0435\u0442\u043a\u0438 \u0441\u043b\u0435\u0432\u0430 \u0438 \u043d\u0430\u0436\u043c\u0438\u0442\u0435 \u00ab\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0441\u043d\u0438\u043c\u043e\u043a\u00bb",
         "ko": "\uD83D\uDC49 \uc67c\uce78\uc5d0 \ube44\uace0 \u0027\uc2a4\ub0a0\uc0f7 \uc0dd\uc131\u0027\uc744 \ub204\ub974\uc138\uc694",
     },
+    "👉 从左侧选择快照查看变更": {
+        "en": "\uD83D\uDC49 Select a snapshot on the left to view changes",
+    },
+    "没有更早的快照用于比较。": {
+        "en": "No earlier snapshot to compare.",
+    },
     "✅ 快照已创建！": {"en": "\u2705 Snapshot created!"},
     "📜 {name} 的快照历史": {
         "en": "\ud83d\udcdc Snapshot history of {name}",
@@ -204,6 +210,16 @@ _TRANSLATIONS = {
         "fr": "\ud83d\udcdc Historique des snapshots de {name}",
         "ru": "\ud83d\udcdc \u0418\u0441\u0442\u043e\u0440\u0438\u044f \u0441\u043d\u0438\u043c\u043a\u043e\u0432 {name}",
         "ko": "\ud83d\udcdc {name} \uc2a4\ub0a0\uc0f7 \uae30\ub85d",
+    },
+    "📈 {name} 的快照时间线": {
+        "en": "\ud83d\udcc8 Snapshot timeline of {name}",
+        "es": "\ud83d\udcc8 L\u00ednea temporal de snapshots de {name}",
+        "pt": "\ud83d\udcc8 Linha do tempo de snapshots de {name}",
+        "ja": "\ud83d\udcc8 {name}\u306e\u30b9\u30ca\u30c3\u30d7\u30bf\u30a4\u30e0\u30e9\u30a4\u30f3",
+        "de": "\ud83d\udcc8 Snapshot-Zeitachse von {name}",
+        "fr": "\ud83d\udcc8 Chronologie des snapshots de {name}",
+        "ru": "\ud83d\udcc8 \u0425\u0440\u043e\u043d\u043e\u043b\u043e\u0433\u0438\u044f {name}",
+        "ko": "\ud83d\udcc8 {name} \uc2a4\ub0a0\uc0f7 \uc2dc\uac04\ub77c\uc778",
     },
     "删除所选快照": {
         "en": "Delete Selected",
