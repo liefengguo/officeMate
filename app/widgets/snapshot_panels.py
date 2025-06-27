@@ -8,6 +8,7 @@ snapshot_panels.py
 
 from typing import Optional
 from PySide6.QtCore import Signal
+from PySide6.QtGui import QShortcut, QKeySequence
 from core.i18n import _, i18n
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
@@ -71,6 +72,9 @@ class SnapshotMiddlePanel(QWidget):
         self.create_btn.clicked.connect(self._emit_create)
         self.remark_edit.enterPressed.connect(self._emit_create)
         self.compare_btn.clicked.connect(self.compareRequested)
+        # 支持快捷键：Ctrl+S 创建快照
+        self.shortcut_create = QShortcut(QKeySequence("Ctrl+S"), self)
+        self.shortcut_create.activated.connect(self._emit_create)
         self._update_create_state()
 
     def _emit_create(self):
