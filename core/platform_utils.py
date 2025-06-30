@@ -4,7 +4,7 @@
 platform_utils.py
 ~~~~~~~~~~~~~~~~~
 
-Platform‑specific helpers for DocSnap.
+Platform‑specific helpers for OfficeMate.
 
 * **is_dark_mode()** – Detect whether the OS is currently using a dark appearance.
 * **get_app_data_dir()** – Return a writable, per‑user directory that follows
@@ -68,7 +68,7 @@ def is_dark_mode() -> bool:  # noqa: D401 – simple function
 
 
 # ------------------------------------------------------------------- data paths
-def get_app_data_dir(subfolder: str = "DocSnap") -> Path:
+def get_app_data_dir(subfolder: str = "OfficeMate") -> Path:
     """Return a per‑user *application data* directory suitable for storing files.
 
     * macOS : ``~/Library/Application Support/<subfolder>``

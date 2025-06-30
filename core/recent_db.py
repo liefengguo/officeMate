@@ -1,9 +1,12 @@
 import os
 import json
+from pathlib import Path
+from .platform_utils import get_app_data_dir
 
 class RecentDocDB:
     def __init__(self):
-        self.path = os.path.expanduser("~/.docsnap/recent_docs.json")
+        base = get_app_data_dir()
+        self.path = str(Path(base) / "recent_docs.json")
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         if not os.path.exists(self.path):
             with open(self.path, "w") as f:

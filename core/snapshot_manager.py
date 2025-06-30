@@ -69,7 +69,7 @@ class SnapshotManager(QObject):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         doc_name = os.path.basename(file_path)
         ext = os.path.splitext(file_path)[1]  # keep original extension (e.g., ".txt")
-        # Store snapshots under ~/Library/Application Support/DocSnap/snapshots/<doc_name>/
+        # Store snapshots under .../OfficeMate/snapshots/<doc_name>/
         snapshot_dir = SNAP_ROOT / os.path.basename(file_path)
         snapshot_dir.mkdir(parents=True, exist_ok=True)
 
@@ -214,5 +214,5 @@ class SnapshotManager(QObject):
         # 2) fallback heuristic (legacy snapshots)
         snap_path = meta["snapshot_path"]
         doc_name = meta["file"]
-        doc_dir = os.path.dirname(os.path.dirname(snap_path))  # parent of .docsnap
+        doc_dir = os.path.dirname(os.path.dirname(snap_path))  # parent dir of snapshots
         return os.path.join(doc_dir, doc_name)

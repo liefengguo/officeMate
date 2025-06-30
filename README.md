@@ -10,11 +10,11 @@ OfficeMate 是一款基于 Python 和 PySide6 的桌面文档助手，用于创�
 - **恢复与撤销**：可从指定快照恢复文件，并自动备份上一版本以便撤销。
 - **多语言界面**：内置中文、English、Español、Português、日语、Deutsch、Français、Русский、한국어等语言。
 - **主题切换**：支持深色、浅色及跟随系统的主题设置。
-- **数据目录**：快照存放在平台推荐的个人数据目录（如 Application Support、%APPDATA%、~/.local/share）。
-- **配置路径**：应用设置将保存为 INI 文件，路径与快照数据相同：
-  - Windows：`%APPDATA%\OfficeMate\OfficeMate.ini`
-  - macOS：`~/Library/Application Support/OfficeMate/OfficeMate.ini`
-  - Linux：`~/.local/share/OfficeMate/OfficeMate.ini`
+- **数据目录**：所有快照、版本库及最近文档列表等均存放在平台推荐的个人数据目录：
+  - Windows：`%APPDATA%\OfficeMate`
+  - macOS：`~/Library/Application Support/OfficeMate`
+  - Linux：`~/.local/share/OfficeMate`
+- **配置路径**：用户设置保存为上述目录下的 `OfficeMate.ini`。
 - **图形界面**：包含主页、项目页、历史页、对比页与设置页，操作简单。
 
 ## 安装与启动
