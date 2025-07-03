@@ -11,6 +11,10 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import QCoreApplication, QSettings
 
+# Set application identifiers before any path lookups
+QCoreApplication.setOrganizationName("OfficeMate")
+QCoreApplication.setApplicationName("OfficeMate")
+
 from core.themes import apply_theme
 from core.i18n import set_language
 from core.snapshot_manager import SnapshotManager
@@ -24,11 +28,9 @@ def main() -> None:
     app.setWindowIcon(QIcon(str(icon_path)))
 
     # --- Configure persistent settings path cross-platform ---
-    settings_dir = get_app_data_dir("OfficeMate")
+    settings_dir = get_app_data_dir()
     QSettings.setDefaultFormat(QSettings.IniFormat)
     QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, str(settings_dir))
-    QCoreApplication.setOrganizationName("OfficeMate")
-    QCoreApplication.setApplicationName("OfficeMate")
 
     lang = os.getenv("DOCSNAP_LANG")
     if lang:
