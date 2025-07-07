@@ -13,8 +13,8 @@ class SnapshotRepository:
         If *db_path* is None, place the versions database in the
         per‑user application data directory, e.g.:
 
-          • macOS : ~/Library/Application Support/DocSnap/versions.json
-          • Windows: %APPDATA%\DocSnap\versions.json
+         • macOS : ~/Library/Application Support/OfficeMate/versions.json
+         • Windows: %APPDATA%\\OfficeMate\\versions.json
         """
         if db_path is None:
             db_path = Path(get_app_data_dir()) / "versions.json"

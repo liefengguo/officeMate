@@ -4,7 +4,7 @@
 platform_utils.py
 ~~~~~~~~~~~~~~~~~
 
-Platform‑specific helpers for DocSnap.
+Platform‑specific helpers for OfficeMate.
 
 * **is_dark_mode()** – Detect whether the OS is currently using a dark appearance.
 * **get_app_data_dir()** – Return a writable, per‑user directory that follows
@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QStandardPaths
+
 
 try:  # Windows registry is only available on Windows
     import winreg
@@ -68,32 +68,22 @@ def is_dark_mode() -> bool:  # noqa: D401 – simple function
 
 
 # ------------------------------------------------------------------- data paths
-def get_app_data_dir(subfolder: str = "DocSnap") -> Path:
-    """Return a per‑user *application data* directory suitable for storing files.
+def get_app_data_dir(subfolder: str = "OfficeMate") -> Path:
+    """Return the per‑user directory used to store OfficeMate data.
 
     * macOS : ``~/Library/Application Support/<subfolder>``
     * Windows: ``%APPDATA%\\<subfolder>``
-    * Linux  : ``~/.local/share/<subfolder>``  (fallback)
+    * Linux  : ``~/.local/share/<subfolder>``
 
     The directory is **created if it does not already exist**.
     """
-    # QStandardPaths chooses the right location for us.
-    base_dir_str = QStandardPaths.writableLocation(QStandardPaths.AppDataLocation)
-    base = Path(base_dir_str) if base_dir_str else Path()
+    if sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
+    elif sys.platform.startswith("win"):
+        base = Path(os.getenv("APPDATA") or Path.home() / "AppData" / "Roaming")
+    else:
+        base = Path.home() / ".local" / "share"
 
-    # Fallback if Qt failed to provide a path (rare but possible)
-    if not base:
-        if sys.platform == "darwin":
-            base = Path.home() / "Library" / "Application Support"
-        elif sys.platform.startswith("win"):
-            appdata = os.getenv("APPDATA") or (Path.home() / "AppData" / "Roaming")
-            base = Path(appdata)
-        else:  # generic *nix fallback
-            base = Path.home() / ".local" / "share"
-
-    # Ensure subfolder included once
-    if subfolder and subfolder not in base.parts:
-        base = base / subfolder
-
-    base.mkdir(parents=True, exist_ok=True)
-    return base
+    path = base / subfolder if subfolder else base
+    path.mkdir(parents=True, exist_ok=True)
+    return path
