@@ -14,7 +14,10 @@ OfficeMate 是一款基于 Python 和 PySide6 的桌面文档助手，用于创�
   - Windows：`%APPDATA%\OfficeMate`
   - macOS：`~/Library/Application Support/OfficeMate`
   - Linux：`~/.local/share/OfficeMate`
-- **配置路径**：用户设置保存为上述目录下的 `OfficeMate.ini`。
+- **配置路径**：用户设置保存为上述目录下的 `OfficeMate.ini`，其完整位置例如：
+  - Windows：`%APPDATA%\OfficeMate\OfficeMate.ini`
+  - macOS：`~/Library/Application Support/OfficeMate/OfficeMate.ini`
+  - Linux：`~/.local/share/OfficeMate/OfficeMate.ini`
 - **图形界面**：包含主页、项目页、历史页、对比页与设置页，操作简单。
 
 ## 安装与启动
