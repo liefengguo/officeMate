@@ -133,10 +133,22 @@ class DocxLoader(SnapshotLoader):
                     except Exception:
                         pass
 
+                    # Extract text including tab and break elements
+                    texts = []
+                    for node in run._element:
+                        tag = node.tag.split('}')[-1]
+                        if tag == 't' and node.text:
+                            texts.append(node.text)
+                        elif tag == 'tab':
+                            texts.append('\t')
+                        elif tag == 'br':
+                            texts.append('\n')
+                    text_val = ''.join(texts) if texts else run.text
+
                     runs.append(
                         {
                             "type": "text",
-                            "text": run.text,
+                            "text": text_val,
                             "font": getattr(run.font, "name", None),
                             "size": size_val,
                             "bold": bool(run.bold),
