@@ -32,10 +32,31 @@ from .loader_registry import LoaderRegistry
 class DocxLoader(SnapshotLoader):
     """Loader for .docx snapshot files."""
 
+    @staticmethod
+    def _extract_run_text(run) -> str:
+        """Return text content of a run including tabs and breaks."""
+        texts = []
+        for node in run._element.iter():
+            tag = node.tag.split('}')[-1]
+            if tag in ("t", "delText", "instrText") and node.text:
+                texts.append(node.text)
+            elif tag == "tab":
+                texts.append("\t")
+            elif tag in ("br", "cr"):
+                texts.append("\n")
+        if texts:
+            return "".join(texts)
+        return run.text
+
     def get_text(self, file_path: str) -> str:
         """Return concatenated text of all paragraphs."""
         doc = Document(file_path)
-        paragraphs: List[str] = [para.text for para in doc.paragraphs]
+        paragraphs: List[str] = []
+        for para in doc.paragraphs:
+            text_parts = []
+            for run in para.runs:
+                text_parts.append(self._extract_run_text(run) or "")
+            paragraphs.append("".join(text_parts))
         return "\n".join(paragraphs)
 
     def load_structured(self, file_path: str):
@@ -133,17 +154,7 @@ class DocxLoader(SnapshotLoader):
                     except Exception:
                         pass
 
-                    # Extract text including tab and break elements
-                    texts = []
-                    for node in run._element:
-                        tag = node.tag.split('}')[-1]
-                        if tag == 't' and node.text:
-                            texts.append(node.text)
-                        elif tag == 'tab':
-                            texts.append('\t')
-                        elif tag == 'br':
-                            texts.append('\n')
-                    text_val = ''.join(texts) if texts else run.text
+                    text_val = self._extract_run_text(run)
 
                     runs.append(
                         {
@@ -158,10 +169,11 @@ class DocxLoader(SnapshotLoader):
                         }
                     )
 
+                para_text = "".join(r["text"] for r in runs if r.get("type") == "text")
                 structured.append(
                     {
                         "index": idx,
-                        "text": para.text,
+                        "text": para_text,
                         "style": para.style.name if para.style else None,
                         "runs": runs,
                         "line_spacing": line_spacing,
