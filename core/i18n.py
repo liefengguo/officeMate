@@ -106,6 +106,12 @@ _TRANSLATIONS = {
         "ru": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b (*.txt *.docx);;\u0412\u0441\u0435 \u0444\u0430\u0439\u043b\u044b (*)",
         "ko": "\ubb38\uc11c (*.txt *.docx);;\ubaa8\ub4e0 \ud30c\uc77c (*)",
     },
+    "Word 文档 (*.docx);;所有文件 (*)": {
+        "en": "Word documents (*.docx);;All files (*)",
+    },
+    "文本文件 (*.txt);;所有文件 (*)": {
+        "en": "Text files (*.txt);;All files (*)",
+    },
     "文件不存在": {
         "en": "File not found",
         "es": "Archivo no encontrado",
@@ -765,7 +771,21 @@ _TRANSLATIONS = {
         "fr": "… {count} paragraphes inchang\u00e9s …",
         "ru": "… {count} \u0431\u0435\u0437 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439 \u0430\u0431\u0437\u0430\u0446\u0435\u0432 …",
         "ko": "… {count}\uac1c \ub2e8\ub77d \ubcc0\ud654 \uc5c6\uc74c …",
-    }
+    },
+    "🧩 {name} 快照合并": {"en": "🧩 Merge snapshots for {name}"},
+    "导入待合并文档": {"en": "Import Document"},
+    "查看差异": {"en": "Show Diff"},
+    "预览合并": {"en": "Preview Merge"},
+    "导出合并结果": {"en": "Export Merged"},
+    "👉 首先导入文档": {"en": "👉 Import a document first"},
+    "👉 选择基准快照并点击“查看差异”": {"en": "👉 Select base snapshot then click 'Show Diff'"},
+    "👉 选择合并目标快照并点击“预览合并”": {"en": "👉 Select target snapshot then click 'Preview Merge'"},
+    "保存合并文档": {"en": "Save merged document"},
+    "已导出合并文档": {"en": "Merged document exported"},
+    "导出失败：{e}": {"en": "Export failed: {e}"},
+    "基准快照：": {"en": "Base:"},
+    "合并目标快照：": {"en": "Target:"},
+    "待合并文档：": {"en": "Remote:"},
 }
 
 # Populate other languages with English text if missing
