@@ -56,13 +56,16 @@ class DocxLoader(SnapshotLoader):
         from docx.oxml.text.paragraph import CT_P
         from docx.oxml.table import CT_Tbl
 
-        root = getattr(getattr(container, "element", None), "body", None)
-        if root is None:
-            root = getattr(container, "element", None)
+        root = getattr(container, "element", None)
         if root is None:
             root = getattr(container, "_element", None)
         if root is None:
             return
+
+        # Document objects expose ``element.body`` while header/footer wrappers
+        # expose ``_element`` directly.  Normalize to the element that owns
+        # paragraphs/tables.
+        root = getattr(root, "body", root)
         for child in root.iterchildren():
             if isinstance(child, CT_P):
                 yield Paragraph(child, container)
@@ -75,8 +78,11 @@ class DocxLoader(SnapshotLoader):
         seen = set()
 
         def _add(container):
-            if container is not None and id(container) not in seen:
-                seen.add(id(container))
+            """Yield container once using its underlying XML element as key."""
+            key = getattr(container, "_element", container)
+            key_id = id(key)
+            if container is not None and key_id not in seen:
+                seen.add(key_id)
                 yield container
 
         for section in doc.sections:
